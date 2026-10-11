@@ -1,13 +1,8 @@
-"""Measure ESP32-CAM MJPEG delivery rate without Qt or JPEG decoding.
-
-Close Vision Drive and other camera viewers before running this test so they do
-not compete for the camera's single capture/stream path.
-"""
+# Measure ESP32-CAM MJPEG delivery rate without Qt or JPEG decoding.
 
 import argparse
 import time
 from urllib.request import Request, urlopen
-
 
 class JpegCounter:
     def __init__(self):

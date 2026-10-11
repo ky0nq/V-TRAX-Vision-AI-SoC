@@ -1,4 +1,4 @@
-"""Save the same HDMI ROI shown by the HUD, only with fresh TEST telemetry."""
+# Save the same HDMI ROI shown by the HUD, only with fresh TEST telemetry.
 from pathlib import Path
 import queue
 import re

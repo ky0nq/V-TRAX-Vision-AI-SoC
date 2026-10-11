@@ -1,4 +1,4 @@
-"""ESP32-CAM worker with a single latest-frame mailbox."""
+# ESP32-CAM worker with a single latest-frame mailbox.
 import sys
 from array import array
 import threading
@@ -10,13 +10,12 @@ from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QImage
 from PySide6.QtQuick import QQuickImageProvider
 
+
 class FrameNotifier(QObject):
     frameReady = Signal()
 
 
 class MjpegReceiver:
-    """Receive and decode ESP32-CAM frames off the Qt GUI thread."""
-
     def __init__(self, url):
         self.url = url
         self.mac_discovery = MacDiscovery(url[4:]) if url.startswith("mac:") else None
@@ -41,21 +40,34 @@ class MjpegReceiver:
         while not self.stop_event.is_set():
             try:
                 self.resolved_url = None
-                url = self.mac_discovery.resolve(self.stop_event) if self.mac_discovery else discover_camera_url(stop_event=self.stop_event) if self.url == 'auto' else self.url
+                url = (
+                    self.mac_discovery.resolve(self.stop_event)
+                    if self.mac_discovery
+                    else discover_camera_url(stop_event=self.stop_event)
+                    if self.url == 'auto'
+                    else self.url
+                )
                 if not url:
-                    raise ConnectionError('Camera discovery pending: check power, same LAN and MAC; automatic probes support /24 or smaller' if self.mac_discovery else 'ESP32-CAM not found via mDNS')
+                    raise ConnectionError(
+                        'Camera discovery pending: check power, same LAN and MAC; automatic probes support /24 or smaller'
+                        if self.mac_discovery
+                        else 'ESP32-CAM not found via mDNS'
+                    )
                 self.resolved_url = url
                 request = Request(url, headers={'User-Agent': 'MotionHUD/1.0'})
+
                 with urlopen(request, timeout=4) as response:
                     if 'multipart/' not in response.headers.get('Content-Type', '').lower():
                         raise ValueError('Use the ESP32-CAM MJPEG URL on port 81: /stream')
                     self.error = None
                     buffer = bytearray()
+
                     while not self.stop_event.is_set():
                         chunk = response.read1(4096)
                         if not chunk:
                             raise ConnectionError('Camera stream ended')
                         buffer.extend(chunk)
+
                         while True:
                             start = buffer.find(b'\xff\xd8')
                             if start < 0:
@@ -66,13 +78,16 @@ class MjpegReceiver:
                                 break
                             if start:
                                 del buffer[:start]
+
                             end = buffer.find(b'\xff\xd9', 2)
                             if end < 0:
                                 if len(buffer) > 1024 * 1024:
                                     buffer.clear()
                                 break
+
                             jpeg = bytes(buffer[:end + 2])
                             del buffer[:end + 2]
+
                             try:
                                 image = QImage.fromData(jpeg, 'JPEG')
                             except ValueError:
@@ -81,6 +96,7 @@ class MjpegReceiver:
                             if image.isNull():
                                 self.invalid_frames += 1
                                 continue
+
                             notify = False
                             with self.lock:
                                 if self.latest is not None:
@@ -94,6 +110,7 @@ class MjpegReceiver:
                                     notify = True
                             if notify:
                                 self.notifier.frameReady.emit()
+
             except Exception as exc:
                 if self.mac_discovery and self.resolved_url:
                     self.mac_discovery.reject(self.resolved_url)
@@ -132,7 +149,7 @@ class CameraProvider(QQuickImageProvider):
         return True
 
     def set_image(self, image):
-        """Publish a JPEG already decoded by the camera receiver thread."""
+        # Publish a JPEG already decoded by the camera receiver thread.
         if image.isNull():
             return False
         with self.lock:

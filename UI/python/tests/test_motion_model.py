@@ -1,4 +1,4 @@
-"""Vehicle target-command behavior matched against supplied firmware constants."""
+# Verify vehicle target control command behavior
 import sys
 from pathlib import Path
 import unittest

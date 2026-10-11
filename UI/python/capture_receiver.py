@@ -1,4 +1,4 @@
-"""USB/HDMI capture input; forwards native frames without JPEG conversion."""
+# USB/HDMI capture input; forwards native frames without JPEG conversion.
 import time
 from PySide6.QtCore import QObject, Slot, QTimer
 from PySide6.QtMultimedia import QCamera, QMediaDevices, QMediaCaptureSession, QVideoSink

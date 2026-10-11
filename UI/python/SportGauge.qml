@@ -46,11 +46,11 @@ Item {
             curve(244,212,90,270,'#555b66',1)
             curve(235,202,90,270,'#a5a8ae',1.3)
             // Layered light: warm gold with a restrained redline near full scale.
-            curve(225,193,90,270,'#081522',20)   // 바깥 발광
+            curve(225,193,90,270,'#081522',20)   // Outer glow
             curve(225,193,90,270,'#102c43',10)
             curve(225,193,90,270,'#245575',5)
-            curve(225,193,90,270,'#78c4ef',2)    // 메인 곡선
-            curve(225,193,245,270,'#b7e4ff',2)   // 끝부분
+            curve(225,193,90,270,'#78c4ef',2)    // Main curve
+            curve(225,193,245,270,'#b7e4ff',2)   // End cap
             curve(218,185,90,270,'#192c3b',1)
             var steps=gauge.signedValue?60:50, majorEvery=gauge.signedValue?10:5
             for(var i=0;i<=steps;i++) {

@@ -1,5 +1,4 @@
-"""Estimate the supplied ESP32 controller's command state, not measured km/h."""
-
+# Estimate the supplied ESP32 controller's command state, not measured km/h.
 
 class MotionModel:
     TARGET_SPEED = (0.0, 67.0, 100.0, 139.0, 188.0, 255.0)
@@ -22,7 +21,7 @@ class MotionModel:
 
     @property
     def motor_output(self):
-        """Estimated straight-driving PWM, before differential steering."""
+        # test code
         if self.speed <= 0:
             return 0
         command = max(self.MOTOR_COMMAND_MIN, min(255, int(self.speed + 0.5)))
