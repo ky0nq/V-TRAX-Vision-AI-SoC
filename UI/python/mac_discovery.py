@@ -7,7 +7,7 @@ import subprocess
 import time
 
 # ESP32-CAM MAC addr
-DEFAULT_MAC = '5C-01-3B-47-98-E0'
+DEFAULT_MAC = '5C-01-3B-47-98-E1'
 
 
 def normalize_mac(value):
