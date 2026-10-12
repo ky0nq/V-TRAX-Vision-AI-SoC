@@ -19,7 +19,7 @@ module mm2s_engine #(
     input                           start,
     input                           abort,
     input                           cyclic,
-    input       [ADDR_WIDTH-1:0]    src_addr,   // latched at init (can be updated per frame)
+    input       [ADDR_WIDTH-1:0]    src_addr,   // Latched at init (can be updated every frame)
     input       [LEN_WIDTH-1:0]     length,
     input       [BURST_WIDTH+1:0]   burst_cfg,
     output                          busy,

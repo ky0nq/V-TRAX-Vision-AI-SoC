@@ -243,25 +243,25 @@ static int ReadSetup(vdma_handle *vdma_context)
 	vdma_context->ReadCfg.HoriSizeInput = vdma_context->hsize;
 
 	vdma_context->ReadCfg.Stride = vdma_context->hsize;
-	/* GENLOCK 프레임 지연 - 화면 찢어짐(tearing)의 핵심 파라미터
+	/* GENLOCK frame delay - the key parameter for screen tearing
 	 *
-	 * 읽기 채널이 쓰기 채널보다 몇 프레임 뒤를 따라갈지 정한다. 0이면 카메라가
-	 * 채우고 있는 버퍼를 HDMI가 동시에 읽을 수 있어 화면이 가로로 찢어진다.
-	 * 정지 화면에서는 전혀 안 보이고, 피사체가 움직일 때만 "화면이 떨린다"는
-	 * 형태로 드러나기 때문에 클럭 문제로 오진하기 쉽다.
+	 * Sets how many frames the read channel trails behind the write channel. If 0, HDMI
+	 * can read the buffer the camera is filling at the same time, tearing the image horizontally.
+	 * It is completely invisible on a still scene and only shows up as "the screen jitters"
+	 * when the subject moves, so it is easy to misdiagnose as a clock problem.
 	 *
-	 * 1 이 안전한 기본값이다. Digilent 공식 데모도 읽기=1, 쓰기=0 이다.
+	 * 1 is the safe default. The official Digilent demo also uses read=1, write=0.
 	 *
-	 * 0 으로 내릴 수 있는 조건 : 블록디자인의 genlock 짝이 맞아야 한다.
-	 *     S2MM(쓰기) = Dynamic Genlock Master
-	 *     MM2S(읽기) = Dynamic Genlock Slave   <- BD 기본값은 Master 다
-	 * 이 짝이 맞으면 드라이버가 SYNC_EN 을 세우고 하드웨어가 두 채널의 충돌을
-	 * 막아준다. 대신 표시 지연이 한 프레임 줄어든다.
+	 * Condition for lowering it to 0 : the genlock pairing in the block design must match.
+	 *     S2MM(write) = Dynamic Genlock Master
+	 *     MM2S(read)  = Dynamic Genlock Slave   <- BD default is Master
+	 * When this pairing matches, the driver sets SYNC_EN and the hardware prevents
+	 * collisions between the two channels. In return, display latency drops by one frame.
 	 *
-	 * MM2S 가 Master 로 남아 있으면 드라이버의
+	 * If MM2S is left as Master, the driver's
 	 *     if (Channel->GenLock != XAXIVDMA_GENLOCK_MASTER)
 	 *         CrBits |= XAXIVDMA_CR_SYNC_EN_MASK;
-	 * 조건에 걸려 SYNC_EN 이 안 켜진다. 그때는 이 값이 유일한 방어선이다.
+	 * condition is hit and SYNC_EN is not enabled. In that case this value is the only line of defense.
 	 */
 	vdma_context->ReadCfg.FrameDelay = 1;
 

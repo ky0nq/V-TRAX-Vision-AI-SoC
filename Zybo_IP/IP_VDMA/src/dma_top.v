@@ -6,22 +6,22 @@
 //                      │
 //                 [dma_regmap]  0x00~0x3F : MM2S registers / 0x40~0x7F : S2MM registers
 //                  │        │
-//   MM2S cfg/status│        │S2MM cfg/status
+//  MM2S cfg/status │        │ S2MM cfg/status
 //                  v        v
 //      dma_mm2s_video      s_axis_video (24bit) -> s2mm_packetizer -> s2mm_write_top
-//      (DDR/BRAM -> video)                                           (camera -> DDR)
+//      (DDR/BRAM -> video)                                            (camera -> DDR)
 //            ▲                   │
-//            └ newest_idx, DA0~2 ┘   (VDMA genlock role : reads the buffer that was just fully written)
+//            └ newest_idx, DA0~2 ┘   (acts as VDMA genlock : reads the buffer just finished writing)
 //
-// Port groups (prefixes for Vivado automatic interface inference)
+// Port groups (prefixes for Vivado interface auto-inference)
 //   s_axi_lite_*    : CPU register access (AXI4-Lite)
 //   s_axis_video_*  : camera video input (24bit RGB, tlast = EOL)  <- AXI_GammaCorrection
-//                     (the former external axis_frame_packetizer is built in as s2mm_packetizer)
+//                     (the former external axis_frame_packetizer is now built in as s2mm_packetizer)
 //   m_axi_s2mm_*    : DDR write (AXI3)
 //   m_axi_mm2s_*    : DDR/BRAM read (AXI4)
 //   m_axis_video_*  : video output (24bit RGB, tuser = SOF, tlast = EOL)
 //
-// Single clock: aclk (all interfaces are assumed to share the same clock)
+// Single clock aclk (all interfaces assumed to share the same clock)
 //
 module dma_top #(
     parameter integer PIXELS_PER_LINE = 1280,
@@ -61,7 +61,7 @@ module dma_top #(
     input  wire         s_axis_video_tvalid,
     output wire         s_axis_video_tready,
     input  wire         s_axis_video_tlast,     // EOL (end of line)
-    input  wire         s_axis_video_tuser,     // SOF (connected only; the packetizer uses its own counter)
+    input  wire         s_axis_video_tuser,     // SOF (connected only; packetizer uses its own counter)
 
     // ================= M_AXI_S2MM (AXI3 write) =================
     output wire [3:0]   m_axi_s2mm_awid,
@@ -223,11 +223,11 @@ module dma_top #(
         .m_axis_tready (pk_tready)
     );
 
-    // s_axis_video_tuser is for interface compatibility (the packetizer generates SOF itself)
+    // s_axis_video_tuser is for interface compatibility (packetizer generates SOF itself)
     wire _unused_video_tuser = s_axis_video_tuser;
 
     // ------------------------------------------------------------------
-    // S2MM (camera -> DDR) : write-side top used as is
+    // S2MM (camera -> DDR) : write-side top as is
     // ------------------------------------------------------------------
     s2mm_write_top #(
         .ID_WIDTH        (4),

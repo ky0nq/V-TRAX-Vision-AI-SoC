@@ -1,9 +1,9 @@
 `timescale 1ns / 1ps
-// top_cnn_board 검증 : ROM (img.mem 에 이미지 N_IMG 장) + top_cnn 을 GPIO 식 ctrl / status 로 돌린다.
-//   이미지마다 ctrl[11:4] 로 골라 start 하고, 각도를 expected_angles.mem (make_mem.py 의 기준 모델 값) 과 비교한다.
-//   실행 폴더에 img.mem / wgt.mem / prm.mem 이 있어야 한다. expected_angles.mem 은 있으면 비교하고 없으면 각도만 찍는다.
-//   ROM 은 N_IMG (기본 5) 장 크기이고, 실제로 돌리는 장수는 img.mem 의 줄 수 / 4096 으로 자동으로 정한다 (최대 N_IMG).
-module tb_top_cnn_board #(parameter integer N_IMG = 40) ();   // 시뮬레이션 ROM 크기 (보드 top 의 기본은 5)
+// top_cnn_board verification : runs ROM (N_IMG images in img.mem) + top_cnn through GPIO-style ctrl / status.
+//   For each image, select it with ctrl[11:4] and start, then compare the angle with expected_angles.mem (reference model values from make_mem.py).
+//   img.mem / wgt.mem / prm.mem must be in the run directory. expected_angles.mem is compared if present; otherwise only the angles are printed.
+//   The ROM holds N_IMG (default 5) images; the number actually run is set automatically as (lines in img.mem) / 4096 (max N_IMG).
+module tb_top_cnn_board #(parameter integer N_IMG = 40) ();   // Simulation ROM size (board top default is 5)
     reg clk = 0, rst_n = 0;
     always #5 clk = ~clk;
     reg  [31:0] ctrl = 0;
@@ -20,7 +20,7 @@ module tb_top_cnn_board #(parameter integer N_IMG = 40) ();   // 시뮬레이션
     task run_image; input integer n;
         begin
             ctrl = {20'd0, n[7:0], 4'h0}; @(negedge clk);
-            ctrl = {20'd0, n[7:0], 4'h1}; repeat (3) @(negedge clk);          // start 상승 에지 (번호 래치)
+            ctrl = {20'd0, n[7:0], 4'h1}; repeat (3) @(negedge clk);          // start rising edge (latches the index)
             ctrl = {20'd0, n[7:0], 4'h0};
             t0 = $time;
             while (!done) begin @(negedge clk); if (($time - t0) > 64'd30_000_000) begin err("TIMEOUT"); $display("  status=%h", status); $finish; end end
@@ -42,8 +42,8 @@ module tb_top_cnn_board #(parameter integer N_IMG = 40) ();   // 시뮬레이션
     initial begin
         for (i = 0; i < 256; i = i + 1) exp_angle[i] = 8'hxx;
         fd = $fopen("expected_angles.mem", "r");
-        if (fd) begin $fclose(fd); $readmemh("expected_angles.mem", exp_angle); end        // 없으면 비교 생략
-        // img.mem 의 줄 수로 이미지 장수 결정
+        if (fd) begin $fclose(fd); $readmemh("expected_angles.mem", exp_angle); end        // Skip comparison if missing
+        // Determine the image count from the number of lines in img.mem
         n_lines = 0; fd = $fopen("img.mem", "r");
         if (fd) begin while (!$feof(fd)) begin if ($fgets(line, fd)) n_lines = n_lines + 1; end $fclose(fd); end
         n_run = n_lines / 4096;
@@ -54,7 +54,7 @@ module tb_top_cnn_board #(parameter integer N_IMG = 40) ();   // 시뮬레이션
         repeat (5) @(negedge clk);
         if (!start_ready) err("start_ready=0 after reset");
         for (i = 0; i < n_run; i = i + 1) run_image(i);
-        // start 를 1 로 계속 두어도 한 번만 시작하는지 (이미지 0)
+        // Check that holding start at 1 starts only once (image 0)
         ctrl = 32'h1; t0 = $time;
         while (!done) begin @(negedge clk); if (($time - t0) > 64'd30_000_000) begin err("TIMEOUT 2"); $finish; end end
         repeat (6) @(negedge clk);

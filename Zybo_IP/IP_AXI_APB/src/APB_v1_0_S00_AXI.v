@@ -1,14 +1,14 @@
 `timescale 1 ns / 1 ps
 //
-// ===== Changes =====
-// Only 2 places were modified compared to the original (everything else is identical to the original):
-//   1) PWDATA/PSTRB capture logic: modified to use S_AXI_AWADDR[1] to select which of the upper/lower 16 bits
-//      is the byte lane that actually carries the data
-//      (previously it always looked only at WDATA[15:0]/WSTRB[1:0], so writes to registers
-//       that are not word-aligned, such as offset 2/6, did not actually take effect)
-//   2) axi_rdata capture logic: modified to use PADDR[1] to place the 16-bit response received from APB
+// ===== Modifications =====
+// Only 2 places were modified compared to the original (everything else is identical):
+//   1) PWDATA/PSTRB capture logic: modified to use S_AXI_AWADDR[1] to select which
+//      of the upper/lower 16 bits is the byte lane that actually carries the data
+//      (previously it always looked only at WDATA[15:0]/WSTRB[1:0], so writes to
+//       non-word-aligned registers such as offset 2/6 did not actually take effect)
+//   2) axi_rdata capture logic: modified to use PADDR[1] to place the 16-bit APB response
 //      into the upper/lower byte lane that the CPU actually reads
-// Both modification points are marked with "==== FIX ====" comments.
+// Both modified spots are marked with a "==== FIX ====" comment.
 //
 
 	module APB_v1_0_S00_AXI #
@@ -431,8 +431,8 @@
 	end    
 	
     // ==== FIX (1/2): on write, select the upper/lower 16-bit byte lane using address[1] ====
-    // Previously it always looked only at S_AXI_WDATA[15:0]/WSTRB[1:0], but for registers
-    // that are not word-aligned (e.g. offset 2/6), per the AXI protocol the actual data is carried on [31:16]/WSTRB[3:2],
+    // Previously it always looked only at S_AXI_WDATA[15:0]/WSTRB[1:0], but for
+    // non-word-aligned registers such as offset 2/6, the AXI spec puts the actual data on [31:16]/WSTRB[3:2],
     // so the correct lane must be selected based on S_AXI_AWADDR[1].
     always @( posedge S_AXI_ACLK ) begin
         if ( S_AXI_ARESETN == 1'b0 )begin
@@ -482,7 +482,7 @@
                         {PSEL,PENABLE,PWRITE} <= {2'b00,PWRITE};
                         PSTATE <= 2'b00;
                         // ==== FIX (2/2): on read, use PADDR[1] to place the response data
-                        // into the upper/lower 16-bit lane that the CPU actually reads ====
+                        // into the upper/lower 16-bit lane the CPU will actually read ====
                         // PADDR is already latched with the read address at this point, so it can be used as is.
                         if(!PWRITE) begin
                             if (PADDR[1])

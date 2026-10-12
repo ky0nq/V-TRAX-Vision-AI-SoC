@@ -21,8 +21,8 @@
 `define RESULT_W   8     // final regression output = signed INT8
 
 `define ACT_AW    14     // input_buf : 24bit x 16384 Word (region A=0, B=8192)
-`define WBUF_AW    9     // weight_buf : 24bit x 512 Word = 반쪽 2 개 x 256 (이중 버퍼, 2026-09-23). 주소 = {반쪽, 0 ~ 255}
-`define CHUNK_W    9     // chunk_len 1 ~ 256 (256 을 8bit 에 담지 않는다)
+`define WBUF_AW    9     // weight_buf : 24bit x 512 Word = 2 halves x 256 (double buffer, 2026-09-23). Address = {half, 0 ~ 255}
+`define CHUNK_W    9     // chunk_len 1 ~ 256 (256 is not stored in 8 bits)
 `define K_W       13     // K_total 1 ~ 4096
 `define POS_W     12     // output position index
 `define W_AW      16     // Weight Word address

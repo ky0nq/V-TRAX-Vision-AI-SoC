@@ -2,7 +2,7 @@
 //
 // dma_mm2s : Read channel (replaces MCDMA MM2S)
 //
-//   dma_regmap --(cfg / pulse)--> [frame select]  LIVE=0 : SA
+//   dma_regmap --(config/pulses)--> [frame select]  LIVE=0 : SA
 //                                      |          LIVE=1 : S2MM DA[newest_idx]
 //                                      v
 //                                 mm2s_engine --(M_AXI AR/R, 32bit addr)--> axi_mem_intercon
@@ -13,14 +13,14 @@
 //                                 M_AXIS (32bit packed) --> mm2s_depacketizer
 //
 // [Differences from the previous version]
-//   The register map (AXI-Lite) has moved up to dma_regmap in dma_top,
-//   so here config values are received as wires and status is returned as wires. The rest of the logic is the same.
+//   The register map (AXI-Lite) moved up to dma_regmap in dma_top,
+//   so this module receives config values as wires and returns status as wires. The rest of the logic is the same.
 //
 // Operation summary
-//   - CYCLIC=1 : when a frame ends, the next frame starts immediately without CPU intervention
-//   - LIVE=0   : repeats a single SA only (loading screen 0x8000_0000, frozen filter result, etc.)
-//   - LIVE=1   : at the start of every frame, reads the buffer most recently completed by S2MM (DA[newest_idx])
-//   - LIVE / SA changes are applied automatically at the next frame boundary
+//   - CYCLIC=1 : when a frame ends, start the next frame immediately without CPU intervention
+//   - LIVE=0   : repeat a single SA (loading screen 0x8000_0000, frozen filter result, etc.)
+//   - LIVE=1   : at the start of every frame, read the buffer most recently completed by S2MM (DA[newest_idx])
+//   - LIVE / SA changes take effect automatically at the next frame boundary
 //
 // Single clock: aclk
 //
@@ -49,7 +49,7 @@ module dma_mm2s #(
     output reg  [2:0]   cur_buf_idx,
 
     // ================= Info from S2MM =================
-    input  wire [2:0]   s2mm_newest_idx,  // index of the buffer that was just fully written
+    input  wire [2:0]   s2mm_newest_idx,  // Index of the buffer just finished writing
     input  wire [31:0]  s2mm_buf_addr0,   // DA0
     input  wire [31:0]  s2mm_buf_addr1,   // DA1
     input  wire [31:0]  s2mm_buf_addr2,   // DA2
@@ -82,7 +82,7 @@ module dma_mm2s #(
 );
 
     // ------------------------------------------------------------------
-    // port -> internal names (the logic below keeps the same names as the previous version)
+    // Port -> internal name (the logic below keeps the same names as the previous version)
     // ------------------------------------------------------------------
     wire [31:0] CDMACR_reg    = cr;
     wire [31:0] SA_reg        = sa;
@@ -101,7 +101,7 @@ module dma_mm2s #(
     assign error_addr = dma_error_addr;
 
     // ------------------------------------------------------------------
-    // Frame select (role of newest_rx_idx / mm2s_override in the MCDMA ISR)
+    // Frame select (plays the role of newest_rx_idx / mm2s_override in the MCDMA ISR)
     // ------------------------------------------------------------------
     wire cr_cyclic = CDMACR_reg[4];
     wire cr_live   = CDMACR_reg[5];
@@ -110,14 +110,14 @@ module dma_mm2s #(
     wire [2:0] newest_raw = cr_idx_sw ? SW_IDX_reg : s2mm_newest_idx;
     wire [2:0] newest_idx = ({1'b0, newest_raw} < NUM_BUF_reg) ? newest_raw : 3'd0;
 
-    // buffer addresses use S2MM's DA0~2 as is (FB_BASE register is unused)
+    // Buffer addresses use S2MM's DA0~2 directly (FB_BASE register is unused)
     wire [31:0] live_addr = (newest_idx == 3'd0) ? s2mm_buf_addr0 :
                             (newest_idx == 3'd1) ? s2mm_buf_addr1 :
                                                    s2mm_buf_addr2;
     wire [31:0] frame_src = cr_live ? live_addr : SA_reg;
 
-    // index of the buffer currently being read (for debugging, SR[10:8])
-    // captured on the same clock as the moment the datapath latches src_addr (init)
+    // Index of the buffer currently being read (for debugging, SR[10:8])
+    // Captured on the same clock in which the datapath latches src_addr (init)
     reg start_q;
     always @(posedge aclk) begin
         if (!aresetn) begin

@@ -4,23 +4,23 @@
 /*
  *  vdma_api.h
  *
- *  AXI VDMA 를 프레임버퍼로 쓰기 위한 얇은 래퍼. 본체는 Xilinx 예제
- *  vdma_api.c 를 거의 그대로 쓴 것입니다.
+ *  A thin wrapper for using AXI VDMA as a frame buffer. The body is the Xilinx example
+ *  vdma_api.c, used almost as is.
  *
  *  ---------------------------------------------------------------------
- *  인코딩에 대한 기록
+ *  Note on encoding
  *
- *  이 파일은 원래 GB2312(중국어) 로 인코딩되어 있었습니다. 아래 세 개의
- *  enum 주석이 중국어였고, 그래서 편집기를 UTF-8 로 맞춰도 이 파일만
- *  깨져 보였습니다. 다른 소스는 전부 UTF-8 이라 멀쩡했는데 이 하나가
- *  섞여 있어서 "한글 주석이 깨진다" 로 보였던 것입니다.
+ *  This file was originally encoded in GB2312 (Chinese). The three enum
+ *  comments below were in Chinese, so even with the editor set to UTF-8 this file alone
+ *  looked garbled. All the other sources were UTF-8 and looked fine, but this one being
+ *  mixed in made it look like "the Korean comments are garbled".
  *
- *  원문과 뜻은 그대로 두고 한국어로 옮긴 뒤 UTF-8 로 다시 저장했습니다.
- *  코드는 한 글자도 바꾸지 않았습니다.
+ *  The comments were translated keeping the original meaning (first to Korean, now English) and re-saved as UTF-8.
+ *  Not a single character of code was changed.
  *
- *      원문 //VDMA只开启读通道          -> VDMA 읽기 채널만 연다
- *      원문 //VDMA只开启写通道          -> VDMA 쓰기 채널만 연다
- *      원문 //同时开启VDMA写通道和读通道 -> 쓰기와 읽기를 동시에 연다
+ *      Original //VDMA只开启读通道          -> Open only the VDMA read channel
+ *      Original //VDMA只开启写通道          -> Open only the VDMA write channel
+ *      Original //同时开启VDMA写通道和读通道 -> Open both write and read at the same time
  */
 
 /* ------------------------------------------------------------ */
@@ -36,16 +36,16 @@
 /* ------------------------------------------------------------ */
 
 /*
- *  run_vdma_frame_buffer() 에 넘길 동작 모드.
+ *  Operating mode to pass to run_vdma_frame_buffer().
  *
- *  카메라 -> DDR -> HDMI 처럼 양방향이 다 필요하면 BOTH 를 씁니다.
- *  한쪽만 열면 반대쪽 채널은 설정도 기동도 하지 않습니다.
+ *  Use BOTH when both directions are needed, e.g. camera -> DDR -> HDMI.
+ *  If only one side is opened, the other channel is neither configured nor started.
  */
 typedef enum
 {
-	ONLY_READ=1,    /* VDMA 읽기 채널만 연다 (DDR -> 화면) */
-	ONLY_WRITE,     /* VDMA 쓰기 채널만 연다 (카메라 -> DDR) */
-	BOTH            /* 쓰기와 읽기를 동시에 연다 */
+	ONLY_READ=1,    /* Open only the VDMA read channel (DDR -> display) */
+	ONLY_WRITE,     /* Open only the VDMA write channel (camera -> DDR) */
+	BOTH            /* Open both write and read at the same time */
 }vdma_run_mode;
 
 /* ------------------------------------------------------------ */
@@ -53,19 +53,19 @@ typedef enum
 /* ------------------------------------------------------------ */
 
 /*
- *  VDMA 를 프레임버퍼 모드로 설정하고 기동합니다.
+ *  Configures VDMA in frame buffer mode and starts it.
  *
- *  InstancePtr        : 호출자가 들고 있는 XAxiVdma 인스턴스
+ *  InstancePtr        : XAxiVdma instance held by the caller
  *  DeviceId           : XPAR_AXIVDMA_0_DEVICE_ID
- *  hsize              : 가로 픽셀 수. 내부에서 스트림 폭(바이트)을 곱해
- *                       실제 stride 로 환산합니다
- *  vsize              : 세로 라인 수
- *  buf_base_addr      : 프레임버퍼 시작 주소
- *  number_frame_count : 프레임 카운터 인터럽트를 쓸 때의 프레임 수
- *  enable_frm_cnt_intr: 0 이면 에러 인터럽트만 켭니다
- *  mode               : 위 enum
+ *  hsize              : horizontal pixel count. Internally multiplied by the stream width (bytes)
+ *                       to get the actual stride
+ *  vsize              : vertical line count
+ *  buf_base_addr      : frame buffer start address
+ *  number_frame_count : frame count when using the frame counter interrupt
+ *  enable_frm_cnt_intr: if 0, only the error interrupt is enabled
+ *  mode               : the enum above
  *
- *  반환 : XST_SUCCESS 이면 성공
+ *  Returns : XST_SUCCESS on success
  */
 int run_vdma_frame_buffer(XAxiVdma* InstancePtr, int DeviceId, int hsize,
 		int vsize, int buf_base_addr, int number_frame_count,

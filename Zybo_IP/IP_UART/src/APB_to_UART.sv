@@ -17,7 +17,7 @@ module APB_to_UART (
     output logic        PREADY,
     output logic        PSLVERR,
 
-    // ===== Signals going out to uart =====
+    // ===== Signals going out to the UART =====
     output logic [7:0]  o_tx_data,  
     output logic        o_tx_valid,
     input  logic        i_tx_ready, 
@@ -29,9 +29,9 @@ module APB_to_UART (
     output logic        o_irq
 );
 
-    logic [7:0]  rx_data_r;   // last received rx data
-    logic [7:0]  tx_data_r;   // last written tx data
-    logic        irq_en_r;    // interrupt enable flag
+    logic [7:0]  rx_data_r;   // Last received rx data
+    logic [7:0]  tx_data_r;   // Last written tx data
+    logic        irq_en_r;    // Interrupt enable
 	logic       irq_pending_r;
 
     logic w_busy;
@@ -55,7 +55,7 @@ module APB_to_UART (
             o_tx_valid <= 1'b0; 
 			irq_pending_r <= irq_pending_r | i_rx_valid;
 			if (i_rx_valid) rx_data_r <= i_rx_data;
-            // ---- reflect receive signals from the UART core ----
+            // ---- Reflect receive signals from the UART core ----
             if (PSEL && PENABLE) begin
                 PREADY  <= 1'b1;
                 PSLVERR <= 1'b0;
@@ -66,7 +66,7 @@ module APB_to_UART (
                             if (strb_lo) begin
                                 tx_data_r <= PWDATA[8:1];
                                 o_tx_data <= PWDATA[8:1];
-                                if (PWDATA[0] && i_tx_ready) begin // only when start bit && idle
+                                if (PWDATA[0] && i_tx_ready) begin // Only when start bit && idle
                                     o_tx_valid <= 1'b1;
                                 end
                             end

@@ -4,7 +4,7 @@
 //  dma_regmap : DMA register map (a single AXI-Lite slave controls both MM2S / S2MM)
 //
 //  ---------------------------- MM2S (Read) ----------------------------------
-//  0x00 MM2S_CR   [2]  ABORT     : writing 1 gives a 1-clock abort pulse (not stored, reads 0)
+//  0x00 MM2S_CR   [2]  ABORT     : writing 1 gives a 1-clock abort pulse (not stored, reads as 0)
 //                 [4]  CYCLIC    : 1 = automatically start the next frame when a frame ends
 //                 [5]  LIVE      : 0 = repeat fixed SA / 1 = S2MM DA[newest_idx]
 //                 [6]  IDX_SW    : 0 = newest_idx from S2MM / 1 = from SW_IDX
@@ -13,22 +13,22 @@
 //                 [12] IOC_Irq (W1C), [14] Err_Irq (W1C)
 //  0x18 SA        address to read when LIVE=0 (loading screen = 0x8000_0000)
 //  0x1C READ_ERR  address of the first error beat (RO)
-//  0x28 BTT       frame byte count, writing it starts MM2S
+//  0x28 BTT       frame byte count; writing it starts MM2S
 //  0x30 BURST_CFG [7:0] ARLEN, [9:8] burst type (00 FIXED, 01 INCR)
 //  0x38 NUM_BUF   [3:0] number of buffers (max 3)
-//  0x3C SW_IDX    [2:0] buffer index written by the CPU when IDX_SW=1
+//  0x3C SW_IDX    [2:0] buffer index set by the CPU when IDX_SW=1
 //
 //  ---------------------------- S2MM (Write) ---------------------------------
 //  0x40 S2MM_CR   [12] IOC_IrqEn / [14] Err_IrqEn
 //  0x44 S2MM_SR   [0] busy, [1] idle, [4] write_error, [10:8] newest,
 //                 [12] IOC_Irq (W1C), [14] Err_Irq (W1C)
-//  0x48 DA0       frame buffer 0 address  ┐ S2MM writes to these in order,
-//  0x4C DA1       frame buffer 1 address  │ and MM2S also reads these addresses as is in LIVE mode
-//  0x50 DA2       frame buffer 2 address  ┘ (they do not need to be contiguous)
-//  0x54 START     writing 1 to [0] starts S2MM (not stored, reads 0)
+//  0x48 DA0       frame buffer 0 addr ┐ S2MM writes them in order,
+//  0x4C DA1       frame buffer 1 addr │ and MM2S reads these same addresses in LIVE mode
+//  0x50 DA2       frame buffer 2 addr ┘ (need not be contiguous)
+//  0x54 START     writing 1 to [0] starts S2MM (not stored, reads as 0)
 //  0x58 WRITE_ERR address of the first error burst (RO)
 //
-//  other addresses : reads return 0, writes are ignored
+//  Other addresses : read as 0, writes ignored
 //
 //  mm2s_irq = (MM2S IOC_Irq & IOC_IrqEn) | (MM2S Err_Irq & Err_IrqEn)
 //  s2mm_irq = (S2MM IOC_Irq & IOC_IrqEn) | (S2MM Err_Irq & Err_IrqEn)
@@ -154,7 +154,7 @@ module dma_regmap #
     assign S_AXI_RVALID  = axi_rvalid;
 
     //======================================================
-    // AWREADY / AWADDR / WREADY  (accepted together once both address and data arrive)
+    // AWREADY / AWADDR / WREADY  (accepted together once both address and data have arrived)
     //======================================================
     always @(posedge S_AXI_ACLK) begin
         if (S_AXI_ARESETN == 1'b0) begin
@@ -198,7 +198,7 @@ module dma_regmap #
             mm2s_cr        <= 32'd0;
             mm2s_sa        <= 32'd0;
             mm2s_btt       <= 32'd0;
-            mm2s_burst_cfg <= 10'b01_0000_1111;   // default: INCR, 16 beat
+            mm2s_burst_cfg <= 10'b01_0000_1111;   // Default: INCR, 16 beat
             mm2s_num_buf   <= 4'd3;
             mm2s_sw_idx    <= 3'd0;
             mm2s_start     <= 1'b0;
@@ -210,7 +210,7 @@ module dma_regmap #
             s2mm_da2       <= 32'd0;
             s2mm_start     <= 1'b0;
         end else begin
-            // pulses default to 0 every clock -> 1 for one clock only when the condition is met
+            // Pulses default to 0 every clock -> 1 for one clock only when the condition is met
             mm2s_start <= 1'b0;
             mm2s_abort <= 1'b0;
             s2mm_start <= 1'b0;

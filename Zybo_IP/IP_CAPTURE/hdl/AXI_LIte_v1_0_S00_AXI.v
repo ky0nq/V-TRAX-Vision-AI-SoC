@@ -237,11 +237,11 @@ module AXI_LIte_v1_0_S00_AXI #(
 	    else begin
 	        capture_done_d <= CAPTURE_DONE;
 	
-	        // CAPTURE_DONE 상승 에지에서 IRQ 발생
+	        // Raise IRQ on the rising edge of CAPTURE_DONE
 	        if (CAPTURE_DONE && !capture_done_d)
 	            irq_pending_r <= 1'b1;
 	
-	        // 0x00 레지스터 bit1에 1을 쓰면 IRQ clear
+	        // Writing 1 to bit1 of register 0x00 clears the IRQ
 	        else if (slv_reg_wren &&
 	                 (axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 3'h0) &&
 	                 S_AXI_WSTRB[0] &&

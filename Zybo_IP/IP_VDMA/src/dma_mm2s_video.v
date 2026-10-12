@@ -2,7 +2,7 @@
 //
 // dma_mm2s_video = dma_mm2s + mm2s_depacketizer
 //
-//   dma_regmap --(conf)--> dma_mm2s --(M_AXI)--> axi_mem_intercon (DDR / BRAM)
+//   dma_regmap --(config)--> dma_mm2s --(M_AXI)--> axi_mem_intercon (DDR / BRAM)
 //                              |
 //                              | 32bit packed bytes (internal connection)
 //                              v
@@ -12,8 +12,8 @@
 //                     M_AXIS_VIDEO (24bit RGB, 1 pixel/beat) --> v_axi4s_vid_out.video_in
 //
 //   Output stream convention (AXI4-Stream Video)
-//     tuser : first pixel of the frame (SOF)
-//     tlast : last pixel of the line (EOL)
+//     tuser : first pixel of frame (SOF)
+//     tlast : last pixel of line (EOL)
 //
 module dma_mm2s_video #(
     parameter integer FIFO_DEPTH      = 64,
@@ -75,7 +75,7 @@ module dma_mm2s_video #(
     input  wire         m_axis_video_tready
 );
 
-    // internal 32bit packed stream (dma_mm2s -> depacketizer)
+    // Internal 32bit packed stream (dma_mm2s -> depacketizer)
     wire [31:0] pk_tdata;
     wire [3:0]  pk_tkeep;
     wire        pk_tlast;

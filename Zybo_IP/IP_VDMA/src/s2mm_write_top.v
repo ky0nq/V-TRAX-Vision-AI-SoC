@@ -4,8 +4,8 @@
 //
 // [Changes from the previous version]
 //   - base_addr[0:2] array port -> base_addr0/1/2
-//   - removed the trailing comma in the port list
-//   - pass through the write engine's status outputs (busy, frame_done, newest_idx, wr_error, wr_error_addr)
+//   - Removed the trailing comma in the port list
+//   - Pass through the write engine status outputs (busy, frame_done, newest_idx, wr_error, wr_error_addr)
 //
 module s2mm_write_top #(
     parameter ID_WIDTH        = 4,

@@ -17,14 +17,14 @@ module APB_to_Timer (
     output logic        PREADY,
     output logic        PSLVERR,
 
-    // ===== Signals going out to Timer =====
+    // ===== Signals going out to the Timer =====
     output logic        o_cnt_en,
     output logic [31:0] o_psc,
     output logic [31:0] o_arr,
-    output logic        o_cnt_valid,  // always 1'b0
-    output logic [31:0] o_i_cnt,      // always 32'h0
+    output logic        o_cnt_valid,  // Always 1'b0
+    output logic [31:0] o_i_cnt,      // Always 32'h0
 
-    // ===== Signals coming in from Timer =====
+    // ===== Signals coming in from the Timer =====
     input  logic        i_done,
 
     // ===== Interrupt output =====

@@ -1,27 +1,27 @@
 `timescale 1ns / 1ps
 //
-// tb_dma_top : verifies operation of the whole DMA (S2MM + MM2S + register map)
+// tb_dma_top : functional check of the full DMA (S2MM + MM2S + register map)
 //
-//  Structure
-//   - AXI-Lite master tasks (CPU)          : register write/read (0x00 ~ 0x7F)
-//   - Camera stream generator              : per frame tuser[0]=SOF, tlast on the last word
-//   - AXI3 write slave (DDR)               : actually stores the data written by S2MM in a memory array
-//   - AXI4 read slave (DDR + BRAM window)  : DDR returns stored values, BRAM window returns the loading-screen pattern
-//   - Video output checker (vid_out)       : random tready, checks pixel value/tuser/tlast
+//  Components
+//   - AXI-Lite master task (CPU)            : register write/read (0x00 ~ 0x7F)
+//   - Camera stream generator               : tuser[0]=SOF per frame, tlast on the last word
+//   - AXI3 write slave (DDR)                : actually stores the data written by S2MM in a memory array
+//   - AXI4 read slave (DDR + BRAM window)   : DDR returns stored values, BRAM window returns the loading-screen pattern
+//   - Video output checker (vid_out)        : random tready, checks pixel values/tuser/tlast
 //
 //  Data rule : for byte offset o within a frame and tag t,  byte = (o*7 + t*40) & 0xFF
 //     t = 0..5 : camera frame (frame number % 6)
 //     t = 6    : BRAM loading screen
-//   -> first byte of the output frame / 40 = tag = where the frame came from
+//   -> first byte of output frame / 40 = tag = which source the frame came from
 //
 //  Resolution : 64 x 4 (the writer requires each line to be a multiple of 64 bytes : 64px x 3B = 192B = 3 bursts)
 //
 //  Scenario
 //   T0 : start S2MM (DA0/1/2 at deliberately separated addresses) + start the camera stream
-//   T1 : MM2S loading screen cyclic (LIVE=0, SA = BRAM)    -> tag 6 repeated
-//   T2 : switch to LIVE=1                                  -> changes to camera tags and keeps updating
-//   T3 : return to LIVE=0                                  -> tag 6 again
-//   T4 : status registers / no errors / data actually written to the DA addresses / normal stop
+//   T1 : MM2S loading screen loop (LIVE=0, SA = BRAM)    -> tag 6 repeats
+//   T2 : switch to LIVE=1                                -> changes to camera tags and keeps updating
+//   T3 : back to LIVE=0                                  -> tag 6 again
+//   T4 : status registers / no errors / data actually written at the DA addresses / clean stop
 //
 module tb_dma_top;
 
@@ -36,7 +36,7 @@ module tb_dma_top;
     localparam integer TAG_BRAM    = 6;
 
     localparam [31:0] BRAM_BASE = 32'h8000_0000;
-    localparam [31:0] DA0 = 32'h1000_0000;             // deliberately non-contiguous addresses
+    localparam [31:0] DA0 = 32'h1000_0000;             // Deliberately non-contiguous addresses
     localparam [31:0] DA1 = 32'h1100_4000;
     localparam [31:0] DA2 = 32'h1230_8000;
 
@@ -136,12 +136,12 @@ module tb_dma_top;
     // ------------------------------------------------------------------
     // Memory (DDR : stores values written by S2MM / BRAM window : loading-screen pattern)
     // ------------------------------------------------------------------
-    logic [7:0] ddr [logic [31:0]];     // sparse memory that stores only written addresses
+    logic [7:0] ddr [logic [31:0]];     // Sparse memory that stores only written addresses
 
     function [7:0] mem_byte(input [31:0] a);
         if (a >= BRAM_BASE)       mem_byte = pat(a - BRAM_BASE, TAG_BRAM);
         else if (ddr.exists(a))   mem_byte = ddr[a];
-        else                      mem_byte = 8'hEE;   // unwritten address (the checker flags an error if it is read)
+        else                      mem_byte = 8'hEE;   // Unwritten address (checker reports an error if it is read)
     endfunction
 
     function [31:0] mem_word(input [31:0] a);
@@ -208,7 +208,7 @@ module tb_dma_top;
                 q_id[q_wp]   <= r_arid;
                 q_wp         <= q_wp + 1'b1;
             end
-            // prepare the next beat (when there is no current beat or it just advanced)
+            // Prepare the next beat (when there is no current beat or it was just handed off)
             if (!r_rvalid || r_rready) begin
                 if (q_cnt != 0 && ($urandom % 5) != 0) begin
                     r_rvalid <= 1'b1;
@@ -234,11 +234,11 @@ module tb_dma_top;
     // Camera stream generator
     // ------------------------------------------------------------------
     reg     cam_en        = 1'b0;
-    integer cam_frames    = 0;       // number of frames sent
+    integer cam_frames    = 0;       // Number of frames sent
 
     task cam_word(input [31:0] d, input sof, input eof);
         begin
-            while (($urandom % 2) == 0) @(posedge aclk);   // random gaps (the camera is slower than the video output)
+            while (($urandom % 2) == 0) @(posedge aclk);   // Random gaps (camera slower than video output)
             #1;
             c_tdata  = d;
             c_tuser  = {15'd0, sof};
@@ -261,7 +261,7 @@ module tb_dma_top;
                 cam_word({pat(wi*4+3, tag), pat(wi*4+2, tag), pat(wi*4+1, tag), pat(wi*4, tag)},
                          (wi == 0), (wi == FRAME_WORDS - 1));
             cam_frames = cam_frames + 1;
-            repeat (200) @(posedge aclk);                   // blanking between frames
+            repeat (200) @(posedge aclk);                   // Blanking between frames
         end
     end
 
@@ -378,7 +378,7 @@ module tb_dma_top;
         aresetn = 1'b1;
         repeat (5) @(posedge aclk);
 
-        // ================= T0 : S2MM start =================
+        // ================= T0 : start S2MM =================
         $display("\n===== T0 : S2MM start (camera -> DDR) =====");
         axil_write(R_DA0, DA0);
         axil_write(R_DA1, DA1);
@@ -398,7 +398,7 @@ module tb_dma_top;
         wait_frames(3);
         check(last_tag == TAG_BRAM,     "T1 loading image repeats");
 
-        // wait until S2MM finishes writing the first frame (SR[12] IOC_Irq)
+        // Wait until S2MM finishes writing the first frame (SR[12] IOC_Irq)
         for (i = 0; i < 20000; i = i + 1) begin
             axil_read(R_S2MM_SR, rd);
             if (rd[12]) i = 20000;
@@ -413,13 +413,13 @@ module tb_dma_top;
         wait_frames(20);
         check(live_tag_changes >= 2,    "T2 live frames keep updating");
 
-        // ================= T3 : return to loading screen =================
+        // ================= T3 : back to loading screen =================
         $display("\n===== T3 : back to park (BRAM) =====");
         axil_write(R_MM2S_CR, CR_CYCLIC | CR_ERR_EN);
         wait_frames(4);
         check(last_tag == TAG_BRAM,     "T3 back to loading image");
 
-        // ================= T4 : status check / stop =================
+        // ================= T4 : check status / stop =================
         $display("\n===== T4 : status & stop =====");
         axil_read(R_S2MM_SR, rd);
         check(rd[0] == 1'b1,            "T4 S2MM busy (running)");
@@ -430,7 +430,7 @@ module tb_dma_top;
         check(ddr.exists(DA0) && ddr.exists(DA1) && ddr.exists(DA2),
                                         "T4 S2MM wrote all three buffers");
 
-        axil_write(R_MM2S_CR, CR_ERR_EN);                // clear CYCLIC -> stop
+        axil_write(R_MM2S_CR, CR_ERR_EN);                // Clear CYCLIC -> stop
         for (i = 0; i < 5000; i = i + 1) begin
             axil_read(R_MM2S_SR, rd);
             if (rd[1]) i = 5000;

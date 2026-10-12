@@ -2,16 +2,16 @@
 //
 // s2mm_axi_writer (S2MM write engine)
 //
-// [Changes from the previous version] the transfer logic (state machine, burst, address calculation) is unchanged
+// [Changes from the previous version] Transfer logic (state machine, burst, address calculation) unchanged
 //   1) base_addr[0:2] array port -> split into base_addr0/1/2 (Verilog / IP packaging compatibility)
-//   2) added status outputs
-//        busy          : 1 after start (stays 1 since it runs in circular mode)
+//   2) Added status outputs
+//        busy          : 1 after start (stays 1 since it runs in cyclic mode)
 //        frame_done    : 1-clock pulse each time a frame is fully written
-//        newest_idx    : index of the buffer that was just fully written (0~2) -> to MM2S's s2mm_newest_idx
+//        newest_idx    : index of the buffer just finished (0~2) -> to MM2S's s2mm_newest_idx
 //        wr_error      : BRESP error (SLVERR/DECERR) occurred (held until the next start)
-//        wr_error_addr : start address of the first burst that had an error
+//        wr_error_addr : start address of the first burst that got an error
 //
-// Operation : after start, keeps writing frames in the order base0 -> base1 -> base2 -> base0 ... (circular)
+// Operation : after start, keeps writing frames in the order base0 -> base1 -> base2 -> base0 ... (cyclic)
 //
 module s2mm_axi_writer #(
     parameter ID_WIDTH        = 4,
@@ -30,7 +30,7 @@ module s2mm_axi_writer #(
     input  wire [ADDR_WIDTH-1:0]             base_addr1,
     input  wire [ADDR_WIDTH-1:0]             base_addr2,
 
-    // status outputs (added)
+    // Status outputs (added)
     output reg                               busy,
     output reg                               frame_done,
     output reg  [2:0]                        newest_idx,
@@ -83,10 +83,10 @@ module s2mm_axi_writer #(
     reg [BEAT_WIDTH-1:0] beat_count;
     reg [BURST_COUNT_WIDTH-1:0] burst_count;
     reg [LINE_COUNT_WIDTH-1:0] line_count;
-    reg [1:0] base_cnt;     // index of the next buffer to write
-    reg [1:0] wr_idx;       // index of the buffer currently being written (added)
+    reg [1:0] base_cnt;     // Index of the next buffer to write
+    reg [1:0] wr_idx;       // Index of the buffer currently being written (added)
 
-    // buffer address pointed to by base_cnt (a selector instead of an array)
+    // Buffer address pointed to by base_cnt (selector instead of an array)
     wire [ADDR_WIDTH-1:0] base_sel = (base_cnt == 2'd0) ? base_addr0 :
                                      (base_cnt == 2'd1) ? base_addr1 :
                                                           base_addr2;
@@ -183,7 +183,7 @@ module s2mm_axi_writer #(
 
                 BRESP : begin
                     if (b_handshake) begin
-                        // on an error response, record only the first one (current_addr = start address of the burst just sent)
+                        // On an error response, record only the first one (current_addr = start address of the burst just sent)
                         if (M_AXI_BRESP[1] && !wr_error) begin
                             wr_error      <= 1'b1;
                             wr_error_addr <= current_addr;
@@ -192,11 +192,11 @@ module s2mm_axi_writer #(
                         if (burst_count == BURSTS_PER_LINE-1) begin
                             burst_count <= 0;
                             if (line_count == FRAME_HEIGHT-1) begin
-                                // ---- frame complete ----
+                                // ---- Frame complete ----
                                 line_count   <= 0;
                                 frame_done   <= 1'b1;
-                                newest_idx   <= {1'b0, wr_idx};      // buffer that was just fully written
-                                current_addr <= base_sel;            // move to the next buffer
+                                newest_idx   <= {1'b0, wr_idx};      // Buffer just finished
+                                current_addr <= base_sel;            // Move to the next buffer
                                 wr_idx       <= base_cnt;
                                 base_cnt     <= (base_cnt == 2'd2) ? 2'd0 : base_cnt + 1'b1;
                             end else begin

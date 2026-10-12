@@ -20,7 +20,7 @@ module timer (
     assign o_cnt  = counter;
     assign o_done = done_tick;
 
-    // ---- prescaler: counts clocks up to the psc value and generates a 1-clock tick ----
+    // ---- prescaler: count psc clocks and generate a 1-clock tick ----
     always @(posedge clk) begin
         if (!rst_n) begin
             psc_counter <= 0;
@@ -39,7 +39,7 @@ module timer (
         end
     end
 
-    // ---- main counter: increments by 1 on every psc_tick, generates done_tick when it reaches arr ----
+    // ---- main counter: increments by 1 on each psc_tick, asserts done_tick when it reaches arr ----
     always @(posedge clk) begin
         if (!rst_n) begin
             counter   <= 0;
