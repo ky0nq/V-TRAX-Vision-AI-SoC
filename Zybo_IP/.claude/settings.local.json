@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(python -c ' *)",
-      "Bash(python \"C:/Users/kccistc/AppData/Local/Temp/claude/d--IP/5b29842b-ffec-4ef8-8461-1d1740d2ea53/scratchpad/scan.py\")",
-      "Bash(echo \"exit $?\")"
-    ]
-  }
-}
