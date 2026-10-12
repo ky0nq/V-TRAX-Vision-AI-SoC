@@ -1,4 +1,4 @@
-PC-Based Image MEM Inference Verification Using C (No FPGA/Vitis Required)
+PC-Based Image MEM Inference Verification Using C (No FPGA/Vitis Required) 
 =======================================================================
 
 Included Files:
