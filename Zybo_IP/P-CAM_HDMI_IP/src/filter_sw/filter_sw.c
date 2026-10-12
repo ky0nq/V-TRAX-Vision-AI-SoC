@@ -1,7 +1,7 @@
 /*
  *  filter_sw.c
  *
- *  소프트웨어 필터. 구조와 주의사항은 filter_sw.h 를 먼저 읽으세요.
+ *  Software filter. Read filter_sw.h first for the structure and caveats.
  */
 
 #include <string.h>
@@ -13,17 +13,17 @@
 #include "xaxivdma_hw.h"
 
 /*===========================================================================
- *  ★ 메모리 안의 채널 위치
+ *  ★ Channel positions in memory
  *
- *  스트림이 R-B-G 이고 AXI 는 최하위 바이트가 낮은 주소로 가므로,
- *  픽셀 하나가 메모리에 [G][B][R] 로 놓인다고 보고 있습니다.
+ *  Since the stream is R-B-G and AXI puts the least significant byte at the lowest address,
+ *  we assume each pixel is laid out in memory as [G][B][R].
  *
- *  확인 방법 : 'n' 으로 FILT_CH_R 을 고르고 'f' 를 누릅니다.
- *      빨간 계열만 남으면   -> 아래 세 줄이 맞습니다. 그대로 두세요.
- *      초록만 남으면        -> OFF_R 과 OFF_G 를 맞바꾸세요.
- *      파랑만 남으면        -> OFF_R 과 OFF_B 를 맞바꾸세요.
+ *  How to check : select FILT_CH_R with 'n' and press 'f'.
+ *      Only red remains     -> the three lines below are correct. Leave them as is.
+ *      Only green remains   -> swap OFF_R and OFF_G.
+ *      Only blue remains    -> swap OFF_R and OFF_B.
  *
- *  이 세 줄만 맞으면 아래 모든 필터가 함께 맞습니다.
+ *  As long as these three lines are right, all the filters below are right too.
  *===========================================================================*/
 #define OFF_G   0
 #define OFF_B   1
@@ -32,17 +32,17 @@
 #define BYTES_PER_PIXEL 3
 
 /*===========================================================================
- *  상태
+ *  State
  *===========================================================================*/
 static XAxiVdma *s_vdma;
 static UINTPTR   s_cap_base;
 static UINTPTR   s_disp[2];
 static u16       s_w, s_h;
-static u32       s_stride;          /* 한 줄의 바이트 수 */
+static u32       s_stride;          /* Bytes per line */
 static u32       s_frame_bytes;
 static int       s_ready;
-static int       s_disp_idx;        /* 다음에 CPU 가 쓸 표시 버퍼 */
-static int       s_live;            /* 1 = 실시간 영상 상태 */
+static int       s_disp_idx;        /* Display buffer the CPU writes next */
+static int       s_live;            /* 1 = live video mode */
 static Filt_kind s_kind = FILT_GRAY;
 static int       s_thresh = 128;
 
@@ -57,10 +57,10 @@ static const char *s_names[FILT_COUNT] = {
 };
 
 /*===========================================================================
- *  헬퍼
+ *  Helpers
  *===========================================================================*/
 
-/* 한 픽셀의 밝기. 77/150/29 는 8비트로 정규화한 Rec.601 계수입니다. */
+/* Luminance of one pixel. 77/150/29 are the Rec.601 coefficients normalized to 8 bits. */
 static u8 gray_of(const u8 *p)
 {
     return (u8)(((u32)p[OFF_R] * 77u +
@@ -76,11 +76,11 @@ static void put_gray(u8 *p, u8 v)
 }
 
 /*
- *  S2MM 이 방금 다 채운 캡처 버퍼의 인덱스.
+ *  Index of the capture buffer S2MM has just finished filling.
  *
- *  PARKPTR[28:24] 가 "지금 쓰고 있는" 인덱스이므로, 그 직전 버퍼가 완성된
- *  프레임입니다. 이 계산을 빼먹고 현재 인덱스를 그대로 쓰면 절반만 채워진
- *  프레임을 필터링하게 됩니다.
+ *  PARKPTR[28:24] is the index "currently being written", so the buffer just before it
+ *  is the completed frame. If you skip this calculation and use the current index as is,
+ *  you end up filtering a half-filled frame.
  */
 static int newest_capture(void)
 {
@@ -95,18 +95,18 @@ static int newest_capture(void)
 }
 
 /*
- *  ★ 읽기 채널의 시작주소를 바꾸고 "반영"까지 시키는 함수.
+ *  ★ Function that changes the read channel start addresses and also makes them "take effect".
  *
- *  여기서 한 번 크게 헤맸습니다. XAxiVdma_DmaSetBufferAddr() 는 이름과 달리
- *  시작주소 레지스터에 값을 써 넣기만 합니다. VDMA 는 그 값을 곧바로 쓰지
- *  않습니다.
+ *  This one cost a lot of time once. Despite its name, XAxiVdma_DmaSetBufferAddr()
+ *  only writes the values into the start address registers. VDMA does not use them
+ *  right away.
  *
  *      xaxivdma_channel.c : XAxiVdma_ChannelSetBufferAddr()
  *          -> XAxiVdma_WriteReg(StartAddrBase, START_ADDR_OFFSET + i*4, addr)
- *             ... 그리고 그대로 return. 커밋 동작이 없습니다.
+ *             ... and then simply returns. There is no commit step.
  *
- *  이 설계는 SG 를 쓰지 않으므로(INCLUDE_SG = 0) direct register 모드이고,
- *  이 모드에서 설정을 커밋하는 것은 VSIZE 쓰기입니다.
+ *  This design does not use SG (INCLUDE_SG = 0), so it is in direct register mode,
+ *  and in this mode the configuration is committed by writing VSIZE.
  *
  *      xaxivdma_channel.c : XAxiVdma_ChannelStart()
  *          else {
@@ -114,13 +114,13 @@ static int newest_capture(void)
  *              XAxiVdma_WriteReg(StartAddrBase, VSIZE_OFFSET, Channel->Vsize);
  *          }
  *
- *  그래서 주소를 쓴 뒤 XAxiVdma_DmaStart() 를 한 번 더 불러 VSIZE 를 다시
- *  쓰게 합니다. 이미 돌고 있는 채널에 대해서도 안전합니다. ChannelStart 는
- *  "이미 running 이면 VSIZE 만 다시 쓰고 XST_SUCCESS 로 끝나는" 경로를
- *  가지고 있고, XST_DEVICE_BUSY 는 SG 모드에서만 나옵니다.
+ *  So after writing the addresses we call XAxiVdma_DmaStart() once more to rewrite
+ *  VSIZE. This is safe even for a channel that is already running. ChannelStart has
+ *  a path that "if already running, only rewrites VSIZE and returns XST_SUCCESS",
+ *  and XST_DEVICE_BUSY only occurs in SG mode.
  *
- *  이걸 빼면 증상이 아주 조용합니다. 함수는 XST_SUCCESS 를 돌려주고
- *  로그도 정상으로 찍히는데 화면만 그대로입니다.
+ *  Without this the symptom is very quiet. The function returns XST_SUCCESS
+ *  and the logs look normal, but the screen just stays the same.
  */
 static int commit_read_addrs(UINTPTR *set)
 {
@@ -129,14 +129,14 @@ static int commit_read_addrs(UINTPTR *set)
     if (st != XST_SUCCESS) {
         return st;
     }
-    return XAxiVdma_DmaStart(s_vdma, XAXIVDMA_READ);   /* VSIZE 재기록 = 커밋 */
+    return XAxiVdma_DmaStart(s_vdma, XAXIVDMA_READ);   /* Rewriting VSIZE = commit */
 }
 
 /*
- *  MM2S 의 프레임스토어를 전부 같은 주소로 맞춥니다.
+ *  Points all MM2S frame stores at the same address.
  *
- *  셋을 같은 곳으로 두면 VDMA 가 어느 인덱스를 고르든 같은 버퍼를 읽습니다.
- *  파킹도, genlock 인덱스 계산도 신경 쓸 필요가 없어집니다.
+ *  With all three at the same place, VDMA reads the same buffer whichever index it picks.
+ *  No need to worry about parking or genlock index calculation.
  */
 static int point_display_at(UINTPTR addr)
 {
@@ -150,10 +150,10 @@ static int point_display_at(UINTPTR addr)
 }
 
 /*===========================================================================
- *  필터 본체
+ *  Filter implementations
  *
- *  전부 src -> dst 한 방향입니다. 제자리 처리를 하지 않으므로 이웃 연산에서
- *  이미 처리된 픽셀을 다시 읽는 사고가 나지 않습니다.
+ *  All are one-way src -> dst. Since nothing is processed in place, neighborhood
+ *  operations never accidentally re-read already processed pixels.
  *===========================================================================*/
 
 static void filt_copy(const u8 *src, u8 *dst)
@@ -161,7 +161,7 @@ static void filt_copy(const u8 *src, u8 *dst)
     memcpy(dst, src, s_frame_bytes);
 }
 
-/* keep 위치의 바이트만 남기고 나머지 두 채널을 0 으로 만듭니다. */
+/* Keeps only the byte at the keep position and zeroes the other two channels. */
 static void filt_channel(const u8 *src, u8 *dst, int keep)
 {
     u32 n = (u32)s_w * s_h;
@@ -200,16 +200,16 @@ static void filt_binary(const u8 *src, u8 *dst)
 }
 
 /*
- *  소벨 3x3.
+ *  Sobel 3x3.
  *
- *  일부러 단순하게 썼습니다. 픽셀마다 이웃 9개의 밝기를 그 자리에서 계산하니
- *  픽셀당 27바이트를 읽습니다. 느립니다. 그게 이 필터의 교육적 가치입니다 -
- *  같은 알고리즘을 PL 로 옮겼을 때의 차이가 여기서 나옵니다.
+ *  Written simply on purpose. It computes the luminance of the 9 neighbors on the spot for each pixel,
+ *  reading 27 bytes per pixel. It is slow. That is this filter's educational value -
+ *  this is where the difference shows when the same algorithm is moved to the PL.
  *
- *  빠르게 만들고 싶다면 : 밝기를 미리 한 줄씩 만들어 두고 세 줄을 돌려쓰면
- *  읽기가 1/3 로 줄어듭니다. 최적화 실습 과제로 좋습니다.
+ *  To make it faster : precompute luminance one line at a time and rotate three lines,
+ *  which cuts reads to 1/3. A good optimization exercise.
  *
- *  테두리 한 픽셀은 이웃이 없으므로 0 으로 둡니다.
+ *  The one-pixel border has no neighbors, so it is left at 0.
  */
 static void filt_sobel(const u8 *src, u8 *dst)
 {
@@ -239,7 +239,7 @@ static void filt_sobel(const u8 *src, u8 *dst)
             if (gx < 0) gx = -gx;
             if (gy < 0) gy = -gy;
 
-            m = gx + gy;            /* |Gx|+|Gy| : 제곱근을 피한 근사 */
+            m = gx + gy;            /* |Gx|+|Gy| : approximation that avoids the square root */
             if (m > 255) m = 255;
 
             put_gray(dp, (u8)m);
@@ -249,7 +249,7 @@ static void filt_sobel(const u8 *src, u8 *dst)
 }
 
 /*===========================================================================
- *  공개 함수
+ *  Public functions
  *===========================================================================*/
 
 int filter_sw_init(XAxiVdma *vdma, UINTPTR cap_base, UINTPTR disp_base, u16 w, u16 h)
@@ -271,8 +271,8 @@ int filter_sw_init(XAxiVdma *vdma, UINTPTR cap_base, UINTPTR disp_base, u16 w, u
     s_ready       = 1;
 
     /*
-     * 표시 버퍼를 검게 지워 둡니다. 지우지 않으면 처음 전환하는 순간
-     * DDR 의 쓰레기 값이 한 프레임 보입니다.
+     * Clear the display buffers to black. Otherwise, at the moment of the first switch,
+     * garbage values in DDR are visible for one frame.
      */
     memset((void *)s_disp[0], 0, s_frame_bytes);
     memset((void *)s_disp[1], 0, s_frame_bytes);
@@ -327,8 +327,8 @@ void filter_sw_apply(void)
     dst = (u8 *)s_disp[s_disp_idx];
 
     /*
-     * VDMA 가 캐시를 거치지 않고 쓴 데이터를 읽어야 하므로, 캐시에 남은
-     * 낡은 사본을 먼저 버립니다.
+     * We need to read data that VDMA wrote bypassing the cache, so first discard
+     * stale copies left in the cache.
      */
     Xil_DCacheInvalidateRange((INTPTR)src, s_frame_bytes);
 
@@ -347,10 +347,10 @@ void filter_sw_apply(void)
 
     XTime_GetTime(&t1);
 
-    /* 결과가 캐시에만 있으면 VDMA 는 옛날 내용을 읽습니다. 반드시 내려보냅니다. */
+    /* If the result is only in the cache, VDMA reads old contents. Always flush it out. */
     Xil_DCacheFlushRange((INTPTR)dst, s_frame_bytes);
 
-    /* 다 쓴 뒤에야 화면을 이쪽으로 옮깁니다. 이것이 더블버퍼링입니다. */
+    /* Only after writing is complete is the display switched here. This is double buffering. */
     if (point_display_at(s_disp[s_disp_idx]) != XST_SUCCESS) {
         xil_printf("filter : failed to repoint MM2S\r\n");
         return;
@@ -385,7 +385,7 @@ void filter_sw_live(void)
         return;
     }
 
-    /* MM2S 를 원래대로 캡처 버퍼 3장에 되돌립니다. */
+    /* Restore MM2S to the original 3 capture buffers. */
     for (i = 0; i < s_vdma->MaxNumFrames; i++) {
         set[i] = s_cap_base + (UINTPTR)i * s_frame_bytes;
     }

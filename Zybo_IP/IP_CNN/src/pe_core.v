@@ -1,3 +1,4 @@
+
 `timescale 1ns / 1ps
 
 module pe_core (
@@ -9,8 +10,8 @@ module pe_core (
 
     output wire o_act_ready,
 
-    input  wire [23:0] i_wgt_data,
-    input  wire        i_wgt_valid,
+    input wire [23:0] i_wgt_data,
+    input wire        i_wgt_valid,
 
     output wire o_wgt_ready,
 
@@ -90,9 +91,8 @@ module single_pe (
 
     reg signed [31:0] acc_reg;
 
-    // 곱을 한 단 레지스터로 끊는다 (타이밍 2026-09-23 : 곱 + 32b 누산이 한 클럭이면 100 MHz 에서 경계).
-    //   step 에서 곱과 토큰 (valid / last) 을 잡고, 다음 클럭에 누산한다. step 이 멈춰도 잡아 둔 곱은
-    //   그 다음 클럭에 누산되므로 stall 과 무관하다. 결과 pulse 는 마지막 MAC 에지에서 2 clk 뒤 (전에는 1 clk).
+    // Two-stage MAC pipeline
+    // Stage 1: Multiply, Stage 2: Accumulate
     reg signed [15:0] product_q;
     reg               pq_valid;
     reg               pq_last;
@@ -116,9 +116,9 @@ module single_pe (
                 pq_valid       <= 1'b0;
                 pq_last        <= 1'b0;
             end else begin
-                o_result_valid <= 1'b0;  // 1 pulse
+                o_result_valid <= 1'b0;  // One-cycle pulse
 
-                // 1 단 : step 에서 곱과 토큰을 잡는다 (i_step_en = 0 : pe stop)
+                // Stage 1: Multiplication
                 pq_valid <= i_step_en && i_mac_valid;
                 pq_last  <= i_step_en && i_mac_valid && i_mac_last;
                 if (i_step_en) begin
@@ -127,7 +127,7 @@ module single_pe (
                     product_q  <= $signed(act_in) * $signed(weight_in);
                 end
 
-                // 2 단 : 잡아 둔 곱을 누산한다
+                // Stage 2: Accumulation
                 if (pq_valid) begin
                     acc_reg <= acc_next;
                     if (pq_last) begin
@@ -152,23 +152,23 @@ module pe_array (
     input wire i_step_en,
     input wire i_acc_clear,
 
-    // Activation
+    // Activation input
     input wire [23:0] i_act_data,
 
-    // Weight
+    // Weight input
     input wire [23:0] i_wgt_data,
 
-    // mac control
+    // MAC control
     input wire [8:0] i_mac_valid,
     input wire [8:0] i_mac_last,
 
-    // pe result
+    // PE results
     output wire [287:0] o_result_data,
 
-    // PE result valid
+    // Result valid signals
     output wire [8:0] o_result_valid
 );
-    // Activation Connect
+    // Activation connections
     wire signed [7:0] act_00_01;
     wire signed [7:0] act_01_02;
 
@@ -178,7 +178,7 @@ module pe_array (
     wire signed [7:0] act_20_21;
     wire signed [7:0] act_21_22;
 
-    // Weight Connect
+    // Weight connections
     wire signed [7:0] weight_00_10;
     wire signed [7:0] weight_10_20;
 
@@ -344,8 +344,7 @@ module act_skew (
 
     output wire [23:0] o_data
 );
-    // lane0 1 단, lane1 2 단, lane2 3 단.  pe_cntl 의 mac_valid (valid_pipe[r+c], 레지스터) 가 inject 다음 step 부터
-    // 유효하므로 PE(r,c) 는 beat k 를 step k+1+r+c 에 봐야 한다 (2026-09-22 수정 : 원래는 lane0 이 조합 통과라 beat 0 이 빠졌다)
+    // Lane delays: 1, 2, 3 cycles
     reg [7:0] data_d0_1, data_d1_1, data_d1_2, data_d2_1, data_d2_2, data_d2_3;
 
     wire [23:0] feed_data;
@@ -364,16 +363,15 @@ module act_skew (
                 data_d2_1 <= 8'd0; data_d2_2 <= 8'd0; data_d2_3 <= 8'd0;
             end else begin
                 if (i_step_en) begin
-                    data_d0_1 <= feed_data[7:0];                                          // lane0 : 1 단
-                    data_d1_1 <= feed_data[15:8];   data_d1_2 <= data_d1_1;               // lane1 : 2 단
-                    data_d2_1 <= feed_data[23:16];  data_d2_2 <= data_d2_1;  data_d2_3 <= data_d2_2;   // lane2 : 3 단
+                    data_d0_1 <= feed_data[7:0];                                           // Lane 0: 1 cycle
+                    data_d1_1 <= feed_data[15:8];   data_d1_2 <= data_d1_1;                // Lane 1: 2 cycles
+                    data_d2_1 <= feed_data[23:16];  data_d2_2 <= data_d2_1;  data_d2_3 <= data_d2_2;  // Lane 2: 3 cycles
                 end
             end
         end
     end
 
-    // clear / reset 은 위 레지스터에서 처리한다. 조합 mux 로 0 을 만들면 pe_cntl 상태 -> 곱셈기 -> 누산기가
-    // 한 경로가 되어 타이밍이 깨져서 뺐다 (2026-09-23). P_CLEAR 동안은 step_en=0 이라 값이 쓰이지 않는다
+    // Registered reset and clear
     assign o_data = {data_d2_3, data_d1_2, data_d0_1};
 endmodule
 
@@ -397,8 +395,7 @@ module wgt_skew (
 
     output wire [23:0] o_data
 );
-    // lane0 1 단, lane1 2 단, lane2 3 단.  pe_cntl 의 mac_valid (valid_pipe[r+c], 레지스터) 가 inject 다음 step 부터
-    // 유효하므로 PE(r,c) 는 beat k 를 step k+1+r+c 에 봐야 한다 (2026-09-22 수정 : 원래는 lane0 이 조합 통과라 beat 0 이 빠졌다)
+    // Lane delays: 1, 2, 3 cycles
     reg [7:0] data_d0_1, data_d1_1, data_d1_2, data_d2_1, data_d2_2, data_d2_3;
 
     wire [23:0] feed_data;
@@ -417,14 +414,14 @@ module wgt_skew (
                 data_d2_1 <= 8'd0; data_d2_2 <= 8'd0; data_d2_3 <= 8'd0;
             end else begin
                 if (i_step_en) begin
-                    data_d0_1 <= feed_data[7:0];                                          // lane0 : 1 단
-                    data_d1_1 <= feed_data[15:8];   data_d1_2 <= data_d1_1;               // lane1 : 2 단
-                    data_d2_1 <= feed_data[23:16];  data_d2_2 <= data_d2_1;  data_d2_3 <= data_d2_2;   // lane2 : 3 단
+                    data_d0_1 <= feed_data[7:0];                                           // Lane 0: 1 cycle
+                    data_d1_1 <= feed_data[15:8];   data_d1_2 <= data_d1_1;                // Lane 1: 2 cycles
+                    data_d2_1 <= feed_data[23:16];  data_d2_2 <= data_d2_1;  data_d2_3 <= data_d2_2;  // Lane 2: 3 cycles
                 end
             end
         end
     end
 
-    // clear / reset 은 위 레지스터에서 처리한다 (act_skew 와 같은 이유로 조합 mux 를 뺐다 2026-09-23)
+    // Registered reset and clear
     assign o_data = {data_d2_3, data_d1_2, data_d0_1};
 endmodule

@@ -1,14 +1,14 @@
 `timescale 1 ns / 1 ps
 //
-// ===== 수정 사항 =====
-// 원본 대비 딱 2곳만 수정했습니다 (그 외 전부 원본과 동일):
-//   1) PWDATA/PSTRB 캡처 로직: S_AXI_AWADDR[1]로 상/하위 16비트 중
-//      어느 쪽이 실제 데이터가 실린 바이트 레인인지 선택하도록 수정
-//      (기존엔 항상 WDATA[15:0]/WSTRB[1:0]만 봐서, offset 2/6처럼
-//       워드 정렬이 안 된 레지스터에 쓰기가 실제로 안 먹었음)
-//   2) axi_rdata 캡처 로직: PADDR[1]로 APB에서 받은 16비트 응답을
-//      상위/하위 중 CPU가 실제로 읽는 바이트 레인에 맞춰 넣도록 수정
-// 두 수정 지점에는 "==== FIX ====" 주석으로 표시해뒀습니다.
+// ===== Modifications =====
+// Only 2 places were modified compared to the original (everything else is identical):
+//   1) PWDATA/PSTRB capture logic: modified to use S_AXI_AWADDR[1] to select which
+//      of the upper/lower 16 bits is the byte lane that actually carries the data
+//      (previously it always looked only at WDATA[15:0]/WSTRB[1:0], so writes to
+//       non-word-aligned registers such as offset 2/6 did not actually take effect)
+//   2) axi_rdata capture logic: modified to use PADDR[1] to place the 16-bit APB response
+//      into the upper/lower byte lane that the CPU actually reads
+// Both modified spots are marked with a "==== FIX ====" comment.
 //
 
 	module APB_v1_0_S00_AXI #
@@ -430,10 +430,10 @@
 	    end    
 	end    
 	
-    // ==== FIX (1/2): 쓰기 시 주소[1]로 상/하위 16비트 바이트 레인 선택 ====
-    // 기존엔 항상 S_AXI_WDATA[15:0]/WSTRB[1:0]만 봤는데, offset 2/6처럼
-    // 워드 정렬이 안 된 레지스터는 AXI 규약상 실제 데이터가 [31:16]/WSTRB[3:2]에
-    // 실리므로, S_AXI_AWADDR[1]을 보고 올바른 레인을 골라야 함.
+    // ==== FIX (1/2): on write, select the upper/lower 16-bit byte lane using address[1] ====
+    // Previously it always looked only at S_AXI_WDATA[15:0]/WSTRB[1:0], but for
+    // non-word-aligned registers such as offset 2/6, the AXI spec puts the actual data on [31:16]/WSTRB[3:2],
+    // so the correct lane must be selected based on S_AXI_AWADDR[1].
     always @( posedge S_AXI_ACLK ) begin
         if ( S_AXI_ARESETN == 1'b0 )begin
             PWDATA <= 0;
@@ -481,9 +481,9 @@
                     if(PREADY == 1'b1)begin
                         {PSEL,PENABLE,PWRITE} <= {2'b00,PWRITE};
                         PSTATE <= 2'b00;
-                        // ==== FIX (2/2): 읽기 시 PADDR[1]로 응답 데이터를
-                        // 상/하위 16비트 중 CPU가 실제로 읽을 레인에 맞춰 배치 ====
-                        // PADDR은 이 시점에 이미 읽기 주소로 래치돼 있으므로 그대로 사용 가능.
+                        // ==== FIX (2/2): on read, use PADDR[1] to place the response data
+                        // into the upper/lower 16-bit lane the CPU will actually read ====
+                        // PADDR is already latched with the read address at this point, so it can be used as is.
                         if(!PWRITE) begin
                             if (PADDR[1])
                                 axi_rdata <= {{(C_S_AXI_DATA_WIDTH-APB_WIDTH){1'b0}}, PRDATA} << 16;

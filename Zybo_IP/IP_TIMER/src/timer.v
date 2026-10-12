@@ -20,7 +20,7 @@ module timer (
     assign o_cnt  = counter;
     assign o_done = done_tick;
 
-    // ---- prescaler: psc값만큼 클럭을 세서 1클럭 tick 생성 ----
+    // ---- prescaler: count psc clocks and generate a 1-clock tick ----
     always @(posedge clk) begin
         if (!rst_n) begin
             psc_counter <= 0;
@@ -39,7 +39,7 @@ module timer (
         end
     end
 
-    // ---- main counter: psc_tick마다 1씩 증가, arr에 도달하면 done_tick 발생 ----
+    // ---- main counter: increments by 1 on each psc_tick, asserts done_tick when it reaches arr ----
     always @(posedge clk) begin
         if (!rst_n) begin
             counter   <= 0;

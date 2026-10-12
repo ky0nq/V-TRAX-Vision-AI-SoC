@@ -1,28 +1,28 @@
 `timescale 1ns / 1ps
 //
-// dma_mm2s : Read 채널 (MCDMA MM2S 대체)
+// dma_mm2s : Read channel (replaces MCDMA MM2S)
 //
-//   dma_regmap --(설정값/펄스)--> [frame select]  LIVE=0 : SA
+//   dma_regmap --(config/pulses)--> [frame select]  LIVE=0 : SA
 //                                      |          LIVE=1 : S2MM DA[newest_idx]
 //                                      v
-//                                 mm2s_engine --(M_AXI AR/R, 32bit 주소)--> axi_mem_intercon
+//                                 mm2s_engine --(M_AXI AR/R, 32bit addr)--> axi_mem_intercon
 //                                      |                                    ├─ HP0 (DDR)
-//                                      v                                    └─ axi_bram_ctrl (로딩화면)
+//                                      v                                    └─ axi_bram_ctrl (loading screen)
 //                                 mm2s_fifo (32bit)
 //                                      v
 //                                 M_AXIS (32bit packed) --> mm2s_depacketizer
 //
-// [이전 버전과 차이]
-//   레지스터 맵(AXI-Lite)이 dma_top 의 dma_regmap 으로 올라가서,
-//   여기서는 설정값을 선으로 받고 상태를 선으로 돌려줌. 나머지 로직은 동일.
+// [Differences from the previous version]
+//   The register map (AXI-Lite) moved up to dma_regmap in dma_top,
+//   so this module receives config values as wires and returns status as wires. The rest of the logic is the same.
 //
-// 동작 요약
-//   - CYCLIC=1 : 프레임이 끝나면 CPU 개입 없이 바로 다음 프레임
-//   - LIVE=0   : SA 하나만 반복 (로딩화면 0x8000_0000, 필터 결과 고정 등)
-//   - LIVE=1   : 매 프레임 시작마다 S2MM 이 가장 최근 완성한 버퍼(DA[newest_idx])를 읽음
-//   - LIVE / SA 변경은 다음 프레임 경계에서 자동 반영
+// Operation summary
+//   - CYCLIC=1 : when a frame ends, start the next frame immediately without CPU intervention
+//   - LIVE=0   : repeat a single SA (loading screen 0x8000_0000, frozen filter result, etc.)
+//   - LIVE=1   : at the start of every frame, read the buffer most recently completed by S2MM (DA[newest_idx])
+//   - LIVE / SA changes take effect automatically at the next frame boundary
 //
-// 클럭은 aclk 하나
+// Single clock: aclk
 //
 module dma_mm2s #(
     parameter integer FIFO_DEPTH      = 64,
@@ -31,25 +31,25 @@ module dma_mm2s #(
     input  wire         aclk,
     input  wire         aresetn,
 
-    // ================= dma_regmap 에서 오는 설정 =================
+    // ================= Config from dma_regmap =================
     input  wire [31:0]  cr,               // MM2S_CR  ([4] CYCLIC, [5] LIVE, [6] IDX_SW)
     input  wire [31:0]  sa,               // SA
     input  wire [31:0]  btt,              // BTT
     input  wire [9:0]   burst_cfg,        // BURST_CFG
     input  wire [3:0]   num_buf,          // NUM_BUF
     input  wire [2:0]   sw_idx,           // SW_IDX
-    input  wire         start,            // BTT 쓰기 펄스
-    input  wire         abort,            // CR.ABORT 펄스
+    input  wire         start,            // BTT write pulse
+    input  wire         abort,            // CR.ABORT pulse
 
-    // ================= dma_regmap 으로 가는 상태 =================
+    // ================= Status to dma_regmap =================
     output wire         busy,
     output wire         frame_done,
     output wire         error,
     output wire [31:0]  error_addr,
     output reg  [2:0]   cur_buf_idx,
 
-    // ================= S2MM 에서 오는 정보 =================
-    input  wire [2:0]   s2mm_newest_idx,  // 방금 다 쓴 버퍼 번호
+    // ================= Info from S2MM =================
+    input  wire [2:0]   s2mm_newest_idx,  // Index of the buffer just finished writing
     input  wire [31:0]  s2mm_buf_addr0,   // DA0
     input  wire [31:0]  s2mm_buf_addr1,   // DA1
     input  wire [31:0]  s2mm_buf_addr2,   // DA2
@@ -82,7 +82,7 @@ module dma_mm2s #(
 );
 
     // ------------------------------------------------------------------
-    // 포트 -> 내부 이름 (아래 로직은 이전 버전과 같은 이름을 그대로 씀)
+    // Port -> internal name (the logic below keeps the same names as the previous version)
     // ------------------------------------------------------------------
     wire [31:0] CDMACR_reg    = cr;
     wire [31:0] SA_reg        = sa;
@@ -101,7 +101,7 @@ module dma_mm2s #(
     assign error_addr = dma_error_addr;
 
     // ------------------------------------------------------------------
-    // Frame select (MCDMA ISR 의 newest_rx_idx / mm2s_override 역할)
+    // Frame select (plays the role of newest_rx_idx / mm2s_override in the MCDMA ISR)
     // ------------------------------------------------------------------
     wire cr_cyclic = CDMACR_reg[4];
     wire cr_live   = CDMACR_reg[5];
@@ -110,14 +110,14 @@ module dma_mm2s #(
     wire [2:0] newest_raw = cr_idx_sw ? SW_IDX_reg : s2mm_newest_idx;
     wire [2:0] newest_idx = ({1'b0, newest_raw} < NUM_BUF_reg) ? newest_raw : 3'd0;
 
-    // 버퍼 주소는 S2MM 의 DA0~2 를 그대로 사용 (FB_BASE 레지스터는 미사용)
+    // Buffer addresses use S2MM's DA0~2 directly (FB_BASE register is unused)
     wire [31:0] live_addr = (newest_idx == 3'd0) ? s2mm_buf_addr0 :
                             (newest_idx == 3'd1) ? s2mm_buf_addr1 :
                                                    s2mm_buf_addr2;
     wire [31:0] frame_src = cr_live ? live_addr : SA_reg;
 
-    // 지금 읽는 버퍼 번호 (디버깅용, SR[10:8])
-    // datapath 가 src_addr 를 래치하는 순간(init) 과 같은 클럭에 같이 잡음
+    // Index of the buffer currently being read (for debugging, SR[10:8])
+    // Captured on the same clock in which the datapath latches src_addr (init)
     reg start_q;
     always @(posedge aclk) begin
         if (!aresetn) begin
@@ -144,7 +144,7 @@ module dma_mm2s #(
         .BURST_WIDTH     (8),
         .R0_BASE         (32'h0000_0000),   // DDR (HP0)
         .R0_SIZE         (32'h4000_0000),
-        .R1_BASE         (32'h8000_0000),   // BRAM 프레임 창 (axi_bram_ctrl)
+        .R1_BASE         (32'h8000_0000),   // BRAM frame window (axi_bram_ctrl)
         .R1_SIZE         (32'h002A_3000),   // 1280 x 720 x 3-byte BRAM frame window
         .MAX_BURST_BYTES (MAX_BURST_BYTES)
     ) U_READ_ENGINE (

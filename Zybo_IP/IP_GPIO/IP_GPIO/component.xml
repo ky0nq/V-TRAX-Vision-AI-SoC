@@ -142,7 +142,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>2ad963d0</spirit:value>
+            <spirit:value>3d382ef2</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -158,7 +158,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>2ad963d0</spirit:value>
+            <spirit:value>3d382ef2</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -410,7 +410,7 @@
       <spirit:file>
         <spirit:name>src/GPIO_top.sv</spirit:name>
         <spirit:fileType>systemVerilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_7984c5a6</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_48b047bf</spirit:userFileType>
         <spirit:userFileType>IMPORTED_FILE</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
@@ -465,11 +465,11 @@
       </xilinx:taxonomies>
       <xilinx:displayName>APB_GPIO</xilinx:displayName>
       <xilinx:definitionSource>package_project</xilinx:definitionSource>
-      <xilinx:coreRevision>7</xilinx:coreRevision>
+      <xilinx:coreRevision>9</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>xilinx.com:user:GPIO_top:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2026-10-01T01:19:03Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2026-10-09T04:09:04Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="ui.data.coregen.dd@1932480b_ARCHIVE_LOCATION">d:/APB_Peri/IP/IP_GPIO</xilinx:tag>
         <xilinx:tag xilinx:name="ui.data.coregen.dd@70c4837f_ARCHIVE_LOCATION">d:/APB_Peri/IP/IP_GPIO</xilinx:tag>
@@ -570,12 +570,37 @@
         <xilinx:tag xilinx:name="ui.data.coregen.dd@2342e408_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
         <xilinx:tag xilinx:name="ui.data.coregen.dd@463f3fdb_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
         <xilinx:tag xilinx:name="ui.data.coregen.dd@7630f4df_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@1c6307b9_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@4bd691c0_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@7286a094_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@6e2a053e_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@16034347_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@1cb97a5f_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@75918d7f_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@4f3ba9ef_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@31270e8c_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@51e13856_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@19f029c0_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@3008fa3f_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@6440be50_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@18095bfe_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@2ee1fc5d_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@399f54aa_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@4be69816_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@27c715d7_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@5ae806da_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@3a235cb9_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@477340b5_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@7c6dbe94_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@5c2e0aed_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@718cc5c4_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@22defe2_ARCHIVE_LOCATION">d:/Final_Project/IP/IP_GPIO</xilinx:tag>
       </xilinx:tags>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2020.2</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="c6fa786c"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="907a1bad"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="659fe00d"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="8477b0fc"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="58d40c30"/>
     </xilinx:packagingInfo>

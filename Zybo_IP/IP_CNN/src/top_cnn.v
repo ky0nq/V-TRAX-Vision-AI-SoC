@@ -4,22 +4,23 @@
 module top_cnn #(
     parameter [31:0] IMG_RAM_BASE = 32'd0,
     parameter [12:0] IMG_WORDS    = 13'd4096,
-    // Requant M / S 기본값 = Model C export (ModelC_HW_TOP_READY_20260923_020957/HW_TOP_TEST/hw_params.txt). 2026-09-24
-    //   q = sat_int8( round( (acc + bias) * M / 2^S ) ).  L3 = 최종 FC2 의 ANGLE_MULT / ANGLE_SHIFT (1 LSB = 1 도)
-    parameter [31:0] L0_QM = 32'd1574039,
+    // Default Requant M / S values = Model C export 
+    //   q = sat_int8( round( (acc + bias) * M / 2^S ) ). 
+    //   L3 = ANGLE_MULT / ANGLE_SHIFT of the final FC2 layer (1 LSB = 1 degree)
+    parameter [31:0] L0_QM = 32'd3157292,
     parameter [ 5:0] L0_QS = 6'd30,
-    parameter [31:0] L1_QM = 32'd3254702,
+    parameter [31:0] L1_QM = 32'd11411101,
     parameter [ 5:0] L1_QS = 6'd30,
-    parameter [31:0] L2_QM = 32'd485488,
+    parameter [31:0] L2_QM = 32'd3791004,
     parameter [ 5:0] L2_QS = 6'd30,
     // L3_QM/QS = Final ANGLE_MULT/ANGLE_SHIFT
-    parameter [31:0] L3_QM = 32'd1726771,
+    parameter [31:0] L3_QM = 32'd7489321,
     parameter [ 5:0] L3_QS = 6'd30
 ) (
     input wire clk,
     input wire rst_n,
 
-    // ---- AXI4-Lite CSR ---------------------------------------------------
+    // ---- AXI4-Lite CSR --------------------------------------------------
     input  wire       i_start_valid,
     output wire       o_start_ready,
     output wire       o_busy,
@@ -33,13 +34,13 @@ module top_cnn #(
     output wire [11:0] o_img_rd_addr,
     input  wire [23:0] i_img_rdata,
 
-    // ---- 공유 RAM (Weight + Bias) : 주소 다음 clk 에 데이터, 핸드셰이크 없음 ------------
-    //   word 0 .. 45249     : weight (i_rdata[23:0] 사용)
-    //   word 45250 .. 45292 : bias   (i_rdata[31:0] 사용).  영역 구분은 주소로만 한다
+    // ---- Parameter RAM (Weight + Bias)------------------------------------
+    //   word 0 .. 45249     : weight - i_rdata[23:0]
+    //   word 45250 .. 45292 : bias   - i_rdata[31:0]
     output wire [15:0] o_ram_rd_addr,
     input  wire [31:0] i_rdata,
 
-    // ---- 디버그 -------------------------------------------------------------
+    // ---- Debugging -------------------------------------------------------
     output wire [2:0] o_layer_idx,
     output wire [3:0] o_cnn_state
 );
@@ -88,25 +89,25 @@ module top_cnn #(
     wire [31:0] c_param_wr_data;
     wire        c_writer_mode;
 
-    // ---- act_path 출력 -----------------------------------------------------
+    // ---- act_path output -----------------------------------------------------
     wire        a_ld_done;
     wire [23:0] a_data;
     wire [ 2:0] a_keep;
     wire        a_valid;
 
-    // ---- wgt_path 출력 -----------------------------------------------------
+    // ---- wgt_path output -----------------------------------------------------
     wire w_ld_done, w_ld_ready;
     wire        w_chunk_done;
     wire [23:0] w_data;
     wire [ 2:0] w_keep;
     wire        w_valid;
 
-    // ---- pe_core 출력 ------------------------------------------------------
+    // ---- pe_core output ------------------------------------------------------
     wire p_act_ready, p_wgt_ready;
     wire [287:0] p_result_data;
     wire [  8:0] p_result_valid;
 
-    // ---- out_path 출력 -----------------------------------------------------
+    // ---- out_path output -----------------------------------------------------
     wire         r_result_space_ready;
     wire r_param_load_done, r_params_ready;
     wire        r_wr_en;
@@ -122,9 +123,10 @@ module top_cnn #(
     assign o_done_status  = r_done_status;
     assign o_final_result = r_final_result[7:0];
 
-    // 공유 RAM 주소 : bias 적재 중 (cnn_cntl C_PARAM_LOAD, ram_owner = 1) 에는 bias 영역, 그 외에는 weight 주소
-    localparam [15:0] PRM_RAM_BASE = 16'd45250;   // = fc2 weight 끝 다음 word (16'hB0C2)
-    wire ram_owner;  // cnn_cntl.o_ram_owner. top_cnn 안에서만 쓴다
+    // Parameter RAM Address: Select the bias region during bias loading (cnn_cntl C_PARAM_LOAD, ram_owner = 1); 
+    // otherwise, select the weight address.
+    localparam [15:0] PRM_RAM_BASE = 16'd45250; // = First word after the FC2 weight region (16'hB0C2)
+    wire ram_owner;  // cnn_cntl.o_ram_owner. Used only within top_cnn.
     assign o_ram_rd_addr = ram_owner ? (PRM_RAM_BASE + {9'd0, param_mem_addr}) : wgt_rd_addr;
 
     top_cnn_cntl #(
@@ -220,7 +222,7 @@ module top_cnn #(
         .o_param_mem_addr(param_mem_addr),
         .i_param_mem_data(i_rdata),
 
-        // ---- 디버그 ----------------------------------------------------------
+        // ---- Debugging ----------------------------------------------------
         .o_layer_idx       (o_layer_idx),
         .o_cnn_state       (o_cnn_state),
         .o_pe_cmd_ready_dbg()

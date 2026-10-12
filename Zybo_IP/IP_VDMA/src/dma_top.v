@@ -1,27 +1,27 @@
 `timescale 1ns / 1ps
 //
-// dma_top : VDMA 방식 DMA (MM2S + S2MM), AXI-Lite 하나 + 레지스터 맵 하나
+// dma_top : VDMA-style DMA (MM2S + S2MM), one AXI-Lite + one register map
 //
 //               s_axi_lite (7bit, 0x00 ~ 0x7F)
 //                      │
-//                 [dma_regmap]  0x00~0x3F : MM2S 레지스터 / 0x40~0x7F : S2MM 레지스터
+//                 [dma_regmap]  0x00~0x3F : MM2S registers / 0x40~0x7F : S2MM registers
 //                  │        │
-//      MM2S 설정/상태│        │S2MM 설정/상태
+//  MM2S cfg/status │        │ S2MM cfg/status
 //                  v        v
 //      dma_mm2s_video      s_axis_video (24bit) -> s2mm_packetizer -> s2mm_write_top
-//      (DDR/BRAM -> 영상)                                           (카메라 -> DDR)
+//      (DDR/BRAM -> video)                                            (camera -> DDR)
 //            ▲                   │
-//            └ newest_idx, DA0~2 ┘   (VDMA genlock 역할 : 방금 다 쓴 버퍼를 읽음)
+//            └ newest_idx, DA0~2 ┘   (acts as VDMA genlock : reads the buffer just finished writing)
 //
-// 포트 그룹 (Vivado 인터페이스 자동 인식용 접두사)
-//   s_axi_lite_*    : CPU 레지스터 접근 (AXI4-Lite)
-//   s_axis_video_*  : 카메라 영상 입력 (24bit RGB, tlast = EOL)  <- AXI_GammaCorrection
-//                     (예전 외부 axis_frame_packetizer 를 s2mm_packetizer 로 내장)
-//   m_axi_s2mm_*    : DDR 쓰기 (AXI3)
-//   m_axi_mm2s_*    : DDR/BRAM 읽기 (AXI4)
-//   m_axis_video_*  : 영상 출력 (24bit RGB, tuser = SOF, tlast = EOL)
+// Port groups (prefixes for Vivado interface auto-inference)
+//   s_axi_lite_*    : CPU register access (AXI4-Lite)
+//   s_axis_video_*  : camera video input (24bit RGB, tlast = EOL)  <- AXI_GammaCorrection
+//                     (the former external axis_frame_packetizer is now built in as s2mm_packetizer)
+//   m_axi_s2mm_*    : DDR write (AXI3)
+//   m_axi_mm2s_*    : DDR/BRAM read (AXI4)
+//   m_axis_video_*  : video output (24bit RGB, tuser = SOF, tlast = EOL)
 //
-// 클럭은 aclk 하나 (모든 인터페이스 동일 클럭 전제)
+// Single clock aclk (all interfaces assumed to share the same clock)
 //
 module dma_top #(
     parameter integer PIXELS_PER_LINE = 1280,
@@ -56,12 +56,12 @@ module dma_top #(
     output wire         s_axi_lite_rvalid,
     input  wire         s_axi_lite_rready,
 
-    // ================= S_AXIS_VIDEO (카메라 영상 입력, 24bit RGB) =================
+    // ================= S_AXIS_VIDEO (camera video input, 24bit RGB) =================
     input  wire [23:0]  s_axis_video_tdata,
     input  wire         s_axis_video_tvalid,
     output wire         s_axis_video_tready,
-    input  wire         s_axis_video_tlast,     // EOL (줄 끝)
-    input  wire         s_axis_video_tuser,     // SOF (연결만, packetizer 는 자체 카운터 사용)
+    input  wire         s_axis_video_tlast,     // EOL (end of line)
+    input  wire         s_axis_video_tuser,     // SOF (connected only; packetizer uses its own counter)
 
     // ================= M_AXI_S2MM (AXI3 write) =================
     output wire [3:0]   m_axi_s2mm_awid,
@@ -104,7 +104,7 @@ module dma_top #(
     input  wire         m_axi_mm2s_rvalid,
     output wire         m_axi_mm2s_rready,
 
-    // ================= M_AXIS_VIDEO (영상 출력) =================
+    // ================= M_AXIS_VIDEO (video output) =================
     output wire [23:0]  m_axis_video_tdata,
     output wire [2:0]   m_axis_video_tkeep,
     output wire         m_axis_video_tuser,
@@ -114,9 +114,9 @@ module dma_top #(
 );
 
     // ------------------------------------------------------------------
-    // 레지스터 맵 <-> 채널 연결 신호
+    // Register map <-> channel connection signals
     // ------------------------------------------------------------------
-    // MM2S 설정 / 상태
+    // MM2S config / status
     wire [31:0] mm2s_cr, mm2s_sa, mm2s_btt;
     wire [9:0]  mm2s_burst_cfg;
     wire [3:0]  mm2s_num_buf;
@@ -126,7 +126,7 @@ module dma_top #(
     wire [31:0] mm2s_error_addr;
     wire [2:0]  mm2s_cur_buf;
 
-    // S2MM 설정 / 상태
+    // S2MM config / status
     wire [31:0] s2mm_cr, s2mm_da0, s2mm_da1, s2mm_da2;
     wire        s2mm_start;
     wire        s2mm_busy, s2mm_frame_done, s2mm_error;
@@ -134,7 +134,7 @@ module dma_top #(
     wire [2:0]  s2mm_newest_idx;
 
     // ------------------------------------------------------------------
-    // 레지스터 맵 (AXI-Lite slave 하나)
+    // Register map (single AXI-Lite slave)
     // ------------------------------------------------------------------
     dma_regmap #(
         .C_S_AXI_DATA_WIDTH (32),
@@ -191,7 +191,7 @@ module dma_top #(
     );
 
     // ------------------------------------------------------------------
-    // Packetizer : 24bit 픽셀 -> 32bit packed (tuser=SOF, tlast=프레임 끝)
+    // Packetizer : 24bit pixel -> 32bit packed (tuser=SOF, tlast=end of frame)
     // ------------------------------------------------------------------
     wire [31:0] pk_tdata;
     wire [3:0]  pk_tkeep;
@@ -223,11 +223,11 @@ module dma_top #(
         .m_axis_tready (pk_tready)
     );
 
-    // s_axis_video_tuser 는 인터페이스 호환용 (packetizer 가 SOF 를 직접 만듦)
+    // s_axis_video_tuser is for interface compatibility (packetizer generates SOF itself)
     wire _unused_video_tuser = s_axis_video_tuser;
 
     // ------------------------------------------------------------------
-    // S2MM (카메라 -> DDR) : write 쪽 top 그대로
+    // S2MM (camera -> DDR) : write-side top as is
     // ------------------------------------------------------------------
     s2mm_write_top #(
         .ID_WIDTH        (4),
@@ -287,7 +287,7 @@ module dma_top #(
     );
 
     // ------------------------------------------------------------------
-    // MM2S (DDR/BRAM -> 영상)
+    // MM2S (DDR/BRAM -> video)
     // ------------------------------------------------------------------
     dma_mm2s_video #(
         .FIFO_DEPTH      (MM2S_FIFO_DEPTH),

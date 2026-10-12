@@ -1,32 +1,32 @@
 `timescale 1ns / 1ps
 //
-// tb_dma_top : DMA 전체 (S2MM + MM2S + 레지스터 맵) 동작 확인
+// tb_dma_top : functional check of the full DMA (S2MM + MM2S + register map)
 //
-//  구성
-//   - AXI-Lite 마스터 태스크 (CPU)          : 레지스터 쓰기/읽기 (0x00 ~ 0x7F)
-//   - 카메라 스트림 생성기                    : 프레임마다 tuser[0]=SOF, 마지막 워드 tlast
-//   - AXI3 쓰기 슬레이브 (DDR)               : S2MM 이 쓴 데이터를 실제로 메모리 배열에 저장
-//   - AXI4 읽기 슬레이브 (DDR + BRAM 창)     : DDR 은 저장된 값, BRAM 창은 로딩화면 패턴
-//   - 영상 출력 체커 (vid_out)                : tready 랜덤, 픽셀값/tuser/tlast 검사
+//  Components
+//   - AXI-Lite master task (CPU)            : register write/read (0x00 ~ 0x7F)
+//   - Camera stream generator               : tuser[0]=SOF per frame, tlast on the last word
+//   - AXI3 write slave (DDR)                : actually stores the data written by S2MM in a memory array
+//   - AXI4 read slave (DDR + BRAM window)   : DDR returns stored values, BRAM window returns the loading-screen pattern
+//   - Video output checker (vid_out)        : random tready, checks pixel values/tuser/tlast
 //
-//  데이터 규칙 : 프레임 안 바이트 오프셋 o, 태그 t 에 대해  byte = (o*7 + t*40) & 0xFF
-//     t = 0..5 : 카메라 프레임 (프레임 번호 % 6)
-//     t = 6    : BRAM 로딩화면
-//   -> 출력 프레임 첫 바이트 / 40 = 태그 = 어디서 온 프레임인지
+//  Data rule : for byte offset o within a frame and tag t,  byte = (o*7 + t*40) & 0xFF
+//     t = 0..5 : camera frame (frame number % 6)
+//     t = 6    : BRAM loading screen
+//   -> first byte of output frame / 40 = tag = which source the frame came from
 //
-//  해상도 : 64 x 4 (writer 는 한 줄이 64바이트 배수여야 함 : 64px x 3B = 192B = 3 burst)
+//  Resolution : 64 x 4 (the writer requires each line to be a multiple of 64 bytes : 64px x 3B = 192B = 3 bursts)
 //
-//  시나리오
-//   T0 : S2MM 시작 (DA0/1/2 를 일부러 떨어진 주소로) + 카메라 스트림 시작
-//   T1 : MM2S 로딩화면 순환 (LIVE=0, SA = BRAM)          -> 태그 6 반복
-//   T2 : LIVE=1 전환                                     -> 카메라 태그로 바뀌고 계속 갱신
-//   T3 : LIVE=0 복귀                                     -> 다시 태그 6
-//   T4 : 상태 레지스터 / 에러 없음 / DA 주소에 실제로 쓰였는지 / 정상 정지
+//  Scenario
+//   T0 : start S2MM (DA0/1/2 at deliberately separated addresses) + start the camera stream
+//   T1 : MM2S loading screen loop (LIVE=0, SA = BRAM)    -> tag 6 repeats
+//   T2 : switch to LIVE=1                                -> changes to camera tags and keeps updating
+//   T3 : back to LIVE=0                                  -> tag 6 again
+//   T4 : status registers / no errors / data actually written at the DA addresses / clean stop
 //
 module tb_dma_top;
 
     // ------------------------------------------------------------------
-    // 파라미터
+    // Parameters
     // ------------------------------------------------------------------
     localparam integer W           = 64;
     localparam integer H           = 4;
@@ -36,11 +36,11 @@ module tb_dma_top;
     localparam integer TAG_BRAM    = 6;
 
     localparam [31:0] BRAM_BASE = 32'h8000_0000;
-    localparam [31:0] DA0 = 32'h1000_0000;             // 일부러 연속이 아닌 주소
+    localparam [31:0] DA0 = 32'h1000_0000;             // Deliberately non-contiguous addresses
     localparam [31:0] DA1 = 32'h1100_4000;
     localparam [31:0] DA2 = 32'h1230_8000;
 
-    // 레지스터 주소
+    // Register addresses
     localparam [6:0] R_MM2S_CR = 7'h00, R_MM2S_SR = 7'h04, R_SA = 7'h18, R_RERR = 7'h1C,
                      R_BTT = 7'h28, R_BCFG = 7'h30, R_NBUF = 7'h38,
                      R_S2MM_CR = 7'h40, R_S2MM_SR = 7'h44,
@@ -49,14 +49,14 @@ module tb_dma_top;
     localparam [31:0] CR_CYCLIC = 32'h10, CR_LIVE = 32'h20, CR_ERR_EN = 32'h4000;
 
     // ------------------------------------------------------------------
-    // 클럭 / 리셋
+    // Clock / reset
     // ------------------------------------------------------------------
     reg aclk = 1'b0;
     reg aresetn = 1'b0;
     always #5 aclk = ~aclk;
 
     // ------------------------------------------------------------------
-    // DUT 신호
+    // DUT signals
     // ------------------------------------------------------------------
     wire mm2s_irq, s2mm_irq;
 
@@ -127,28 +127,28 @@ module tb_dma_top;
     );
 
     // ------------------------------------------------------------------
-    // 데이터 규칙
+    // Data rule
     // ------------------------------------------------------------------
     function [7:0] pat(input integer o, input integer tag);
         pat = (o * 7 + tag * 40);
     endfunction
 
     // ------------------------------------------------------------------
-    // 메모리 (DDR : S2MM 이 쓴 값 저장 / BRAM 창 : 로딩화면 패턴)
+    // Memory (DDR : stores values written by S2MM / BRAM window : loading-screen pattern)
     // ------------------------------------------------------------------
-    logic [7:0] ddr [logic [31:0]];     // 쓴 주소만 저장하는 희소 메모리
+    logic [7:0] ddr [logic [31:0]];     // Sparse memory that stores only written addresses
 
     function [7:0] mem_byte(input [31:0] a);
         if (a >= BRAM_BASE)       mem_byte = pat(a - BRAM_BASE, TAG_BRAM);
         else if (ddr.exists(a))   mem_byte = ddr[a];
-        else                      mem_byte = 8'hEE;   // 안 쓴 주소 (읽으면 체커에서 에러)
+        else                      mem_byte = 8'hEE;   // Unwritten address (checker reports an error if it is read)
     endfunction
 
     function [31:0] mem_word(input [31:0] a);
         mem_word = {mem_byte(a + 3), mem_byte(a + 2), mem_byte(a + 1), mem_byte(a)};
     endfunction
 
-    // ---------------- AXI3 쓰기 슬레이브 (S2MM) ----------------
+    // ---------------- AXI3 write slave (S2MM) ----------------
     reg        aw_have = 1'b0;
     reg [31:0] aw_addr_q = 0;
     reg [7:0]  w_beat = 0;
@@ -184,7 +184,7 @@ module tb_dma_top;
         end
     end
 
-    // ---------------- AXI4 읽기 슬레이브 (MM2S) ----------------
+    // ---------------- AXI4 read slave (MM2S) ----------------
     reg [31:0] q_addr [0:7];
     reg [7:0]  q_len  [0:7];
     reg [4:0]  q_id   [0:7];
@@ -208,7 +208,7 @@ module tb_dma_top;
                 q_id[q_wp]   <= r_arid;
                 q_wp         <= q_wp + 1'b1;
             end
-            // 다음 beat 준비 (지금 beat 가 없거나 방금 넘어갔을 때)
+            // Prepare the next beat (when there is no current beat or it was just handed off)
             if (!r_rvalid || r_rready) begin
                 if (q_cnt != 0 && ($urandom % 5) != 0) begin
                     r_rvalid <= 1'b1;
@@ -231,14 +231,14 @@ module tb_dma_top;
     end
 
     // ------------------------------------------------------------------
-    // 카메라 스트림 생성기
+    // Camera stream generator
     // ------------------------------------------------------------------
     reg     cam_en        = 1'b0;
-    integer cam_frames    = 0;       // 보낸 프레임 수
+    integer cam_frames    = 0;       // Number of frames sent
 
     task cam_word(input [31:0] d, input sof, input eof);
         begin
-            while (($urandom % 2) == 0) @(posedge aclk);   // 랜덤 공백 (카메라는 영상보다 느리게)
+            while (($urandom % 2) == 0) @(posedge aclk);   // Random gaps (camera slower than video output)
             #1;
             c_tdata  = d;
             c_tuser  = {15'd0, sof};
@@ -261,12 +261,12 @@ module tb_dma_top;
                 cam_word({pat(wi*4+3, tag), pat(wi*4+2, tag), pat(wi*4+1, tag), pat(wi*4, tag)},
                          (wi == 0), (wi == FRAME_WORDS - 1));
             cam_frames = cam_frames + 1;
-            repeat (200) @(posedge aclk);                   // 프레임 사이 블랭킹
+            repeat (200) @(posedge aclk);                   // Blanking between frames
         end
     end
 
     // ------------------------------------------------------------------
-    // 영상 출력 체커
+    // Video output checker
     // ------------------------------------------------------------------
     integer pix_cnt   = 0;
     integer frame_cnt = 0;
@@ -322,7 +322,7 @@ module tb_dma_top;
     end
 
     // ------------------------------------------------------------------
-    // AXI-Lite 마스터 태스크
+    // AXI-Lite master tasks
     // ------------------------------------------------------------------
     task axil_write(input [6:0] a, input [31:0] d);
         begin
@@ -368,7 +368,7 @@ module tb_dma_top;
     endtask
 
     // ------------------------------------------------------------------
-    // 시나리오
+    // Scenario
     // ------------------------------------------------------------------
     reg [31:0] rd;
     integer    i;
@@ -378,7 +378,7 @@ module tb_dma_top;
         aresetn = 1'b1;
         repeat (5) @(posedge aclk);
 
-        // ================= T0 : S2MM 시작 =================
+        // ================= T0 : start S2MM =================
         $display("\n===== T0 : S2MM start (camera -> DDR) =====");
         axil_write(R_DA0, DA0);
         axil_write(R_DA1, DA1);
@@ -389,7 +389,7 @@ module tb_dma_top;
         axil_read(R_DA1, rd);
         check(rd == DA1,                "T0 DA1 readback");
 
-        // ================= T1 : MM2S 로딩화면 =================
+        // ================= T1 : MM2S loading screen =================
         $display("\n===== T1 : MM2S park on BRAM (loading image) =====");
         axil_write(R_NBUF, 32'd3);
         axil_write(R_SA,   BRAM_BASE);
@@ -398,14 +398,14 @@ module tb_dma_top;
         wait_frames(3);
         check(last_tag == TAG_BRAM,     "T1 loading image repeats");
 
-        // S2MM 이 첫 프레임을 다 쓸 때까지 대기 (SR[12] IOC_Irq)
+        // Wait until S2MM finishes writing the first frame (SR[12] IOC_Irq)
         for (i = 0; i < 20000; i = i + 1) begin
             axil_read(R_S2MM_SR, rd);
             if (rd[12]) i = 20000;
         end
         check(rd[12] == 1'b1,           "T1 S2MM finished first frame");
 
-        // ================= T2 : 라이브 전환 =================
+        // ================= T2 : switch to live =================
         $display("\n===== T2 : LIVE (camera frames from DDR) =====");
         axil_write(R_MM2S_CR, CR_CYCLIC | CR_LIVE | CR_ERR_EN);
         wait_frames(4);
@@ -413,13 +413,13 @@ module tb_dma_top;
         wait_frames(20);
         check(live_tag_changes >= 2,    "T2 live frames keep updating");
 
-        // ================= T3 : 로딩화면 복귀 =================
+        // ================= T3 : back to loading screen =================
         $display("\n===== T3 : back to park (BRAM) =====");
         axil_write(R_MM2S_CR, CR_CYCLIC | CR_ERR_EN);
         wait_frames(4);
         check(last_tag == TAG_BRAM,     "T3 back to loading image");
 
-        // ================= T4 : 상태 확인 / 정지 =================
+        // ================= T4 : check status / stop =================
         $display("\n===== T4 : status & stop =====");
         axil_read(R_S2MM_SR, rd);
         check(rd[0] == 1'b1,            "T4 S2MM busy (running)");
@@ -430,7 +430,7 @@ module tb_dma_top;
         check(ddr.exists(DA0) && ddr.exists(DA1) && ddr.exists(DA2),
                                         "T4 S2MM wrote all three buffers");
 
-        axil_write(R_MM2S_CR, CR_ERR_EN);                // CYCLIC 해제 -> 정지
+        axil_write(R_MM2S_CR, CR_ERR_EN);                // Clear CYCLIC -> stop
         for (i = 0; i < 5000; i = i + 1) begin
             axil_read(R_MM2S_SR, rd);
             if (rd[1]) i = 5000;
@@ -440,7 +440,7 @@ module tb_dma_top;
         check(pix_cnt == 0,             "T4 output ended on frame boundary");
         check(mm2s_irq == 1'b0 && s2mm_irq == 1'b0, "T4 no error interrupts");
 
-        // ================= 결과 =================
+        // ================= Results =================
         $display("\n==========================================");
         $display("  camera frames sent : %0d, video frames out : %0d", cam_frames, frame_cnt);
         if (err_cnt == 0) $display("  ALL TESTS PASSED");
@@ -449,7 +449,7 @@ module tb_dma_top;
         $finish;
     end
 
-    // 워치독
+    // Watchdog
     initial begin
         #20_000_000;
         $display("TIMEOUT (video frames=%0d, camera frames=%0d)", frame_cnt, cam_frames);

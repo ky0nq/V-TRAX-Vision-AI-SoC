@@ -1,7 +1,7 @@
 /*
  *  cam_ae.c
  *
- *  OV5640 AE 타겟 조절. 무엇을 왜 하는지는 cam_ae.h 를 먼저 읽으세요.
+ *  OV5640 AE target adjustment. Read cam_ae.h first for what this does and why.
  */
 
 #include "cam_ae.h"
@@ -9,37 +9,37 @@
 #include "../ov5640/OV5640.h"
 
 /*===========================================================================
- *  레지스터
+ *  Registers
  *===========================================================================*/
 
-/* AE 목표 밝기 */
-#define REG_AEC_CTRL0F      0x3A0F      /* stable range 상한 (WPT)  */
-#define REG_AEC_CTRL10      0x3A10      /* stable range 하한 (BPT)  */
-#define REG_AEC_CTRL1B      0x3A1B      /* stable range 상한 (WPT2) */
-#define REG_AEC_CTRL1E      0x3A1E      /* stable range 하한 (BPT2) */
-#define REG_AEC_CTRL11      0x3A11      /* fast zone 상한           */
-#define REG_AEC_CTRL1F      0x3A1F      /* fast zone 하한           */
+/* AE target brightness */
+#define REG_AEC_CTRL0F      0x3A0F      /* stable range upper (WPT)  */
+#define REG_AEC_CTRL10      0x3A10      /* stable range lower (BPT)  */
+#define REG_AEC_CTRL1B      0x3A1B      /* stable range upper (WPT2) */
+#define REG_AEC_CTRL1E      0x3A1E      /* stable range lower (BPT2) */
+#define REG_AEC_CTRL11      0x3A11      /* fast zone upper           */
+#define REG_AEC_CTRL1F      0x3A1F      /* fast zone lower           */
 
-/* AE 가 현재 잡고 있는 값 (읽기 전용으로 씁니다) */
-#define REG_AEC_PK_EXP_H    0x3500      /* [3:0] = 노출[19:16]      */
-#define REG_AEC_PK_EXP_M    0x3501      /*         노출[15:8]       */
-#define REG_AEC_PK_EXP_L    0x3502      /*         노출[7:0]        */
-#define REG_AEC_PK_GAIN_H   0x350A      /* [1:0] = 게인[9:8]        */
-#define REG_AEC_PK_GAIN_L   0x350B      /*         게인[7:0]        */
+/* Values AE currently holds (used read-only) */
+#define REG_AEC_PK_EXP_H    0x3500      /* [3:0] = exp[19:16]       */
+#define REG_AEC_PK_EXP_M    0x3501      /*         exp[15:8]        */
+#define REG_AEC_PK_EXP_L    0x3502      /*         exp[7:0]         */
+#define REG_AEC_PK_GAIN_H   0x350A      /* [1:0] = gain[9:8]        */
+#define REG_AEC_PK_GAIN_L   0x350B      /*         gain[7:0]        */
 
-/* 게인 상한 */
+/* Gain ceiling */
 #define REG_AEC_GAIN_CEIL_H 0x3A18
 #define REG_AEC_GAIN_CEIL_L 0x3A19
 
 /*===========================================================================
- *  레벨 표
+ *  Level table
  *
- *  레벨 0  : OmniVision 권장 초기값. 출처가 분명한 값입니다.
- *  레벨 +2 : 센서 리셋 기본값. 이 모듈을 쓰기 전 우리 시스템이 있던 자리.
- *  나머지  : 그 사이를 보간한 값. 실측으로 다듬으세요.
+ *  Level 0  : OmniVision recommended initial values. Values from a clear source.
+ *  Level +2 : sensor reset defaults. Where our system was before this module.
+ *  Others   : interpolated between them. Refine them with measurements.
  *
- *  각 행에서 상한(WPT) > 하한(BPT) 관계와
- *  fast zone 하한 < BPT < WPT < fast zone 상한 관계가 유지되어야 합니다.
+ *  In each row, the relation upper (WPT) > lower (BPT) and
+ *  fast zone lower < BPT < WPT < fast zone upper must hold.
  *===========================================================================*/
 typedef struct {
     u8          wpt;        /* 0x3A0F */
@@ -64,7 +64,7 @@ static const Ae_target ae_tab[AE_LEVEL_COUNT] = {
 static Ae_level cur = AE_LEVEL_0;
 
 /*===========================================================================
- *  적용
+ *  Apply
  *===========================================================================*/
 
 void cam_ae_set(Ae_level lv)
@@ -77,9 +77,9 @@ void cam_ae_set(Ae_level lv)
     t = &ae_tab[lv];
 
     /*
-     * 그룹 라이트로 묶습니다. 여섯 개를 따로 쓰면 그 사이에 프레임이
-     * 넘어가면서 상한만 내려가고 하한은 아직 높은 어중간한 조합이 한 프레임
-     * 적용될 수 있습니다. 눈에 띄는 깜빡임이 됩니다.
+     * Bundle them in a group write. If the six are written separately, a frame boundary
+     * can pass in between, so a half-way combination where only the upper limit has dropped
+     * while the lower is still high may be applied for one frame. That shows up as visible flicker.
      */
     OV5640_GroupBegin();
     OV5640_WriteSCCB(REG_AEC_CTRL0F, t->wpt);
@@ -134,7 +134,7 @@ const char *cam_ae_name(Ae_level lv)
 }
 
 /*===========================================================================
- *  상태 출력
+ *  Status output
  *===========================================================================*/
 
 void cam_ae_dump(void)
@@ -149,10 +149,10 @@ void cam_ae_dump(void)
     xil_printf("level : %s\r\n", t->name);
 
     /*-------------------------------------------------------------------
-     *  목표 레지스터 되읽기
+     *  Read back target registers
      *
-     *  써 놓고 확인하지 않으면, SCCB 가 조용히 실패했을 때 "값을 바꿨는데
-     *  화면이 그대로"라는 상황에서 원인을 못 찾습니다.
+     *  If you write without verifying, when SCCB silently fails you cannot find the cause
+     *  of "I changed the value but the screen stays the same".
      *-------------------------------------------------------------------*/
     r0f = OV5640_ReadSCCB(REG_AEC_CTRL0F);
     r10 = OV5640_ReadSCCB(REG_AEC_CTRL10);
@@ -175,10 +175,10 @@ void cam_ae_dump(void)
     xil_printf("  => %s\r\n", ok ? "match" : "!! MISMATCH - suspect SCCB");
 
     /*-------------------------------------------------------------------
-     *  AE 가 지금 잡고 있는 값
+     *  Values AE currently holds
      *
-     *  노출은 20비트, 단위는 1/16 라인입니다.
-     *  게인은 10비트, 실제 배율은 값/16 입니다.
+     *  Exposure is 20 bits, in units of 1/16 line.
+     *  Gain is 10 bits; the actual multiplier is value/16.
      *-------------------------------------------------------------------*/
     exp_raw = ((u32)(OV5640_ReadSCCB(REG_AEC_PK_EXP_H) & 0x0F) << 16)
             | ((u32) OV5640_ReadSCCB(REG_AEC_PK_EXP_M)         <<  8)
@@ -202,7 +202,7 @@ void cam_ae_dump(void)
                (int)ceil_raw);
 
     /*-------------------------------------------------------------------
-     *  읽는 법
+     *  How to read
      *-------------------------------------------------------------------*/
     xil_printf("how to read this\r\n");
     if (gain_raw <= 20) {

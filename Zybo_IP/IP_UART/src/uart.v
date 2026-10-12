@@ -1,8 +1,8 @@
 `timescale 1 ns / 1 ps
 
 
-// UART top module: simple wrapper integrating TX and RX modules.
-// Default config: 100 MHz clock, 115200 baud, 8N1 format
+// UART top-level module: a simple wrapper combining the TX and RX modules.
+// Default settings: 100 MHz clock, 115200 baud, 8N1 format
 
 module uart #(
     parameter CLK_FREQ  = 100_000_000,
@@ -58,24 +58,24 @@ module uart_rx #(
     input  wire       rst_n,
     input  wire       rx,         // Serial input line
     output reg  [7:0] data_out,   // Received byte
-    output reg        valid       // Receive done pulse (1-cycle high)
+    output reg        valid       // Receive-complete pulse (high for 1 clock)
 );
 
     localparam CLKS_PER_BIT  = CLK_FREQ / BAUD_RATE;
     localparam HALF_BIT      = CLKS_PER_BIT / 2;
 
-    // RX FSM states
+    // Receive FSM states
     localparam S_IDLE  = 2'd0; // Idle (detect rx falling edge)
-    localparam S_START = 2'd1; // Wait until start bit center, then re-check
+    localparam S_START = 2'd1; // Wait until the middle of the start bit, then re-check
     localparam S_DATA  = 2'd2; // Sample 8 data bits
-    localparam S_STOP  = 2'd3; // Pass stop bit
+    localparam S_STOP  = 2'd3; // Pass the stop bit
 
     reg [1:0]                    state;
     reg [$clog2(CLKS_PER_BIT):0] clk_cnt;
     reg [2:0]                    bit_idx;
     reg [7:0]                    shift_reg;
 
-    // 2-stage synchronizer bringing rx into clk domain (metastability prevention)
+    // 2-stage synchronizer bringing rx into the clk domain (prevents metastability)
     reg rx_sync0, rx_sync;
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -102,15 +102,15 @@ module uart_rx #(
                 S_IDLE: begin
                     clk_cnt <= 0;
                     bit_idx <= 0;
-                    if (rx_sync == 1'b0) // Falling edge -> start bit candidate
+                    if (rx_sync == 1'b0) // falling edge → start bit candidate
                         state <= S_START;
                 end
 
-                // Wait until start bit center
+                // Wait until the middle of the start bit
                 S_START: begin
                     if (clk_cnt == HALF_BIT - 1) begin
                         clk_cnt <= 0;
-                        if (rx_sync == 1'b0) // Still low -> valid start bit
+                        if (rx_sync == 1'b0) // Still low → valid start bit
                             state <= S_DATA;
                         else
                             state <= S_IDLE; // Treated as noise, discard
@@ -119,7 +119,7 @@ module uart_rx #(
                     end
                 end
 
-                // Sample at the center of each bit period
+                // Sample at the middle of each bit period
                 S_DATA: begin
                     if (clk_cnt == CLKS_PER_BIT - 1) begin
                         clk_cnt              <= 0;
@@ -134,12 +134,12 @@ module uart_rx #(
                     end
                 end
 
-                // Wait one stop bit period, then output data
+                // Wait one bit period for the stop bit, then output data
                 S_STOP: begin
                     if (clk_cnt == CLKS_PER_BIT - 1) begin
                         clk_cnt  <= 0;
                         data_out <= shift_reg;
-                        valid    <= 1'b1; // 1-cycle pulse
+                        valid    <= 1'b1; // 1-clock pulse
                         state    <= S_IDLE;
                     end else begin
                         clk_cnt <= clk_cnt + 1;
@@ -163,15 +163,15 @@ module uart_tx #(
     input  wire       clk,
     input  wire       rst_n,
     input  wire [7:0] data_in,   // Byte to transmit
-    input  wire       valid,     // Transmit start pulse (1-cycle high)
+    input  wire       valid,     // Transmit start pulse (high for 1 clock)
     output reg        ready,     // Idle state (can accept next data)
     output reg        tx         // Serial output line
 );
 
-    // Number of clocks per bit
+    // Number of clocks to count per bit
     localparam CLKS_PER_BIT = CLK_FREQ / BAUD_RATE;
 
-    // TX FSM states
+    // Transmit FSM states
     localparam S_IDLE  = 2'd0; // Idle
     localparam S_START = 2'd1; // Output start bit (0)
     localparam S_DATA  = 2'd2; // Output 8 data bits
@@ -179,8 +179,8 @@ module uart_tx #(
 
     reg [1:0]                    state;
     reg [$clog2(CLKS_PER_BIT):0] clk_cnt;   // Bit period counter
-    reg [2:0]                    bit_idx;   // Index of bit currently being sent
-    reg [7:0]                    shift_reg; // Holds TX data
+    reg [2:0]                    bit_idx;   // Index of the bit currently being sent
+    reg [7:0]                    shift_reg; // Holds the transmit data
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -188,7 +188,7 @@ module uart_tx #(
             clk_cnt   <= 0;
             bit_idx   <= 0;
             shift_reg <= 8'h00;
-            tx        <= 1'b1; // Line is high when idle
+            tx        <= 1'b1; // Line is high in idle state
             ready     <= 1'b1;
         end else begin
             case (state)
@@ -196,7 +196,7 @@ module uart_tx #(
                     tx    <= 1'b1;
                     ready <= 1'b1;
                     if (valid) begin
-                        // Capture data and enter start bit
+                        // Capture data, then enter the start bit
                         shift_reg <= data_in;
                         clk_cnt   <= 0;
                         ready     <= 1'b0;
@@ -216,7 +216,7 @@ module uart_tx #(
                 end
 
                 S_DATA: begin
-                    tx <= shift_reg[bit_idx]; // Send from LSB in order
+                    tx <= shift_reg[bit_idx]; // Transmit in order starting from LSB
                     if (clk_cnt == CLKS_PER_BIT - 1) begin
                         clk_cnt <= 0;
                         if (bit_idx == 3'd7) begin

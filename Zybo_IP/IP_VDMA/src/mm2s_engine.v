@@ -8,7 +8,7 @@ module mm2s_engine #(
 
     parameter [ADDR_WIDTH-1:0] R0_BASE = 32'h0000_0000,   // DDR
     parameter [ADDR_WIDTH-1:0] R0_SIZE = 32'h4000_0000,
-    parameter [ADDR_WIDTH-1:0] R1_BASE = 32'h4400_0000,   // BRAM 프레임 창
+    parameter [ADDR_WIDTH-1:0] R1_BASE = 32'h4400_0000,   // BRAM frame window
     parameter [ADDR_WIDTH-1:0] R1_SIZE = 32'h002A_3000,
 
     parameter MAX_BURST_BYTES = 64
@@ -19,7 +19,7 @@ module mm2s_engine #(
     input                           start,
     input                           abort,
     input                           cyclic,
-    input       [ADDR_WIDTH-1:0]    src_addr,   // init 때 래치됨 (프레임마다 갱신 가능)
+    input       [ADDR_WIDTH-1:0]    src_addr,   // Latched at init (can be updated every frame)
     input       [LEN_WIDTH-1:0]     length,
     input       [BURST_WIDTH+1:0]   burst_cfg,
     output                          busy,

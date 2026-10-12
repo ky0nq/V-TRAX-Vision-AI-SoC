@@ -1,80 +1,80 @@
 `timescale 1ns / 1ps
 
 // ============================================================================
-//  mm2s_controller  (= DMA 의 Control Unit)
+//  mm2s_controller  (= the DMA's Control Unit)
 // ============================================================================
-// DMA가 일하는 중인지 쉬는 중인지"를 관리, datapath에게 시작 신호를 주는 관리자 역할!! 
+// Manages whether the DMA is "working or idle", and acts as the manager that gives the start signal to the datapath!! 
 //
-// [동작 모드]
-//    단발 모드 (cyclic = 0) : start -> 프레임 1장 -> IDLE
-//    반복 모드 (cyclic = 1) : start -> 프레임 끝날 때마다 바로 다음 프레임 -> ...
-//                             CPU 가 중간에 안 끼어들어도 계속 돌아감 (VDMA circular mode)
-//    반복을 멈추는 조건 3가지
-//        1) abort가 들어옴 (CPU가 내리는 멈춤 신호)
-//        2) cyclic 비트가 꺼짐 (CPU가 이번 프레임까지만 하고 멈추라고 명령)
-//        3) 에러 발생 (문제가 생겼으니 더 반복하지 않음)
+// [Operating modes]
+//    Single mode (cyclic = 0) : start -> 1 frame -> IDLE
+//    Cyclic mode (cyclic = 1) : start -> next frame immediately each time a frame ends -> ...
+//                               keeps running without CPU intervention (VDMA circular mode)
+//    3 conditions that stop the repetition
+//        1) abort arrives (stop signal issued by the CPU)
+//        2) cyclic bit is cleared (CPU orders a stop after the current frame)
+//        3) an error occurs (something went wrong, so do not repeat any more)
 // ============================================================================
 
 module mm2s_controller #(
-    parameter ADDR_WIDTH = 32  // 에러 저장용 주소 폭
+    parameter ADDR_WIDTH = 32  // Address width for error storage
 )(
     input                           clk,
     input                           rst_n,
 
     // ------------------------------------------------------------------
-    // CPU와 주고받는 신호
+    // Signals exchanged with the CPU
     // ------------------------------------------------------------------
-    input                           start,        // BTT 레지스터에 쓰면 1클럭 뜸 -> 시작
-    input                           abort,        // CR[2] 에 1 쓰면 1클럭 뜸 -> 멈춤
-    input                           cyclic,       // CR[4] : 1이면 반복 모드
-    output reg                      busy,         // 1 = 일하는 중 -> SR[0]
-    output reg                      done,         // 1 = 일 끝남 -> 다음 start 까지 유지
-    output reg                      error,        // 1 = 에러 남 -> SR[4]
-    output reg  [ADDR_WIDTH-1:0]    error_addr,   // 에러 난 주소 -> READ_ERR 레지스터
-    output reg                      frame_done,   // 프레임 하나 끝날 때마다 1클럭 -> 완료 IRQ, cur_buf 갱신
+    input                           start,        // Pulses for 1 clock when the BTT register is written -> start
+    input                           abort,        // Pulses for 1 clock when 1 is written to CR[2] -> stop
+    input                           cyclic,       // CR[4] : 1 = cyclic mode
+    output reg                      busy,         // 1 = working -> SR[0]
+    output reg                      done,         // 1 = done -> held until the next start
+    output reg                      error,        // 1 = error occurred -> SR[4]
+    output reg  [ADDR_WIDTH-1:0]    error_addr,   // Address where the error occurred -> READ_ERR register
+    output reg                      frame_done,   // 1 clock each time a frame ends -> completion IRQ, cur_buf update
 
     // ------------------------------------------------------------------
-    // Datapath가 알려주는 신호
+    // Signals reported by the Datapath
     // ------------------------------------------------------------------
-    input                           xfer_done,    // 이번 프레임 다 읽었음 신호
-    input                           err_valid,    // 슬레이브가 에러 응답(SLVERR/DECERR)을 줬음
-    input                           cfg_err,      // 설정이 잘못됨 (정렬, 주소 범위, burst 타입 등)
-    input       [ADDR_WIDTH-1:0]    err_addr,     // datapath가 계산해둔 에러 주소
+    input                           xfer_done,    // Signals that this frame has been fully read
+    input                           err_valid,    // Slave returned an error response (SLVERR/DECERR)
+    input                           cfg_err,      // Invalid configuration (alignment, address range, burst type, etc.)
+    input       [ADDR_WIDTH-1:0]    err_addr,     // Error address computed by the datapath
 
     // ------------------------------------------------------------------
-    // Datapath 에게 주는 지시
+    // Commands to the Datapath
     // ------------------------------------------------------------------
-    output                          en,           // 1 = 지금 일해도 된다~
-    output reg                      init          // 1클럭: 새 프레임 시작 
+    output                          en,           // 1 = OK to work now
+    output reg                      init          // 1 clock: start of a new frame 
 );
 
     // ------------------------------------------------------------------
-    //   S_IDLE : 쉬는 중. start 만 기다림
-    //   S_DATA : 일하는 중. datapath 가 AXI 로 데이터를 읽고 있음
+    //   S_IDLE : idle. Waits only for start
+    //   S_DATA : working. The datapath is reading data over AXI
     // ------------------------------------------------------------------
     localparam S_IDLE = 1'b0;
     localparam S_DATA = 1'b1;
 
-    reg state;          // 현재 상태
+    reg state;          // Current state
 
-    // abort 를 "기억"해두는 메모.
-    // abort 는 1클럭짜리 펄스라서, 프레임 끝나는 순간(xfer_done)까지 기억해두지 않으면
-    // "멈추라고 했었나?"를 까먹고 다시 반복해버림. 그래서 한 번 들어오면 1 로 세워둠.
+    // A note that "remembers" abort.
+    // abort is a 1-clock pulse, so unless it is remembered until the frame ends (xfer_done),
+    // we would forget "was I told to stop?" and repeat again. So once it arrives, it is held at 1.
     reg stop_req;
 
-    // S_DATA 상태면 en = 1 -> datapath 가 AR 요청을 낼 수 있음
+    // In S_DATA, en = 1 -> the datapath may issue AR requests
     assign en = (state == S_DATA);
 
-    //   error     : 이미 기록해둔 에러 (이전 클럭에 난 것)
-    //   err_valid : 지금 막 들어온 응답 에러
-    //   cfg_err   : 지금 막 발견된 설정 에러
-    // 셋 중 하나라도 있으면 반복하지 않음.
-    // (error 레지스터는 한 클럭 늦게 올라감... 같은 클럭에 난 에러도 놓치지 않기 위해 err_valid / cfg_err를 같이 봄)
+    //   error     : error already recorded (from a previous clock)
+    //   err_valid : response error that has just arrived
+    //   cfg_err   : config error that has just been detected
+    // If any of the three is set, do not repeat.
+    // (the error register rises one clock late... err_valid / cfg_err are also checked so errors in the same clock are not missed)
     wire err_now = error || err_valid || cfg_err;
 
     always @(posedge clk) begin
         // ==============================================================
-        // 리셋
+        // Reset
         // ==============================================================
         if (!rst_n) begin
             state      <= S_IDLE;
@@ -92,57 +92,57 @@ module mm2s_controller #(
 
             case (state)
                 // ======================================================
-                // S_IDLE : 쉬는 중
+                // S_IDLE : idle
                 // ======================================================
                 S_IDLE: begin
-                    if (start) begin                // CPU 가 BTT 를 썼다 = 출발 신호
-                        state    <= S_DATA;         // 일하는 상태로 이동
-                        init     <= 1'b1;           // 새 프레임 시작 알림
-                        stop_req <= 1'b0;           // 지난번 abort 기억은 지움
-                        busy     <= 1'b1;           // SR에 바쁘다고 표시
-                        done     <= 1'b0;           // 지난번 끝남 표시 지움
-                        error    <= 1'b0;           // 지난번 에러 기록 지움
+                    if (start) begin                // CPU wrote BTT = go signal
+                        state    <= S_DATA;         // Move to the working state
+                        init     <= 1'b1;           // Signal the start of a new frame
+                        stop_req <= 1'b0;           // Clear the previous abort memory
+                        busy     <= 1'b1;           // Mark busy in SR
+                        done     <= 1'b0;           // Clear the previous done flag
+                        error    <= 1'b0;           // Clear the previous error record
                     end
                 end
 
                 // ======================================================
-                // S_DATA : 일하는 중
+                // S_DATA : working
                 // ======================================================
                 S_DATA: begin
                     // --------------------------------------------------
-                    // (1) abort가 들어오면 기억해둠
-                    //     datapath도 abort를 직접 받아서 새 AR 요청을 멈추고,
-                    //     이미 나간 요청의 응답만 다 받은 뒤 xfer_done 을 올려줌.
-                    //     controller는 그때 "반복하지 말자"고 판단하려고 기억만 해둠.
+                    // (1) Remember abort when it arrives
+                    //     The datapath also receives abort directly and stops new AR requests,
+                    //     then raises xfer_done after receiving all responses for requests already issued.
+                    //     The controller only remembers it so it can decide "don't repeat" at that point.
                     // --------------------------------------------------
                     if (abort)
                         stop_req <= 1'b1;
                     // --------------------------------------------------
-                    // (2) 에러 기록 : "처음 난 에러"만 저장
-                    //     !error 조건: 두 번째 에러부터는 무시 -> 첫 원인을 보존
-                    //     참고: cfg_err 계열은 datapath 가 주소를 0 으로 주므로 error_addr = 0
+                    // (2) Error recording : store only the "first error"
+                    //     !error condition: ignore from the second error on -> preserve the root cause
+                    //     Note: for cfg_err cases the datapath gives address 0, so error_addr = 0
                     // --------------------------------------------------
                     if ((err_valid || cfg_err) && !error) begin
                         error      <= 1'b1;
                         error_addr <= err_addr;
                     end
                     // --------------------------------------------------
-                    // (3) 프레임이 끝났을 때 : 반복할지, 쉴지 결정
+                    // (3) When a frame ends : decide whether to repeat or go idle
                     // --------------------------------------------------
                     if (xfer_done) begin
-                        frame_done <= 1'b1; // 어느 쪽이든 일단 프레임 하나 끝났다는 신호 올림
-                        //   cyclic    : 반복 모드가 켜져 있고
-                        //   !stop_req : 예전에 abort가 온 적 없고
-                        //   !abort    : 바로 이 클럭에 abort가 오지도 않았고
-                        //               (stop_req 는 다음 클럭에야 1이 되니까 이것도 같이 봄)
-                        //   !err_now  : 에러도 없음
+                        frame_done <= 1'b1; // Either way, first signal that one frame has ended
+                        //   cyclic    : cyclic mode is on, and
+                        //   !stop_req : no abort has arrived earlier, and
+                        //   !abort    : no abort arrived in this very clock either, and
+                        //               (stop_req only becomes 1 on the next clock, so this is checked too)
+                        //   !err_now  : no error
                         if (cyclic && !stop_req && !abort && !err_now) begin
-                            init <= 1'b1;           // 다음 프레임 바로 시작 (state 는 S_DATA 유지)
-                                                    // busy도 계속 1 -> CPU 입장에선 쭉 바쁘다고 판단! 
+                            init <= 1'b1;           // Start the next frame immediately (state stays S_DATA)
+                                                    // busy also stays 1 -> from the CPU's view it is continuously busy! 
                         end else begin
                             state <= S_IDLE;
-                            busy  <= 1'b0;          // busy 내리고
-                            done  <= 1'b1;          // "끝남" 표시 (다음 start까지 유지)
+                            busy  <= 1'b0;          // Lower busy
+                            done  <= 1'b1;          // Set the "done" flag (held until the next start)
                         end
                     end
                 end

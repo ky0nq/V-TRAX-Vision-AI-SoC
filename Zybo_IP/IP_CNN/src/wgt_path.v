@@ -4,10 +4,6 @@
 // wgt_path : Weight Top
 //
 //   RAM -> wgt_ld_unit -> wgt_buf -> wgt_patch_gen -> wgt_feeder -> PE (skew)
-//
-//   wgt_buf 는 512 word = 반쪽 2 개 x 256 (2026-09-23 이중 버퍼). chunk 하나는 반쪽 하나에 들어간다.
-//   어느 반쪽인지는 cnn_cntl.o_buf_half 가 정한다 : wgt_ld_unit 은 i_ld_start 에서, wgt_patch_gen 은
-//   i_chunk_start 에서 래치한다. 한쪽을 PE 에 공급하는 동안 다른 쪽에 다음 chunk 를 적재할 수 있다.
 // ============================================================================
 module wgt_path (
     input wire clk,
@@ -15,10 +11,9 @@ module wgt_path (
 
     input  wire        i_ld_start,
     input  wire [15:0] i_mem_base,
-    input  wire [ 8:0] i_chunk_word_count,   // reader 가 읽을 chunk 길이 1 ~ 256 (pe_cntl.o_chunk_word_count)
-    input  wire [ 8:0] i_load_chunk_len,     // 적재할 chunk 길이 1 ~ 256      (cnn_cntl.o_chunk_word_count)
-    input  wire        i_buf_half,           // chunk 가 놓이는 wgt_buf 반쪽 (cnn_cntl.o_buf_half). 적재는 i_ld_start, reader 는 i_chunk_start 에서 래치
-    //output wire        o_mem_rd_en,
+    input  wire [ 8:0] i_chunk_word_count,   // Number of words to read out of wgt_buf for this chunk 
+    input  wire [ 8:0] i_load_chunk_len,     // Number of words to copy from RAM into wgt_buf 
+    input  wire        i_buf_half,           // Buffer half
     output wire [15:0] o_mem_rd_addr,
     input  wire [23:0] i_mem_rdata,
     output wire        o_ld_done,
@@ -60,7 +55,6 @@ module wgt_path (
         .i_mem_base         (i_mem_base),
         .i_chunk_word_count (i_load_chunk_len),
         .i_buf_half         (i_buf_half),
-        //.o_mem_rd_en        (o_mem_rd_en),
         .o_mem_rd_addr      (o_mem_rd_addr),
         .i_mem_rdata        (i_mem_rdata),
         .o_buf_we           (buf_we),
@@ -119,8 +113,7 @@ endmodule
 
 
 // ============================================================================
-// wgt_ld_unit : RAM -> wgt_buf copy
-//   쓰기 주소 = {i_buf_half (i_ld_start 에서 래치), idx 0 ~ 255}
+// RAM -> wgt_buf copy
 // ============================================================================
 module wgt_ld_unit (
     input wire clk,
@@ -131,7 +124,6 @@ module wgt_ld_unit (
     input wire [ 8:0] i_chunk_word_count,
     input wire        i_buf_half,
 
-    //output wire        o_mem_rd_en,
     output wire [15:0] o_mem_rd_addr,
     input  wire [23:0] i_mem_rdata,
 
@@ -145,7 +137,7 @@ module wgt_ld_unit (
 );
     localparam S_IDLE = 1'd0, S_WAIT = 1'd1;
 
-    reg [ 1:0] state;
+    reg        state;
     reg [15:0] mem_base;
     reg [ 8:0] chunk_len;
     reg [ 8:0] idx;
@@ -157,7 +149,6 @@ module wgt_ld_unit (
     wire accept_rsp = (state == S_WAIT);
     wire last_word = (idx == chunk_len - 9'd1);
 
-    //assign o_mem_rd_en = rst_n && ((start_load && (i_chunk_word_count != 9'd0)) || (accept_rsp && !last_word));
     assign o_mem_rd_addr = (state == S_IDLE) ? i_mem_base
             : mem_base + {7'd0, idx} + 16'd1;
 
@@ -209,7 +200,7 @@ endmodule
 
 
 // ============================================================================
-// wgt_buf : 512 x 24bit = 반쪽 2 개 x 256 word (주소 [8] = 반쪽)
+// wgt_buf : 512 x 24bit words = 2 halves x 256 words
 // ============================================================================
 module wgt_buf (
     input wire clk,
@@ -225,7 +216,6 @@ module wgt_buf (
     output reg [23:0] o_rdata,
     output reg        o_rvalid
 );
-    // 반쪽 2 개 x 256 weight word
     reg [23:0] mem[0:511];
 
     always @(posedge clk) begin
@@ -242,7 +232,6 @@ endmodule
 
 // ============================================================================
 // wgt_patch_gen : Read buffer sequentially and output beats
-//   읽기 주소 = {i_buf_half (i_chunk_start 에서 래치), rd_idx 0 ~ 255}
 // ============================================================================
 module wgt_patch_gen (
     input wire clk,
@@ -268,11 +257,11 @@ module wgt_patch_gen (
     reg chunk_active;
     reg [8:0] chunk_len_r;
     reg [2:0] col_mask_r;
-    reg       rd_half_r;        // 이 chunk 가 든 반쪽
+    reg       rd_half_r;        // Buffer half containing the current chunk
     reg [8:0] rd_idx;           // Index of the next word to read
-    reg [1:0] pend_count;       // Number of words not yet sent to the feeder
+    reg [1:0] pend_count;       // Number of requested words not yet consumed
 
-    // 2-entry
+    // 2-entry weight data buffer
     reg [23:0] data_buf0, data_buf1;
     reg rd_sel, wr_sel;
     reg [1:0] buf_count;

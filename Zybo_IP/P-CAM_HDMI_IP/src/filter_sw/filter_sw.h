@@ -1,84 +1,84 @@
 /*
  *  filter_sw.h
  *
- *  CPU(PS)로 프레임버퍼를 직접 처리하는 소프트웨어 필터.
- *  하드웨어(블록디자인/비트스트림) 변경은 전혀 없습니다.
+ *  Software filter that processes the frame buffer directly on the CPU (PS).
+ *  No hardware (block design/bitstream) changes at all.
  *
  *  ---------------------------------------------------------------------
- *  왜 하드웨어를 안 바꿔도 되는가
+ *  Why no hardware change is needed
  *
- *  AXI VDMA 는 읽기 채널과 쓰기 채널이 시작주소 레지스터를 따로 가집니다.
+ *  In AXI VDMA, the read and write channels have separate start address registers.
  *
- *      XAXIVDMA_MM2S_ADDR_OFFSET 0x50   읽기(HDMI) 채널 주소 블록
- *      XAXIVDMA_S2MM_ADDR_OFFSET 0xA0   쓰기(카메라) 채널 주소 블록
+ *      XAXIVDMA_MM2S_ADDR_OFFSET 0x50   read (HDMI) channel address block
+ *      XAXIVDMA_S2MM_ADDR_OFFSET 0xA0   write (camera) channel address block
  *
- *  그래서 소프트웨어만으로 이렇게 갈라놓을 수 있습니다.
+ *  So they can be split like this in software alone.
  *
- *      S2MM(카메라) -> [cap0][cap1][cap2]      그대로 순환
+ *      S2MM(camera) -> [cap0][cap1][cap2]      cycles as is
  *                             |
- *                          CPU 읽기 -> 필터 -> CPU 쓰기
+ *                          CPU read -> filter -> CPU write
  *                             v
- *      MM2S(HDMI)   -> [disp0] 또는 [disp1]    번갈아 표시
+ *      MM2S(HDMI)   -> [disp0] or [disp1]      displayed alternately
  *
- *  NUM_FSTORES 가 3 이라는 제약도 문제가 아닙니다. 프레임스토어 개수를
- *  늘리는 게 아니라, 이미 있는 3개가 가리키는 주소만 다르게 쓰는 것이니까요.
+ *  The NUM_FSTORES = 3 constraint is not a problem either. We are not increasing
+ *  the number of frame stores, only using different addresses for the existing 3.
  *
- *  부수 효과로 genlock 걱정이 사라집니다. "손 흔들면 화면이 떨리던" 그 문제는
- *  읽기와 쓰기가 같은 버퍼를 공유해서 생긴 것인데, 이제 구조적으로 분리됩니다.
- *
- *  ---------------------------------------------------------------------
- *  더블버퍼링
- *
- *  CPU 는 항상 "지금 화면에 안 나가는" 쪽에 씁니다. 다 쓴 뒤에야 MM2S 를
- *  그쪽으로 옮깁니다. 그래서 반쯤 그려진 프레임이 화면에 나가지 않습니다.
- *
- *      쓰기 중 : MM2S -> disp0 (완성된 이전 결과)
- *                CPU  -> disp1 (작업 중)
- *      완료    : MM2S -> disp1 로 전환, 다음엔 disp0 에 쓴다
+ *  As a side effect, genlock worries go away. The "screen jitters when you wave your hand" problem
+ *  was caused by read and write sharing the same buffer; now they are structurally separated.
  *
  *  ---------------------------------------------------------------------
- *  반드시 지켜야 하는 것 : 캐시
+ *  Double buffering
  *
- *  VDMA 는 HP 포트로 DDR 을 직접 읽고 씁니다. CPU 캐시를 거치지 않습니다.
+ *  The CPU always writes to the buffer "not currently on screen". Only after it finishes
+ *  is MM2S switched to it. So a half-drawn frame is never displayed.
  *
- *      읽기 전 : Xil_DCacheInvalidateRange()  - 캐시의 낡은 사본을 버린다
- *      쓴 뒤   : Xil_DCacheFlushRange()       - 캐시에만 있는 결과를 내려보낸다
- *
- *  이걸 빠뜨리면 필터 로직이 완벽해도 화면이 안 바뀌거나 이전 프레임이
- *  섞여 나옵니다. 원인을 찾기 아주 어려운 종류의 고장입니다.
+ *      Writing : MM2S -> disp0 (completed previous result)
+ *                CPU  -> disp1 (in progress)
+ *      Done    : MM2S -> switch to disp1, write to disp0 next
  *
  *  ---------------------------------------------------------------------
- *  메모리 안의 바이트 순서  ★ 먼저 확인할 것
+ *  Must-follow rule : cache
  *
- *  이 파이프라인의 AXI4-Stream 은 R-B-G 배치입니다.
+ *  VDMA reads and writes DDR directly through the HP port. It bypasses the CPU cache.
+ *
+ *      Before read : Xil_DCacheInvalidateRange()  - discard stale copies in the cache
+ *      After write : Xil_DCacheFlushRange()       - push results that exist only in the cache out to memory
+ *
+ *  If you omit this, even with perfect filter logic the screen won't change or previous frames
+ *  get mixed in. It is the kind of failure whose cause is very hard to find.
+ *
+ *  ---------------------------------------------------------------------
+ *  Byte order in memory  ★ Check this first
+ *
+ *  The AXI4-Stream in this pipeline is laid out as R-B-G.
  *
  *      AXI_BayerToRGB.vhd:419
  *          m_axis_video_tdata <= "00" & Red & Blue & Green;
  *
- *  AXI 는 tdata 의 최하위 바이트가 낮은 주소로 가므로, 메모리에는
+ *  In AXI the least significant byte of tdata goes to the lowest address, so in memory
  *
  *      byte 0 = tdata[7:0]   = G
  *      byte 1 = tdata[15:8]  = B
  *      byte 2 = tdata[23:16] = R
  *
- *  즉 픽셀당 [G][B][R] 이 됩니다. 흔히 예상하는 RGB 도 BGR 도 아닙니다.
+ *  That is, each pixel is [G][B][R]. Neither the commonly expected RGB nor BGR.
  *
- *  ⚠ 이건 추론입니다. 그래서 채널 분리 필터를 먼저 넣어두었습니다.
- *    FILT_CH_R 을 걸었을 때 화면이 빨간 계열로만 남으면 맞는 것이고,
- *    초록이나 파랑으로 나오면 filter_sw.c 위쪽의 OFF_R / OFF_G / OFF_B
- *    세 줄만 고치면 나머지 필터가 전부 따라서 맞습니다.
+ *  ⚠ This is an inference. That is why the channel-separation filters were added first.
+ *    If applying FILT_CH_R leaves only reddish tones on screen, it is correct;
+ *    if it comes out green or blue, fixing just the three lines OFF_R / OFF_G / OFF_B
+ *    at the top of filter_sw.c makes all the other filters correct as well.
  *
  *  ---------------------------------------------------------------------
- *  성능에 대한 기대치
+ *  Performance expectations
  *
- *  720p 한 장이 1280 x 720 x 3 = 2.76 MB 입니다. 읽고 쓰면 프레임당
- *  5.5 MB 가 DDR 을 오갑니다. Cortex-A9 단일 코어 666 MHz 로는
+ *  One 720p frame is 1280 x 720 x 3 = 2.76 MB. Reading and writing it moves
+ *  5.5 MB per frame over DDR. On a single Cortex-A9 core at 666 MHz:
  *
- *      점 연산(그레이/이진화)  : 대략 10~20 fps
- *      3x3 컨볼루션(소벨)      : 대략 2~5 fps
+ *      Point ops (gray/binary) : roughly 10~20 fps
+ *      3x3 convolution (Sobel) : roughly 2~5 fps
  *
- *  이 모듈은 매번 처리 시간을 ms 로 찍어줍니다. 같은 알고리즘을 PL 에
- *  올렸을 때의 이득이 숫자로 남습니다. 이 대비가 이 모듈의 진짜 목적입니다.
+ *  This module prints the processing time in ms every run. The gain from moving
+ *  the same algorithm to the PL is left as a number. That comparison is the real purpose of this module.
  */
 
 #ifndef FILTER_SW_H
@@ -88,45 +88,45 @@
 #include "xaxivdma.h"
 
 typedef enum {
-    FILT_COPY = 0,      /* 그대로 복사 - 메모리 대역폭만 측정하는 기준선 */
-    FILT_CH_R,          /* 빨강만 남김 - 바이트 순서 확인용 */
-    FILT_CH_G,          /* 초록만 남김 */
-    FILT_CH_B,          /* 파랑만 남김 */
-    FILT_GRAY,          /* 그레이스케일 */
-    FILT_BINARY,        /* 이진화 (임계값 조절 가능) */
-    FILT_SOBEL,         /* 소벨 3x3 엣지 */
+    FILT_COPY = 0,      /* Plain copy - baseline that measures memory bandwidth only */
+    FILT_CH_R,          /* Keep red only - for checking byte order */
+    FILT_CH_G,          /* Keep green only */
+    FILT_CH_B,          /* Keep blue only */
+    FILT_GRAY,          /* Grayscale */
+    FILT_BINARY,        /* Binarization (adjustable threshold) */
+    FILT_SOBEL,         /* Sobel 3x3 edge */
     FILT_COUNT
 } Filt_kind;
 
 /*
- *  vdma       : 이미 run_vdma_frame_buffer() 로 기동된 인스턴스
- *  cap_base   : S2MM 이 쓰는 캡처 버퍼 3장의 시작 주소 (= FRAME_BUFFER_ADDR)
- *  disp_base  : 표시 버퍼 2장을 놓을 시작 주소. 캡처 3장과 겹치면 안 됩니다.
- *  w, h       : 해상도
+ *  vdma       : instance already started via run_vdma_frame_buffer()
+ *  cap_base   : start address of the 3 capture buffers written by S2MM (= FRAME_BUFFER_ADDR)
+ *  disp_base  : start address for the 2 display buffers. Must not overlap the 3 capture buffers.
+ *  w, h       : resolution
  *
- *  반환 : 0 이면 성공
+ *  Returns : 0 on success
  */
 int         filter_sw_init(XAxiVdma *vdma, UINTPTR cap_base, UINTPTR disp_base,
                            u16 w, u16 h);
 
-/* 필터 선택을 순환합니다. 화면은 바뀌지 않습니다 - 'f' 를 눌러야 적용됩니다. */
+/* Cycles the filter selection. The screen does not change - press 'f' to apply. */
 void        filter_sw_next(void);
 Filt_kind   filter_sw_get(void);
 const char *filter_sw_name(Filt_kind k);
 
 /*
- *  지금 이 순간의 프레임을 잡아 필터를 걸고 화면에 띄웁니다(정지화면).
- *  처리 시간을 UART 로 출력합니다.
+ *  Grabs the current frame, applies the filter and displays it (still image).
+ *  Prints the processing time over UART.
  */
 void        filter_sw_apply(void);
 
-/* 필터를 끄고 원래의 실시간 카메라 영상으로 돌아갑니다. */
+/* Turns the filter off and returns to the original live camera feed. */
 void        filter_sw_live(void);
 
-/* 이진화 임계값 조절. delta 만큼 더합니다. 0~255 로 제한됩니다. */
+/* Adjusts the binarization threshold by adding delta. Clamped to 0~255. */
 void        filter_sw_thresh(int delta);
 
-/* 현재 상태를 UART 로 출력합니다. */
+/* Prints the current state over UART. */
 void        filter_sw_dump(void);
 
 #endif /* FILTER_SW_H */

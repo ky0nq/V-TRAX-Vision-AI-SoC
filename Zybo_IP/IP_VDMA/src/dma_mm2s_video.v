@@ -2,18 +2,18 @@
 //
 // dma_mm2s_video = dma_mm2s + mm2s_depacketizer
 //
-//   dma_regmap --(설정)--> dma_mm2s --(M_AXI)--> axi_mem_intercon (DDR / BRAM)
+//   dma_regmap --(config)--> dma_mm2s --(M_AXI)--> axi_mem_intercon (DDR / BRAM)
 //                              |
-//                              | 32bit packed bytes (내부 연결)
+//                              | 32bit packed bytes (internal connection)
 //                              v
 //                     mm2s_depacketizer
 //                              |
 //                              v
 //                     M_AXIS_VIDEO (24bit RGB, 1 pixel/beat) --> v_axi4s_vid_out.video_in
 //
-//   출력 스트림 규약 (AXI4-Stream Video)
-//     tuser : 프레임 첫 픽셀 (SOF)
-//     tlast : 줄의 마지막 픽셀 (EOL)
+//   Output stream convention (AXI4-Stream Video)
+//     tuser : first pixel of frame (SOF)
+//     tlast : last pixel of line (EOL)
 //
 module dma_mm2s_video #(
     parameter integer FIFO_DEPTH      = 64,
@@ -24,7 +24,7 @@ module dma_mm2s_video #(
     input  wire         aclk,
     input  wire         aresetn,
 
-    // ================= dma_regmap 에서 오는 설정 =================
+    // ================= Config from dma_regmap =================
     input  wire [31:0]  cr,
     input  wire [31:0]  sa,
     input  wire [31:0]  btt,
@@ -34,14 +34,14 @@ module dma_mm2s_video #(
     input  wire         start,
     input  wire         abort,
 
-    // ================= dma_regmap 으로 가는 상태 =================
+    // ================= Status to dma_regmap =================
     output wire         busy,
     output wire         frame_done,
     output wire         error,
     output wire [31:0]  error_addr,
     output wire [2:0]   cur_buf_idx,
 
-    // ================= S2MM 에서 오는 정보 =================
+    // ================= Info from S2MM =================
     input  wire [2:0]   s2mm_newest_idx,
     input  wire [31:0]  s2mm_buf_addr0,
     input  wire [31:0]  s2mm_buf_addr1,
@@ -75,7 +75,7 @@ module dma_mm2s_video #(
     input  wire         m_axis_video_tready
 );
 
-    // 내부 32bit packed 스트림 (dma_mm2s -> depacketizer)
+    // Internal 32bit packed stream (dma_mm2s -> depacketizer)
     wire [31:0] pk_tdata;
     wire [3:0]  pk_tkeep;
     wire        pk_tlast;

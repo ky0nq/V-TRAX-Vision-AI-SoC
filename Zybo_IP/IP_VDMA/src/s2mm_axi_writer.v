@@ -1,17 +1,17 @@
 `timescale 1ns / 1ps
 //
-// s2mm_axi_writer (S2MM 쓰기 엔진)
+// s2mm_axi_writer (S2MM write engine)
 //
-// [기존 대비 변경점] 전송 로직(상태 머신, burst, 주소 계산)은 그대로
-//   1) base_addr[0:2] 배열 포트 -> base_addr0/1/2 로 분리 (Verilog / IP 패키징 호환)
-//   2) 상태 출력 추가
-//        busy          : start 이후 1 (순환 모드라 계속 1)
-//        frame_done    : 프레임 하나 다 쓸 때마다 1클럭 펄스
-//        newest_idx    : 방금 다 쓴 버퍼 번호 (0~2) -> MM2S 의 s2mm_newest_idx 로
-//        wr_error      : BRESP 에러(SLVERR/DECERR) 발생 (다음 start 까지 유지)
-//        wr_error_addr : 첫 에러 난 burst 의 시작 주소
+// [Changes from the previous version] Transfer logic (state machine, burst, address calculation) unchanged
+//   1) base_addr[0:2] array port -> split into base_addr0/1/2 (Verilog / IP packaging compatibility)
+//   2) Added status outputs
+//        busy          : 1 after start (stays 1 since it runs in cyclic mode)
+//        frame_done    : 1-clock pulse each time a frame is fully written
+//        newest_idx    : index of the buffer just finished (0~2) -> to MM2S's s2mm_newest_idx
+//        wr_error      : BRESP error (SLVERR/DECERR) occurred (held until the next start)
+//        wr_error_addr : start address of the first burst that got an error
 //
-// 동작 : start 후 base0 -> base1 -> base2 -> base0 ... 순서로 프레임을 계속 씀 (순환)
+// Operation : after start, keeps writing frames in the order base0 -> base1 -> base2 -> base0 ... (cyclic)
 //
 module s2mm_axi_writer #(
     parameter ID_WIDTH        = 4,
@@ -30,7 +30,7 @@ module s2mm_axi_writer #(
     input  wire [ADDR_WIDTH-1:0]             base_addr1,
     input  wire [ADDR_WIDTH-1:0]             base_addr2,
 
-    // 상태 출력 (추가)
+    // Status outputs (added)
     output reg                               busy,
     output reg                               frame_done,
     output reg  [2:0]                        newest_idx,
@@ -83,10 +83,10 @@ module s2mm_axi_writer #(
     reg [BEAT_WIDTH-1:0] beat_count;
     reg [BURST_COUNT_WIDTH-1:0] burst_count;
     reg [LINE_COUNT_WIDTH-1:0] line_count;
-    reg [1:0] base_cnt;     // 다음에 쓸 버퍼 번호
-    reg [1:0] wr_idx;       // 지금 쓰고 있는 버퍼 번호 (추가)
+    reg [1:0] base_cnt;     // Index of the next buffer to write
+    reg [1:0] wr_idx;       // Index of the buffer currently being written (added)
 
-    // base_cnt 가 가리키는 버퍼 주소 (배열 대신 선택기)
+    // Buffer address pointed to by base_cnt (selector instead of an array)
     wire [ADDR_WIDTH-1:0] base_sel = (base_cnt == 2'd0) ? base_addr0 :
                                      (base_cnt == 2'd1) ? base_addr1 :
                                                           base_addr2;
@@ -136,7 +136,7 @@ module s2mm_axi_writer #(
             wr_error      <= 1'b0;
             wr_error_addr <= {ADDR_WIDTH{1'b0}};
         end else begin
-            frame_done <= 1'b0;   // 1클럭 펄스
+            frame_done <= 1'b0;   // 1-clock pulse
 
             case (STATE)
                 IDLE : begin
@@ -183,7 +183,7 @@ module s2mm_axi_writer #(
 
                 BRESP : begin
                     if (b_handshake) begin
-                        // 에러 응답이면 첫 번째만 기록 (current_addr = 방금 burst 시작 주소)
+                        // On an error response, record only the first one (current_addr = start address of the burst just sent)
                         if (M_AXI_BRESP[1] && !wr_error) begin
                             wr_error      <= 1'b1;
                             wr_error_addr <= current_addr;
@@ -192,11 +192,11 @@ module s2mm_axi_writer #(
                         if (burst_count == BURSTS_PER_LINE-1) begin
                             burst_count <= 0;
                             if (line_count == FRAME_HEIGHT-1) begin
-                                // ---- 프레임 완료 ----
+                                // ---- Frame complete ----
                                 line_count   <= 0;
                                 frame_done   <= 1'b1;
-                                newest_idx   <= {1'b0, wr_idx};      // 방금 다 쓴 버퍼
-                                current_addr <= base_sel;            // 다음 버퍼로
+                                newest_idx   <= {1'b0, wr_idx};      // Buffer just finished
+                                current_addr <= base_sel;            // Move to the next buffer
                                 wr_idx       <= base_cnt;
                                 base_cnt     <= (base_cnt == 2'd2) ? 2'd0 : base_cnt + 1'b1;
                             end else begin

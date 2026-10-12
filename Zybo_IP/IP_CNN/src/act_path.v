@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 // ============================================================================
-// act_path : Activation 경로 Top
+// act_path
 //   RAM -> act_ld_unit -> input_buf -+-> act_patch_gen -+
 //                                    |                  +-> MUX -> act_feeder -> PE
 //                                    +-> fc_gen --------+
@@ -10,11 +10,10 @@ module act_path (
     input wire clk,
     input wire rst_n,
 
-    // ---- RAM -> input_buf load ----
+    // ---- RAM -> input_buf----
     input  wire        i_ld_start,
     input  wire [31:0] i_ram_base,
     input  wire [12:0] i_ld_word_count,
-    //output wire        o_ram_rd_en,
     output wire [11:0] o_ram_rd_addr,
     input  wire [23:0] i_ram_rdata,
     output wire        o_ld_done,
@@ -76,7 +75,6 @@ module act_path (
         .i_ld_start     (i_ld_start),
         .i_ram_base     (i_ram_base),
         .i_ld_word_count(i_ld_word_count),
-        //.o_ram_rd_en    (o_ram_rd_en),
         .o_ram_rd_addr  (o_ram_rd_addr),
         .i_ram_rdata    (i_ram_rdata),
         .o_ibuf_we      (ibuf_we),
@@ -179,13 +177,12 @@ module act_ld_unit (
     input wire [31:0] i_ram_base,
     input wire [12:0] i_ld_word_count,
 
-    //output wire        o_ram_rd_en,
     output wire [11:0] o_ram_rd_addr,
     input  wire [23:0] i_ram_rdata,
 
     output wire        o_ibuf_we,
     output wire [13:0] o_ibuf_waddr,
-    output wire [23:0] o_ibuf_wdata,
+    output wire [23:0] o_ibuf_wdata, // Reverse byte order and flip MSB of each byte (uint8 -> int8 offset)
     output wire [ 2:0] o_ibuf_wbe,
 
     output reg o_ld_done
@@ -197,20 +194,16 @@ module act_ld_unit (
     reg [12:0] word_count;
     reg [12:0] word_index;
 
-    wire start_rd = (state == S_IDLE) && i_ld_start && (i_ld_word_count != 13'd0);
     wire accept_rsp = (state == S_WAIT);
     wire last_word = (word_index == word_count - 13'd1);
 
-    // IDLE: 첫 word 요청
-    // WAIT: 현재 응답을 받으면서 다음 word 요청
     wire [31:0] ram_addr_full = (state == S_IDLE) ? i_ram_base : ram_base 
                 + {19'd0, word_index} + 32'd1;
 
-    // 유효 명령 조건: ram_base + word_count <= 4096
-    //assign o_ram_rd_en   = rst_n && (start_rd || (accept_rsp && !last_word));
+    // Only the low 12 bits are used: requires ram_base + word_count <= 4096
     assign o_ram_rd_addr = ram_addr_full[11:0];
 
-    // 현재 응답은 현재 word_index에 저장
+    // Store the current response at the current word_index
     assign o_ibuf_we    = rst_n && accept_rsp;
     assign o_ibuf_waddr = {1'b0, word_index};
     assign o_ibuf_wdata = {i_ram_rdata[7:0],i_ram_rdata[15:8],i_ram_rdata[23:16]} ^ 24'h808080;
@@ -227,6 +220,7 @@ module act_ld_unit (
             o_ld_done <= 0;
 
             case (state)
+                // IDLE: Request the first word
                 S_IDLE: begin
                     if (i_ld_start) begin
                         ram_base   <= i_ram_base;
@@ -237,6 +231,7 @@ module act_ld_unit (
                         else state <= S_WAIT;
                     end
                 end
+                // WAIT: Request the next word while receiving the current response
                 S_WAIT: begin
                     if (accept_rsp) begin
                         if (last_word) begin
@@ -275,7 +270,7 @@ module input_buf (
             o_rd_valid <= 1'b0;
         end else begin
             o_rd_valid <= i_rd_en;
-            // byte enable == 1, INT8 lane only
+            // Write enabled byte lanes
             if (i_wr_en) begin
                 if (i_wr_be[0]) mem[i_wr_addr][7:0] <= i_wr_data[7:0];
                 if (i_wr_be[1]) mem[i_wr_addr][15:8] <= i_wr_data[15:8];
@@ -289,7 +284,7 @@ endmodule
 
 
 // ============================================================================
-// act_patch_gen 
+// Builds 3x3 conv patches from input_buf via a 2-bank 4x4 window cache
 // ============================================================================
 module act_patch_gen (
     input wire clk,
@@ -301,7 +296,8 @@ module act_patch_gen (
     input wire [ 5:0] i_in_c,
     input wire [ 6:0] i_in_h,
     input wire [ 6:0] i_in_w,
-    input wire [ 1:0] i_stride,
+    
+    input wire [ 1:0] i_stride, // stride=1 and does not use this input
     input wire        i_pad_en,
     input wire [12:0] i_k_total,
     input wire [ 2:0] i_row_mask,
@@ -326,7 +322,7 @@ module act_patch_gen (
 
     reg [2:0] state;
 
-    // ---------------- tile / layer 설정 ----------------
+    // ---------------- tile / layer configuration ----------------
     reg [13:0] src_base;
     reg [5:0] in_c;
     reg [6:0] in_h;
@@ -334,27 +330,27 @@ module act_patch_gen (
     reg pad_en;
     reg [12:0] k_total;
     reg [2:0] row_mask;
-    reg words2;  // 1: pixel당 2 word (Cin=6), 0: 1 word (Cin=3)
-    reg [5:0] wpr;  // 한 행의 window 개수 = out_w / 2
-    reg [2:0] wpr_sh;    // log2(wpr).  wpr 은 2 의 거듭제곱 (32 / 16 / 8 / 1)
+    reg words2;          // 1: 2 words per pixel (Cin=6), 0: 1 word per pixel (Cin=3)
+    reg [5:0] wpr;       // Number of windows per row = out_w / 2
+    reg [2:0] wpr_sh;    // MSB index of wpr, used for shifting
     reg [5:0] wpr_mask;  // wpr - 1
-    reg [2:0] in_w_sh;   // log2(in_w). in_w 는 2 의 거듭제곱 (64 / 32 / 16)
+    reg [2:0] in_w_sh;   // log2(in_w), where in_w is a power of 2 (64 / 32 / 16)
     reg [13:0] base_patch;
     reg [1:0] patch_lane;
 
     wire signed [15:0] in_w_s16 = {9'd0, in_w};
 
-    // 2 의 거듭제곱 (1 ~ 64) 의 log2. 그 밖의 값은 최상위 1 의 자리 (타이밍 : 나눗셈 대신 shift 용)
+    // log2 for powers of 2 (1 to 64); otherwise, return the position of the MSB(shift-based timing)
     function [2:0] f_log2_7;
         input [6:0] v;
         begin
             casez (v)
-                7'b1??????: f_log2_7 = 3'd6;
-                7'b01?????: f_log2_7 = 3'd5;
-                7'b001????: f_log2_7 = 3'd4;
-                7'b0001???: f_log2_7 = 3'd3;
-                7'b00001??: f_log2_7 = 3'd2;
-                7'b000001?: f_log2_7 = 3'd1;
+                7'b1zzzzzz: f_log2_7 = 3'd6;
+                7'b01zzzzz: f_log2_7 = 3'd5;
+                7'b001zzzz: f_log2_7 = 3'd4;
+                7'b0001zzz: f_log2_7 = 3'd3;
+                7'b00001zz: f_log2_7 = 3'd2;
+                7'b000001z: f_log2_7 = 3'd1;
                 default:    f_log2_7 = 3'd0;
             endcase
         end
@@ -365,19 +361,18 @@ module act_patch_gen (
     reg [1:0] win_valid;
     reg [11:0] win_tag0, win_tag1;
 
-    // 현재 lane의 patch -> window / quadrant
+    // current lane's patch -> window / quadrant
     wire [13:0] cur_patch = base_patch + {12'd0, patch_lane};
     wire [11:0] cur_win = cur_patch[13:2];
     wire cur_bank = cur_win[0];
     wire [11:0] cur_tag = cur_bank ? win_tag1 : win_tag0;
     wire cur_hit = win_valid[cur_bank] && (cur_tag == cur_win);
 
-    // 현재 window가 출력 격자의 어디에 있는지 계산
-    // 나눗셈 대신 shift / mask (wpr 은 2 의 거듭제곱). 조합 나눗셈은 100 MHz 에서 -19 ns 였다 (2026-09-23)
+    // current window position in the output grid
     wire [5:0] win_x = cur_win[5:0] & wpr_mask;
     wire [5:0] win_y = cur_win >> wpr_sh;
 
-    // 필요한 입력 4×4 영역의 시작 좌표
+    // starting coordinates of the required 4x4 input region
     wire signed [8:0] org_x = $signed(
         {2'b00, win_x, 1'b0}
     ) - (pad_en ? 9'sd1 : 9'sd0);
@@ -386,8 +381,7 @@ module act_patch_gen (
         {2'b00, win_y, 1'b0}
     ) - (pad_en ? 9'sd1 : 9'sd0);
 
-    // 입력의 픽셀 번호 = y × 입력 폭 + x
-    // in_w 도 2 의 거듭제곱이라 곱셈 대신 shift
+    // input pixel index = y * input width + x
     wire signed [15:0] org_L = ($signed({{7{org_y[8]}}, org_y}) <<< in_w_sh) + org_x;
 
     // ---------------- capture counter ----------------
@@ -395,8 +389,8 @@ module act_patch_gen (
     reg signed [15:0] cap_lin;
     reg [1:0] cap_cx, cap_cy;
     reg cap_grp;
-    // 4×4 window 안의 저장 word 주소
-    // Cin=3: pixel당 1 word, Cin=6: pixel당 2 word
+    // word address within the 4x4 window
+    // Cin=3: 1 word per pixel, Cin=6: 2 words per pixel
     wire [4:0] cap_word = words2 ? {cap_cy, cap_cx, cap_grp} : {1'b0, cap_cy, cap_cx};
 
     wire signed [9:0] in_w_s10 = {3'b000, in_w};
@@ -404,6 +398,7 @@ module act_patch_gen (
     wire cap_in_range = (cap_x >= 0) && (cap_x < in_w_s10) &&
                         (cap_y >= 0) && (cap_y < in_h_s10);
     wire cap_last = (cap_cx == 2'd3) && (cap_cy == 2'd3) && (cap_grp == words2);
+    wire cap_adv = ((state == S_CAP_REQ) && !cap_in_range) || ((state == S_CAP_WAIT) && i_rd_valid);
 
     wire [15:0] cap_lin_sh = words2 ? {cap_lin[14:0], 1'b0} : cap_lin;
     wire [15:0] cap_addr_full = {2'b00, src_base} + cap_lin_sh + {15'd0, cap_grp};
@@ -419,7 +414,7 @@ module act_patch_gen (
     assign o_valid = rst_n && (state == S_SEND) && (row_mask != 3'b000);
     assign o_keep  = row_mask;
 
-    // 패치 번호에서 bank와 시작 위치를 직접 계산
+    // Calculate the bank and starting position directly from the patch index
     reg [23:0] lane_data;
     reg [13:0] lane_patch;
     reg [3:0] pix;
@@ -430,17 +425,17 @@ module act_patch_gen (
         for (lane = 0; lane < 3; lane = lane + 1) begin
             lane_patch = base_patch + lane;
 
-            // 패치 시작 위치 0/1/4/5 + kernel 위치
+            // Patch starting position (0/1/4/5) + kernel offset
             pix = {1'b0, lane_patch[1], 1'b0, lane_patch[0]}
                 + {send_ky, 2'b00}
                 + {2'b00, send_kx};
 
-            // 패치 번호 bit 2가 bank 선택 비트
+            // Bit 2 of the patch index selects the bank
             widx = words2
                 ? {lane_patch[2], pix, send_grp}
                 : {lane_patch[2], 1'b0, pix};
 
-            // 임시 word 변수 없이 필요한 byte를 직접 선택
+            // Select the byte directly without a temporary word
             lane_data[8*lane +: 8] =
                 (state == S_SEND && row_mask[lane])
                 ? window_mem[widx][8*send_byte +: 8]
@@ -449,38 +444,6 @@ module act_patch_gen (
     end
 
     assign o_data = lane_data;
-
-    // ---------------- capture 진행 (REQ/WAIT 공용) ----------------
-    task cap_advance;
-        begin
-            if (cap_last) begin
-                if (cur_bank) win_tag1 <= cur_win;
-                else win_tag0 <= cur_win;
-                win_valid[cur_bank] <= 1'b1;
-                state <= S_SELECT;
-            end else begin
-                state <= S_CAP_REQ;
-                if (words2 && !cap_grp) begin
-                    cap_grp <= 1'b1;
-                end else begin
-                    cap_grp <= 1'b0;
-                    if (cap_cx == 2'd3) begin
-                        cap_cx  <= 2'd0;
-                        cap_cy  <= cap_cy + 2'd1;
-                        cap_x   <= org_x;
-                        cap_y   <= cap_y + 9'sd1;
-                        // 현재 x=3 → 다음 줄 x=0으로 이동
-                        cap_lin <= cap_lin + in_w_s16 - 16'sd3;
-                    end else begin
-                        // 같은 줄의 다음 픽셀로 이동
-                        cap_cx  <= cap_cx + 2'd1;
-                        cap_x   <= cap_x + 9'sd1;
-                        cap_lin <= cap_lin + 16'sd1;
-                    end
-                end
-            end
-        end
-    endtask
 
     wire [6:0] out_w_in = i_pad_en ? i_in_w : (i_in_w - 7'd2);
     wire [5:0] wpr_in   = (out_w_in[6:1] == 6'd0) ? 6'd1 : out_w_in[6:1];
@@ -516,7 +479,7 @@ module act_patch_gen (
             o_rd_en <= 1'b0;
 
             case (state)
-                // -----------------------------------------------------
+                // Load tile and layer configuration
                 S_IDLE: begin
                     if (i_tile_start) begin
                         base_patch <= i_pos_base;
@@ -548,9 +511,7 @@ module act_patch_gen (
                     end
                 end
 
-                // -----------------------------------------------------
-                // lane 0,1,2의 patch가 속한 window가 cache에 있는지 확인
-                // -----------------------------------------------------
+                // Check window cache for each active patch lane
                 S_SELECT: begin
                     if (patch_lane == 2'd3) begin
                         send_k    <= 13'd0;
@@ -564,13 +525,12 @@ module act_patch_gen (
                     end else if (cur_hit) begin
                         patch_lane <= patch_lane + 2'd1;
                     end else begin
-                        // 필요한 window가 없으면 해당 영역을 새로 읽음
                         win_valid[cur_bank] <= 1'b0;
                         state <= S_CAP_INIT;
                     end
                 end
 
-                // -----------------------------------------------------
+                // Initialize 4x4 window capture
                 S_CAP_INIT: begin
                     cap_x   <= org_x;
                     cap_y   <= org_y;
@@ -581,7 +541,7 @@ module act_patch_gen (
                     state   <= S_CAP_REQ;
                 end
 
-                // Read 요청을 register로 내보냄 (범위 밖이면 0 저장)
+                // Request window data
                 S_CAP_REQ: begin
                     if (cap_in_range) begin
                         o_rd_en   <= 1'b1;
@@ -589,18 +549,17 @@ module act_patch_gen (
                         state     <= S_CAP_WAIT;
                     end else begin
                         window_mem[{cur_bank, cap_word}] <= 24'd0;
-                        cap_advance;
                     end
                 end
 
+                // Wait for valid input data
                 S_CAP_WAIT: begin
                     if (i_rd_valid) begin
                         window_mem[{cur_bank, cap_word}] <= i_rd_data;
-                        cap_advance;
                     end
                 end
 
-                // -----------------------------------------------------
+                // Send activation patch data to the feeder when ready
                 S_SEND: begin
                     if (o_valid && i_ready) begin
                         if (send_k == k_total - 13'd1) begin
@@ -627,9 +586,37 @@ module act_patch_gen (
                         end
                     end
                 end
-
                 default: state <= S_IDLE;
             endcase
+            // Advance capture position after storing a word
+            if (cap_adv) begin
+                if (cap_last) begin
+                    if (cur_bank) win_tag1 <= cur_win;
+                    else win_tag0 <= cur_win;
+                    win_valid[cur_bank] <= 1'b1;
+                    state <= S_SELECT;
+                end else begin
+                    state <= S_CAP_REQ;
+                    if (words2 && !cap_grp) begin
+                        cap_grp <= 1'b1;
+                    end else begin
+                        cap_grp <= 1'b0;
+                        if (cap_cx == 2'd3) begin
+                            cap_cx  <= 2'd0;
+                            cap_cy  <= cap_cy + 2'd1;
+                            cap_x   <= org_x;
+                            cap_y   <= cap_y + 9'sd1;
+                            // x=3 -> x=0 on next row
+                            cap_lin <= cap_lin + in_w_s16 - 16'sd3;
+                        end else begin
+                            // Move to the next pixel in the same row
+                            cap_cx  <= cap_cx + 2'd1;
+                            cap_x   <= cap_x + 9'sd1;
+                            cap_lin <= cap_lin + 16'sd1;
+                        end
+                    end
+                end
+            end
         end
     end
 endmodule
@@ -652,7 +639,7 @@ module fc_gen (
     output wire        o_valid,
     input  wire        i_ready
 );
-    // Conv 출력 32x32x4 -> FC0 입력 4096개
+    // Conv output 32x32x4
     localparam integer FC0_CHANNELS = 4;
     localparam integer FC0_INPUT_COUNT = 32 * 32 * FC0_CHANNELS;
 
@@ -672,23 +659,22 @@ module fc_gen (
 
     reg  [12:0] word_offset;
     reg  [ 1:0] byte_lane;
-    reg  [12:0] k_word;      // k / 3  (k 와 같이 세는 카운터. 조합 나눗셈은 타이밍 때문에 뺐다 2026-09-23)
+    reg  [12:0] k_word;      // k / 3  
     reg  [ 1:0] k_lane;      // k % 3
 
-    // 필요한 word가 현재 캐시에 있으면 메모리 읽기 생략
-    wire        cache_hit = cached_valid && (cached_addr == wanted_addr);
+    // Skip memory read if the required word is cached
+    wire cache_hit = cached_valid && (cached_addr == wanted_addr);
 
     assign o_valid = rst_n && (state == S_SEND);
     assign o_keep  = 3'b001;
 
     always @(*) begin
         if (input_count == FC0_INPUT_COUNT) begin
-            // 픽셀당 2 word: C0,C1,C2 / C3 -> 픽셀 번호 = k / 4, 채널 번호 = k % 4
+            // 2 words per pixel: C0-C2 / C3, pixel index = k / 4, channel index = k % 4
             word_offset = {1'b0, k[12:2], (k[1:0] == 2'd3)};
-            // C3이면 0, 아니면 채널 번호
+            // 0 if C3, otherwise the channel index
             byte_lane   = (k[1:0] == 2'd3) ? 2'd0 : k[1:0];
         end else begin
-            // 이후 FC: word당 3개
             word_offset = k_word;
             byte_lane   = k_lane;
         end
@@ -726,12 +712,11 @@ module fc_gen (
                         state        <= S_GET;
                     end
                 end
-                // read o,x check
+                // Check cache hit and request data on a miss
                 S_GET: begin
                     state <= cache_hit ? S_SEND : S_WAIT;
                 end
-                //읽기요청을 했을경우
-                //응답 받으면 word와 addr 저장
+                // Wait for memory response and cache the received word
                 S_WAIT: begin
                     if (i_rd_valid) begin
                         cached_word  <= i_rd_data;
@@ -740,7 +725,7 @@ module fc_gen (
                         state        <= S_SEND;
                     end
                 end
-
+                // Send cached data and advance to the next input
                 S_SEND: begin
                     if (o_valid && i_ready) begin
                         if (k == input_count - 1'b1) begin
@@ -765,6 +750,7 @@ module fc_gen (
 
 endmodule
 
+// Select generator output by mode; ready goes only to the active source
 module MUX (
     input wire i_fc_mode,
 
@@ -791,6 +777,7 @@ module MUX (
     assign o_fc_ready = i_fc_mode && i_ready;
 endmodule
 
+// Output register stage between the generator and the PE array
 module act_feeder (
     input wire clk,
     input wire rst_n,

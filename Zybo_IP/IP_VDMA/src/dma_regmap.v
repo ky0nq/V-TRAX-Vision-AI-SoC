@@ -1,34 +1,34 @@
 `timescale 1 ns / 1 ps
 
 // ============================================================================
-//  dma_regmap : DMA 레지스터 맵 (AXI-Lite Slave 하나로 MM2S / S2MM 모두 제어)
+//  dma_regmap : DMA register map (a single AXI-Lite slave controls both MM2S / S2MM)
 //
 //  ---------------------------- MM2S (Read) ----------------------------------
-//  0x00 MM2S_CR   [2]  ABORT     : 1 쓰면 abort 1클럭 펄스 (저장 안 됨, 읽으면 0)
-//                 [4]  CYCLIC    : 1 = 프레임 끝나면 자동으로 다음 프레임
-//                 [5]  LIVE      : 0 = SA 고정 반복 / 1 = S2MM DA[newest_idx]
-//                 [6]  IDX_SW    : 0 = newest_idx 를 S2MM 에서 / 1 = SW_IDX 에서
+//  0x00 MM2S_CR   [2]  ABORT     : writing 1 gives a 1-clock abort pulse (not stored, reads as 0)
+//                 [4]  CYCLIC    : 1 = automatically start the next frame when a frame ends
+//                 [5]  LIVE      : 0 = repeat fixed SA / 1 = S2MM DA[newest_idx]
+//                 [6]  IDX_SW    : 0 = newest_idx from S2MM / 1 = from SW_IDX
 //                 [12] IOC_IrqEn / [14] Err_IrqEn
 //  0x04 MM2S_SR   [0] busy, [1] idle, [4] read_error, [10:8] cur_buf,
 //                 [12] IOC_Irq (W1C), [14] Err_Irq (W1C)
-//  0x18 SA        LIVE=0 일 때 읽을 주소 (로딩화면 = 0x8000_0000)
-//  0x1C READ_ERR  첫 에러 beat 주소 (RO)
-//  0x28 BTT       프레임 바이트 수, 쓰면 MM2S 시작
+//  0x18 SA        address to read when LIVE=0 (loading screen = 0x8000_0000)
+//  0x1C READ_ERR  address of the first error beat (RO)
+//  0x28 BTT       frame byte count; writing it starts MM2S
 //  0x30 BURST_CFG [7:0] ARLEN, [9:8] burst type (00 FIXED, 01 INCR)
-//  0x38 NUM_BUF   [3:0] 버퍼 개수 (최대 3)
-//  0x3C SW_IDX    [2:0] IDX_SW=1 일 때 CPU 가 쓰는 버퍼 번호
+//  0x38 NUM_BUF   [3:0] number of buffers (max 3)
+//  0x3C SW_IDX    [2:0] buffer index set by the CPU when IDX_SW=1
 //
 //  ---------------------------- S2MM (Write) ---------------------------------
 //  0x40 S2MM_CR   [12] IOC_IrqEn / [14] Err_IrqEn
 //  0x44 S2MM_SR   [0] busy, [1] idle, [4] write_error, [10:8] newest,
 //                 [12] IOC_Irq (W1C), [14] Err_Irq (W1C)
-//  0x48 DA0       프레임 버퍼 0 주소  ┐ S2MM 이 순서대로 쓰고,
-//  0x4C DA1       프레임 버퍼 1 주소  │ MM2S 도 LIVE 모드에서 이 주소를 그대로 읽음
-//  0x50 DA2       프레임 버퍼 2 주소  ┘ (연속일 필요 없음)
-//  0x54 START     [0] 에 1 쓰면 S2MM 시작 (저장 안 됨, 읽으면 0)
-//  0x58 WRITE_ERR 첫 에러 burst 주소 (RO)
+//  0x48 DA0       frame buffer 0 addr ┐ S2MM writes them in order,
+//  0x4C DA1       frame buffer 1 addr │ and MM2S reads these same addresses in LIVE mode
+//  0x50 DA2       frame buffer 2 addr ┘ (need not be contiguous)
+//  0x54 START     writing 1 to [0] starts S2MM (not stored, reads as 0)
+//  0x58 WRITE_ERR address of the first error burst (RO)
 //
-//  나머지 주소 : 읽으면 0, 쓰면 무시
+//  Other addresses : read as 0, writes ignored
 //
 //  mm2s_irq = (MM2S IOC_Irq & IOC_IrqEn) | (MM2S Err_Irq & Err_IrqEn)
 //  s2mm_irq = (S2MM IOC_Irq & IOC_IrqEn) | (S2MM Err_Irq & Err_IrqEn)
@@ -39,7 +39,7 @@ module dma_regmap #
     parameter integer C_S_AXI_ADDR_WIDTH = 7          // 0x00 ~ 0x7F
 )
 (
-    // ================= MM2S 쪽으로 =================
+    // ================= To MM2S =================
     output reg  [31:0] mm2s_cr,
     output reg  [31:0] mm2s_sa,
     output reg  [31:0] mm2s_btt,
@@ -56,7 +56,7 @@ module dma_regmap #
     input  wire [31:0] mm2s_error_addr,
     input  wire [2:0]  mm2s_cur_buf,
 
-    // ================= S2MM 쪽으로 =================
+    // ================= To S2MM =================
     output reg  [31:0] s2mm_cr,
     output reg  [31:0] s2mm_da0,
     output reg  [31:0] s2mm_da1,
@@ -95,7 +95,7 @@ module dma_regmap #
 );
 
     // ------------------------------------------------------------------
-    // 주소
+    // Addresses
     // ------------------------------------------------------------------
     // MM2S
     localparam [6:0] A_MM2S_CR   = 7'h00;
@@ -115,7 +115,7 @@ module dma_regmap #
     localparam [6:0] A_START     = 7'h54;
     localparam [6:0] A_WRITE_ERR = 7'h58;
 
-    // 비트 위치 (MM2S / S2MM 공통)
+    // Bit positions (common to MM2S / S2MM)
     localparam CR_ABORT     = 2;
     localparam CR_IOC_IRQEN = 12;
     localparam CR_ERR_IRQEN = 14;
@@ -123,7 +123,7 @@ module dma_regmap #
     localparam SR_ERR_IRQ   = 14;
 
     // ------------------------------------------------------------------
-    // AXI-Lite 내부 신호
+    // AXI-Lite internal signals
     // ------------------------------------------------------------------
     reg [C_S_AXI_ADDR_WIDTH-1 : 0] axi_awaddr;
     reg                            axi_awready;
@@ -154,7 +154,7 @@ module dma_regmap #
     assign S_AXI_RVALID  = axi_rvalid;
 
     //======================================================
-    // AWREADY / AWADDR / WREADY  (주소와 데이터가 둘 다 오면 같이 받음)
+    // AWREADY / AWADDR / WREADY  (accepted together once both address and data have arrived)
     //======================================================
     always @(posedge S_AXI_ACLK) begin
         if (S_AXI_ARESETN == 1'b0) begin
@@ -198,7 +198,7 @@ module dma_regmap #
             mm2s_cr        <= 32'd0;
             mm2s_sa        <= 32'd0;
             mm2s_btt       <= 32'd0;
-            mm2s_burst_cfg <= 10'b01_0000_1111;   // 기본값: INCR, 16 beat
+            mm2s_burst_cfg <= 10'b01_0000_1111;   // Default: INCR, 16 beat
             mm2s_num_buf   <= 4'd3;
             mm2s_sw_idx    <= 3'd0;
             mm2s_start     <= 1'b0;
@@ -210,7 +210,7 @@ module dma_regmap #
             s2mm_da2       <= 32'd0;
             s2mm_start     <= 1'b0;
         end else begin
-            // 펄스들은 매 클럭 기본 0 -> 조건 맞을 때만 1클럭
+            // Pulses default to 0 every clock -> 1 for one clock only when the condition is met
             mm2s_start <= 1'b0;
             mm2s_abort <= 1'b0;
             s2mm_start <= 1'b0;
@@ -220,7 +220,7 @@ module dma_regmap #
                     // ---------------- MM2S ----------------
                     A_MM2S_CR: begin
                         mm2s_cr           <= S_AXI_WDATA;
-                        mm2s_cr[CR_ABORT] <= 1'b0;                 // ABORT 는 저장 안 함
+                        mm2s_cr[CR_ABORT] <= 1'b0;                 // ABORT is not stored
                         mm2s_abort        <= S_AXI_WDATA[CR_ABORT];
                     end
                     A_SA:        mm2s_sa        <= S_AXI_WDATA;
@@ -229,14 +229,14 @@ module dma_regmap #
                     A_SW_IDX:    mm2s_sw_idx    <= S_AXI_WDATA[2:0];
                     A_BTT: begin
                         mm2s_btt   <= S_AXI_WDATA;
-                        mm2s_start <= 1'b1;                        // BTT 쓰기 = MM2S 출발
+                        mm2s_start <= 1'b1;                        // BTT write = MM2S start
                     end
                     // ---------------- S2MM ----------------
                     A_S2MM_CR:   s2mm_cr    <= S_AXI_WDATA;
                     A_DA0:       s2mm_da0   <= S_AXI_WDATA;
                     A_DA1:       s2mm_da1   <= S_AXI_WDATA;
                     A_DA2:       s2mm_da2   <= S_AXI_WDATA;
-                    A_START:     s2mm_start <= S_AXI_WDATA[0];     // START[0] = S2MM 출발
+                    A_START:     s2mm_start <= S_AXI_WDATA[0];     // START[0] = S2MM start
                     default: ;
                 endcase
             end
@@ -244,7 +244,7 @@ module dma_regmap #
     end
 
     //======================================================
-    // Interrupt status (W1C, 세트 우선) - 채널마다 따로
+    // Interrupt status (W1C, set has priority) - separate per channel
     //======================================================
     reg mm2s_error_q, s2mm_error_q;
     reg mm2s_ioc, mm2s_err;
@@ -283,7 +283,7 @@ module dma_regmap #
     assign mm2s_irq = (mm2s_ioc & mm2s_cr[CR_IOC_IRQEN]) | (mm2s_err & mm2s_cr[CR_ERR_IRQEN]);
     assign s2mm_irq = (s2mm_ioc & s2mm_cr[CR_IOC_IRQEN]) | (s2mm_err & s2mm_cr[CR_ERR_IRQEN]);
 
-    // 상태 레지스터 조립 (MM2S / S2MM 같은 비트 배치)
+    // Assemble status registers (same bit layout for MM2S / S2MM)
     wire [31:0] mm2s_sr = {17'd0, mm2s_err, 1'b0, mm2s_ioc, 1'b0, mm2s_cur_buf,
                            3'd0, mm2s_error, 2'd0, ~mm2s_busy, mm2s_busy};
     wire [31:0] s2mm_sr = {17'd0, s2mm_err, 1'b0, s2mm_ioc, 1'b0, s2mm_newest_idx,

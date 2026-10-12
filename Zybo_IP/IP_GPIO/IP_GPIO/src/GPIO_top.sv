@@ -4,7 +4,7 @@ module GPIO_top (
     input  logic        PCLK,
     input  logic        PRESETn,
 
-    // ===== Bridge와 연결되는 APB 신호 =====
+    // ===== APB signals connected to the Bridge =====
     input  logic        PSEL,
     input  logic        PENABLE,
     input  logic        PWRITE,
@@ -17,7 +17,7 @@ module GPIO_top (
     output logic        PSLVERR,
     output logic [7:0]  o_irq,
 
-    // ===== 물리 핀 =====
+    // ===== Physical pins =====
     inout  wire  [15:0] io_port
 );
 
@@ -56,10 +56,10 @@ module GPIO_top (
 	generate
 	    for (i = 0; i < 16; i = i + 1) begin : GPIO_PIN
 	        IOBUF u_iobuf (
-	            .IO(io_port[i]),  // 외부 핀
-	            .I (w_aodr[i]),   // 출력 데이터
-	            .O (w_idr[i]),    // 입력 데이터
-	            .T (~w_cr[i])     // CR=0: 입력, CR=1: 출력
+	            .IO(io_port[i]),  // external pin
+	            .I (w_aodr[i]),   // output data
+	            .O (w_idr[i]),    // input data
+	            .T (~w_cr[i])     // CR=0: input, CR=1: output
 	        );
 	    end
 	endgenerate

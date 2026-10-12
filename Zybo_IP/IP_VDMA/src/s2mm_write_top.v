@@ -1,11 +1,11 @@
 `timescale 1ns / 1ps
 //
-// s2mm_write_top (S2MM : 카메라 스트림 -> DDR)
+// s2mm_write_top (S2MM : camera stream -> DDR)
 //
-// [기존 대비 변경점]
-//   - base_addr[0:2] 배열 포트 -> base_addr0/1/2
-//   - 포트 목록 마지막 쉼표 제거
-//   - 쓰기 엔진의 상태 출력(busy, frame_done, newest_idx, wr_error, wr_error_addr) 전달
+// [Changes from the previous version]
+//   - base_addr[0:2] array port -> base_addr0/1/2
+//   - Removed the trailing comma in the port list
+//   - Pass through the write engine status outputs (busy, frame_done, newest_idx, wr_error, wr_error_addr)
 //
 module s2mm_write_top #(
     parameter ID_WIDTH        = 4,

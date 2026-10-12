@@ -4,7 +4,7 @@ module Timer_top (
     input  logic        PCLK,
     input  logic        PRESETn,
 
-    // ===== Bridge와 연결되는 APB 신호 =====
+    // ===== APB signals connected to the Bridge =====
     input  logic        PSEL,
     input  logic        PENABLE,
     input  logic        PWRITE,
@@ -57,9 +57,9 @@ module Timer_top (
         .cnt_en   (w_cnt_en),
         .psc      (w_psc),
         .arr      (w_arr),
-        .cnt_valid(w_cnt_valid),   // 브릿지가 항상 1'b0 고정
-        .i_cnt    (w_i_cnt),       // 브릿지가 항상 32'h0 고정
-        .o_cnt    (w_o_cnt),       // 받기만 하고 미사용
+        .cnt_valid(w_cnt_valid),   // Bridge always ties this to 1'b0
+        .i_cnt    (w_i_cnt),       // Bridge always ties this to 32'h0
+        .o_cnt    (w_o_cnt),       // Received but unused
         .o_done   (w_done)
     );
 

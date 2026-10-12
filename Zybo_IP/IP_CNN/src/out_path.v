@@ -108,11 +108,7 @@ module out_path (
     end
 
     // =========================================================
-    // Tile Configuration : 직접 전달 (핸드셰이크 정리 2026-09-23)
-    //   cnn_cntl 은 이전 타일의 tile_in_done 뒤, pe_cntl 이 IDLE 이고 수집기가 빈 것을 본 뒤에만
-    //   i_tile_cfg_valid 를 낸다 (요구사항 4 / 14). 그 시점에 output_fifo (tile_active=0) 와
-    //   post_process (READY, cfg_change_allowed=1) 는 항상 받을 수 있으므로 여기서 다시 버퍼링하지
-    //   않는다. 아래 두 ready 는 검증용으로만 남긴다 (둘 다 1 이어야 정상).
+    // Tile configuration passthrough
     // =========================================================
     wire        fifo_cfg_ready;
     wire        pp_cfg_ready;
@@ -402,9 +398,9 @@ module output_fifo (
     reg         tile_last_reg;
     reg         is_fc_reg;
     reg  [ 6:0] conv_w_reg;
-    reg  [ 2:0] conv_w_sh_reg;   // log2(conv_w). W 는 2 의 거듭제곱 (64 / 32 / 16)
+    reg  [ 2:0] conv_w_sh_reg;   // log2(conv_w)
 
-    // 2 의 거듭제곱 (1 ~ 64) 의 log2. 그 밖의 값은 최상위 1 의 자리 (타이밍 : 나눗셈 대신 shift 용)
+    // Width shift helper
     function [2:0] f_log2_7;
         input [6:0] v;
         begin
@@ -563,12 +559,10 @@ module output_fifo (
 
     wire [11:0] current_position;
 
-    // 패치 순번 (2x2 블록 Z 순서, 명세 R369 / R483 : W=64 이면 패치 0..8 -> pos 0,1,64,65,2,3,66,67,4)
-    // -> 화소 위치 y * W + x.  W 가 2 의 거듭제곱이라 shift 로 계산한다 (2026-09-23. 그 전에는 raster 로
-    // 내서 pooling 의 q 순서 검사에서 막혔다)
+    // 2x2 Z-order patch mapping
     wire [11:0] cur_patch = patch_base_reg + {10'd0, out_row};
-    wire [ 9:0] blk       = cur_patch[11:2];                                   // 2x2 블록 번호
-    wire [ 1:0] q         = cur_patch[1:0];                                    // 블록 안 : 0 (0,0) 1 (1,0) 2 (0,1) 3 (1,1)
+    wire [ 9:0] blk       = cur_patch[11:2];                                   // 2x2 block index
+    wire [ 1:0] q         = cur_patch[1:0];                                    // Position within 2x2 block
     wire [ 2:0] wpr_sh    = (conv_w_sh_reg == 3'd0) ? 3'd0 : (conv_w_sh_reg - 3'd1);   // log2(W/2)
     wire [ 9:0] by        = blk >> wpr_sh;
     wire [ 9:0] bx        = blk & ((10'd1 << wpr_sh) - 10'd1);
@@ -725,7 +719,7 @@ module param_buf #(
     wire rsp_fire  = o_rd_rsp_valid && i_rd_rsp_ready;
 
     // Read request Access state condition
-    // 응답이 같은 클럭에 수락되면 다음 요청을 바로 받는다 (연속 읽기. 핸드셰이크 정리 2026-09-23)
+    // Back-to-back read requests
     assign o_rd_req_ready = o_loaded && !loading && !i_load_start && (!o_rd_rsp_valid || i_rd_rsp_ready);
 
     // memory Read/Write
@@ -828,41 +822,37 @@ module post_process (
     // Internal Configuration Registers
     // =========================================================
 
-    // 현재 Tile에서 유효한 출력 channel lane을 저장
+    // Valid output lanes
     // 001 : lane0
     // 011 : lane0~1
     // 111 : lane0~2
     reg [2:0] col_mask_reg;
 
-    // 현재 Tile의 첫 번째 output channel 번호 저장
-    // Bias 주소 계산 시 사용
+    // First output channel
     reg [4:0] out_ch_base_reg;
 
-    // 현재 Layer의 Bias 시작 주소 저장
-    // 실제 Bias 주소 = bias_base + out_ch_base + lane
+    // Bias base address
     reg [5:0] bias_base_reg;
 
-    // 현재 Layer에서 ReLU 적용 여부 저장
+    // ReLU enable
     reg relu_en_reg;
 
-    // 현재 Tile이 Final Layer인지 저장
-    // Normal path와 Final path를 분기하기 위해 사용
+    // Final-layer selection
     reg is_final_layer_reg;
 
-    // 중간 Layer requantization에 사용하는 multiplier 저장
+    // Requant multiplier
     reg signed [31:0] quant_multiplier_reg;
 
-    // 중간 Layer requantization에 사용하는 right shift 값 저장
+    // Requant shift
     reg        [ 5:0] quant_shift_reg;
 
-    // Final Layer의 INT32 결과를 signed INT8 각도로
-    // 변환할 때 사용하는 multiplier 저장
+    // Final angle multiplier
     reg signed [31:0] angle_multiplier_reg;
 
-    // Final Layer 각도 변환 시 사용하는 right shift 값 저장
+    // Final angle shift
     reg        [ 5:0] angle_shift_reg;
 
-    // 새로운 Tile configuration을 받아도 되는 상태인지 표시
+    // Tile configuration enable
     reg cfg_change_allowed;
 
 
@@ -870,29 +860,22 @@ module post_process (
     // Bias Cache
     // =========================================================
 
-    // 현재 output channel tile에서 사용하는 Bias를 저장
-    // Bias는 Tile 설정 시 param_buf에서 한 번 읽고,
-    // 해당 Tile의 여러 row 처리 동안 반복 사용
+    // Bias cache per output channel
     reg signed [31:0] bias_cache0;
     reg signed [31:0] bias_cache1;
     reg signed [31:0] bias_cache2;
 
-    // ---- Bias 읽기 (핸드셰이크 정리 2026-09-23) ----
-    //   요청은 lane 0..n-1 을 연속으로 내고 (req_idx), 응답은 오는 대로 받는다 (rsp_idx, ready 항상 1).
-    //   전에는 lane 마다 요청 -> 응답 대기 를 반복해서 타일마다 7 clk 이 들었다.
-    reg [1:0] bias_req_idx;      // 다음에 요청할 lane
-    reg [1:0] bias_rsp_idx;      // 다음에 받을 lane
-    reg [1:0] bias_n_lanes;      // 이 타일에 필요한 lane 수 (col_mask 001/011/111 -> 1/2/3)
+    // Sequential bias requests
+    reg [1:0] bias_req_idx;      // Next requested lane
+    reg [1:0] bias_rsp_idx;      // Next response lane
+    reg [1:0] bias_n_lanes;      // Active lane count
 
-    // ---- Bias 캐시 2 entry ----
-    //   같은 (bias_base, out_ch_base, col_mask) 타일이 다시 오면 param_buf 를 읽지 않는다.
-    //   Conv0 / Conv1 은 채널 그룹 2 개가 번갈아 오므로 첫 두 타일 뒤로는 전부 hit (타일당 -7 clk).
-    //   param_buf 가 다시 적재되면 (i_params_loaded=0) 비운다.
+    // Two-entry bias cache
     reg        [ 1:0] bc_valid;
     reg        [13:0] bc_key0, bc_key1;           // {bias_base[5:0], out_ch_base[4:0], col_mask[2:0]}
     reg signed [31:0] bc0_b0, bc0_b1, bc0_b2;
     reg signed [31:0] bc1_b0, bc1_b1, bc1_b2;
-    reg               bc_next;                    // 다음에 채울 entry
+    reg               bc_next;                    // Next cache entry
     wire       [13:0] cfg_key  = {i_bias_base, i_out_ch_base, i_col_mask};
     wire              cfg_hit0 = bc_valid[0] && (bc_key0 == cfg_key);
     wire              cfg_hit1 = bc_valid[1] && (bc_key1 == cfg_key);
@@ -903,16 +886,13 @@ module post_process (
     // Input Beat Buffer
     // =========================================================
 
-    // output_fifo에서 받은 96-bit beat 전체를 저장
-    // 한 beat를 저장한 뒤 lane0~2를 순차적으로 처리하기 위해 필요
+    // 96-bit input beat
     reg [95:0] data_reg;
 
-    // 저장된 beat에서 실제 유효한 lane 정보
-    // data_reg와 동일한 handshake에서 함께 저장
+    // Valid lane mask
     reg [2:0] keep_reg;
 
-    // position / channel / tile_end / layer_end 정보를
-    // 처리 완료 후 downstream으로 그대로 전달하기 위해 저장
+    // Input metadata
     reg [18:0] meta_reg;
 
 
@@ -920,8 +900,7 @@ module post_process (
     // Input Lane Split
     // =========================================================
 
-    // 96-bit 입력 beat를 3개의 signed INT32 lane으로 해석
-    // 별도 32-bit reg 3개를 두지 않고 data_reg에서 직접 분리
+    // Three signed INT32 lanes
     wire signed [31:0] lane0_data;
     wire signed [31:0] lane1_data;
     wire signed [31:0] lane2_data;
@@ -935,28 +914,23 @@ module post_process (
     // Lane Processing Control
     // =========================================================
 
-    // 현재 처리 중인 lane 번호
-    // Requant 연산기 하나를 lane0~2가 공유하기 위해 사용
+    // Current lane index
     reg [1:0] lane_idx;
 
-    // lane_idx에 따라 선택된 현재 PE 결과
-    // lane0_data / lane1_data / lane2_data 중 하나를 선택
+    // Selected PE result
     reg signed [31:0] current_lane_data;
 
-    // 현재 lane에 대응하는 Bias
-    // bias_cache0~2 중 하나를 선택
+    // Selected bias
     reg signed [31:0] current_bias;
 
-    // 현재 lane이 실제 유효한 lane인지 확인
-    // keep_reg[lane_idx]를 사용하여 invalid lane 계산을 건너뜀
+    // Selected lane validity
     reg current_lane_valid;
 
     // =========================================================
     // Current Lane Selector
     // =========================================================
     always @(*) begin
-        // 기본값
-        // 잘못된 lane_idx가 들어와도 latch가 생기지 않도록 설정
+        // Default values
         current_lane_data  = 32'd0;
         current_bias       = 32'd0;
         current_lane_valid = 1'b0;
@@ -990,15 +964,12 @@ module post_process (
     end
 
     // =========================================================
-    // Requant 파이프라인 (타이밍 : 2026-09-23)
-    //   한 클럭에 있던 bias 덧셈 -> 32x32 곱 -> 반올림 shift -> 포화 를 4 단으로 나눴다.
-    //   PROCESS 에서 lane 을 한 클럭에 하나씩 넣고 (s0), 3 클럭 뒤 (s3) 결과가 result_lane 에 써진다.
-    //   lane 순서 / keep / meta 처리는 그대로. 한 beat 에 (lane 수 + 3) 클럭이 든다.
+    // Four-stage requant pipeline
     // =========================================================
 
-    // ---- s0 : bias 덧셈 + INT32 포화 (조합, PROCESS 의 현재 lane) ----
-    reg signed [32:0] bias_sum_ext;   // 33-bit 로 더해서 overflow 를 본다
-    reg signed [31:0] acc32_reg;      // Golden 의 A32
+    // S0: Bias addition and INT32 saturation
+    reg signed [32:0] bias_sum_ext;   // Extended sum for overflow
+    reg signed [31:0] acc32_reg;      // Saturated INT32 accumulator
 
     always @(*) begin
         bias_sum_ext = {current_lane_data[31], current_lane_data} + {current_bias[31], current_bias};
@@ -1006,13 +977,13 @@ module post_process (
 
     always @(*) begin
         case (bias_sum_ext[32:31])
-            2'b01:   acc32_reg = 32'h7FFF_FFFF;   // 양의 overflow -> INT32 최댓값
-            2'b10:   acc32_reg = 32'h8000_0000;   // 음의 overflow -> INT32 최솟값
+            2'b01:   acc32_reg = 32'h7FFF_FFFF;   // Positive overflow
+            2'b10:   acc32_reg = 32'h8000_0000;   // Negative overflow
             default: acc32_reg = bias_sum_ext[31:0];
         endcase
     end
 
-    // 현재 레이어의 M / S.  Final FC2 는 각도 변환용 M / S
+    // Select layer multiplier and shift
     reg signed [31:0] current_multiplier;
     reg        [ 5:0] current_shift;
 
@@ -1027,40 +998,35 @@ module post_process (
         end
     end
 
-    // ---- 파이프라인 레지스터 ----
-    //   s1 : acc32, M (DSP 입력 레지스터)   s2 : 64-bit 곱   s3 : 곱 + 반올림 오프셋
-    //   s3 에서 shift + 포화 해서 result_lane / final_result_reg 에 쓴다
-    reg               s1_valid, s2_valid, s3_valid;   // 그 단에 유효 lane 이 있다
-    reg        [ 1:0] s1_lane,  s2_lane,  s3_lane;    // 그 lane 번호
-    reg               s1_last,  s2_last,  s3_last;    // 이 beat 의 마지막 lane 이다
+    // Pipeline registers
+    reg               s1_valid, s2_valid, s3_valid;   // Stage valid bits
+    reg        [ 1:0] s1_lane,  s2_lane,  s3_lane;    // Stage lane indices
+    reg               s1_last,  s2_last,  s3_last;    // Last-lane flags
     reg signed [31:0] s1_acc32;
     reg signed [31:0] s1_mult;
     reg signed [63:0] s2_prod;
     reg signed [63:0] s3_sum;
 
-    // 반올림 : round-to-nearest, ties away from zero
+    // Round to nearest, ties away from zero
     //   P >= 0 : (P + 2^(S-1)) >> S
-    //   P <  0 : (P + 2^(S-1) - 1) >>> S      (= -((|P| + 2^(S-1)) >> S) 와 같다)
-    //   S = 0  : P 그대로
-    //   |P| <= 2^62 (INT32 x INT32) 이고 S <= 30 이라 64-bit 에서 넘치지 않는다
     wire        [63:0] round_half = (current_shift == 6'd0) ? 64'd0 : (64'd1 << (current_shift - 6'd1));
     wire signed [63:0] round_off  = (current_shift == 6'd0) ? 64'sd0 :
                                     (s2_prod[63] ? ($signed(round_half) - 64'sd1) : $signed(round_half));
 
-    // s3 : 산술 우측 shift 뒤 값 (부호 포함)
+    // Signed right shift
     wire signed [63:0] rounded_result = s3_sum >>> current_shift;
 
-    // 일반 레이어 : ReLU + signed INT8 포화
+    // ReLU and INT8 saturation
     reg signed [7:0] normal_int8_result;
 
     always @(*) begin
         if (relu_en_reg && rounded_result[63])        normal_int8_result = 8'd0;    // ReLU
-        else if (rounded_result > $signed(64'd127))   normal_int8_result = 8'h7F;   // 최댓값 초과
-        else if (rounded_result < -$signed(64'd128))  normal_int8_result = 8'h80;   // 최솟값 미만
+        else if (rounded_result > $signed(64'd127))   normal_int8_result = 8'h7F;   // Upper saturation
+        else if (rounded_result < -$signed(64'd128))  normal_int8_result = 8'h80;   // Lower saturation
         else                                          normal_int8_result = rounded_result[7:0];
     end
 
-    // Final FC2 : ReLU 없이 signed INT8 포화 (1 도 단위 각도)
+    // Final INT8 output without ReLU
     reg signed [7:0] final_int8_result;
 
     always @(*) begin
@@ -1069,20 +1035,19 @@ module post_process (
         else                                          final_int8_result = rounded_result[7:0];
     end
 
-    // Final 결과를 handshake 완료까지 유지
+    // Hold final result until accepted
     reg signed [7:0] final_result_reg;
 
     // =========================================================
     // Normal INT8 Output Lane Registers
     // =========================================================
 
-    // 각 lane의 post-process 완료 INT8 결과 저장
-    // 3개 lane 처리가 모두 끝난 뒤 24-bit o_data로 묶어서 출력
+    // Processed INT8 lanes
     reg signed [7:0] result_lane0;
     reg signed [7:0] result_lane1;
     reg signed [7:0] result_lane2;
 
-    // 이 beat 의 마지막 lane 을 파이프라인에 넣었다 (넣은 뒤 결과가 나올 때까지 기다린다)
+    // Last lane issued
     reg issue_done;
 
     // =========================================================
@@ -1092,40 +1057,38 @@ module post_process (
     reg [2:0] next_state;
 
     // FSM state
-    localparam IDLE       = 3'd0; // Tile configuration 대기
-    localparam BIAS_REQ   = 3'd1; // 필요한 Bias read request 발생
-    localparam BIAS_WAIT  = 3'd2; // Bias response 대기
-    localparam READY      = 3'd3; // Bias 준비 완료, FIFO 입력 대기
-    localparam PROCESS    = 3'd4; // lane0~2 순차 post-process
-    localparam OUT_WAIT   = 3'd5; // Normal INT8 output 수락 대기
-    localparam FINAL_WAIT = 3'd6; // Final output 수락 대기
+    localparam IDLE       = 3'd0; // Wait for tile config
+    localparam BIAS_REQ   = 3'd1; // Request bias data
+    localparam BIAS_WAIT  = 3'd2; // Wait for bias response
+    localparam READY      = 3'd3; // Wait for input beat
+    localparam PROCESS    = 3'd4; // Process lanes
+    localparam OUT_WAIT   = 3'd5; // Wait for normal output
+    localparam FINAL_WAIT = 3'd6; // Wait for final output
 
     // =========================================================
     // Handshake Wires
     // =========================================================
 
-    // output_fifo → post_process 실제 입력 수락
+    // Input handshake
     wire input_fire;
 
-    // post_process → pooling_unit 실제 출력 전달
+    // Normal output handshake
     wire output_fire;
 
-    // post_process → result_buf Final 결과 실제 전달
+    // Final output handshake
     wire final_fire;
 
-    // param_buf Bias read request 실제 수락
+    // Bias request handshake
     wire bias_req_fire;
 
-    // param_buf Bias read response 실제 수락
+    // Bias response handshake
     wire bias_rsp_fire;
 
-    // Tile configuration을 실제로 수락하는 조건
-    // IDLE 또는 READY 상태에서 params가 모두 적재된 경우에만 수락
+    // Tile configuration handshake
     wire cfg_fire;
 
-    // Tile configuration의 channel mask 유효성 확인
+    // Validate channel mask
     // Normal Layer : 001 / 011 / 111
-    // Final FC2    : 001만 허용
     wire cfg_mask_valid;
 
     assign cfg_mask_valid = i_is_final_layer ? (i_col_mask == 3'b001) : 
@@ -1133,14 +1096,13 @@ module post_process (
              (i_col_mask == 3'b011) ||
              (i_col_mask == 3'b111));
 
-    // 현재 Tile에서 사용하게 될 마지막 Bias 주소
+    // Last bias address
     wire [6:0] cfg_bias_last_addr;
 
-    // Bias address가 전체 Bias parameter 범위 0~42 안인지 확인
+    // Validate bias address
     wire cfg_bias_addr_valid;
 
-    // Final FC2 configuration 유효성 확인
-    // FC2 : output channel 1개, bias addr 42, ReLU 미사용
+    // Validate final FC2 config
     wire cfg_final_valid;
 
     assign cfg_final_valid = !i_is_final_layer || (
@@ -1153,16 +1115,13 @@ module post_process (
 
     assign cfg_bias_addr_valid = (cfg_bias_last_addr <= 7'd42);
 
-    // 입력 beat의 keep가 현재 Tile 설정과 일치하는지 확인
-    // 정상 keep는 001 / 011 / 111만 허용
+    // Validate input lane mask
     wire input_keep_valid;
 
-    // Final FC2 입력 형식 확인
-    // Final Layer는 lane0 하나만 사용하며
-    // 마지막 Tile이자 마지막 Layer 결과여야 함
+    // Validate final FC2 input
     wire final_input_valid;
 
-    // 입력 beat의 metadata가 현재 Tile 설정과 일치하는지 확인
+    // Validate input metadata
     wire input_meta_valid;
 
     assign input_meta_valid = (i_meta[16:12] == out_ch_base_reg) && (!i_meta[18] || i_meta[17]);
@@ -1186,20 +1145,20 @@ module post_process (
     assign bias_req_fire = o_bias_req_valid && i_bias_req_ready;
     assign bias_rsp_fire = i_bias_rsp_valid && o_bias_rsp_ready;
 
-    // 이번 응답이 이 타일의 마지막 lane 이다
+    // Last bias response
     wire bias_rsp_last = bias_rsp_fire && (bias_rsp_idx == bias_n_lanes - 2'd1);
 
     // =========================================================
-    // Lane 넣기 / 완료 판정
+    // Lane issue and completion
     // =========================================================
 
-    // 이 beat 에서 마지막으로 넣을 lane (keep 은 001 / 011 / 111 로 lane0 부터 연속)
+    // Last valid lane
     wire [1:0] last_lane_idx = keep_reg[2] ? 2'd2 : (keep_reg[1] ? 2'd1 : 2'd0);
 
-    // s0 에 마지막 lane 을 넣는 클럭
+    // Issue last lane
     wire       issue_last    = (state == PROCESS) && !issue_done && (lane_idx == last_lane_idx);
 
-    // 마지막 lane 의 결과가 result_lane 에 써지는 클럭. 다음 클럭에 OUT_WAIT / FINAL_WAIT
+    // Last lane completed
     wire       process_done  = (state == PROCESS) && s3_last;
 
     // =========================================================
@@ -1220,35 +1179,35 @@ module post_process (
 
         case (state)
             // -------------------------------------------------
-            // Tile configuration 대기
+            // Wait for tile configuration
             // -------------------------------------------------
             IDLE: begin
                 if (cfg_fire)
-                    next_state = cfg_hit ? READY : BIAS_REQ;   // 캐시 hit 이면 바로 READY
+                    next_state = cfg_hit ? READY : BIAS_REQ;   // Bias cache hit
             end
 
 
             // -------------------------------------------------
-            // param_buf에 현재 lane Bias 요청
+            // Request lane biases
             // -------------------------------------------------
             BIAS_REQ: begin
-                // lane 0..n-1 요청을 연속으로 내고, 마지막 응답이 오면 READY
+                // Request all required biases
                 if (bias_rsp_last)
                     next_state = READY;
             end
 
 
             // -------------------------------------------------
-            // Bias 응답 대기
+            // Legacy bias wait state
             // -------------------------------------------------
             BIAS_WAIT: begin
-                // 쓰지 않는다 (연속 읽기로 바꾸면서 BIAS_REQ 에 합쳤다)
+                // Unused state
                 next_state = READY;
             end
 
 
             // -------------------------------------------------
-            // output_fifo 입력 대기
+            // Wait for FIFO data
             // -------------------------------------------------
             READY: begin
                 if (cfg_fire) begin
@@ -1261,7 +1220,7 @@ module post_process (
 
 
             // -------------------------------------------------
-            // 현재 beat의 lane 순차 처리
+            // Process input lanes
             // -------------------------------------------------
             PROCESS: begin
                 if (process_done) begin
@@ -1274,7 +1233,7 @@ module post_process (
 
 
             // -------------------------------------------------
-            // Normal output이 pooling_unit에 수락되기를 대기
+            // Wait for pooling handshake
             // -------------------------------------------------
             OUT_WAIT: begin
                 if (output_fire)
@@ -1283,7 +1242,7 @@ module post_process (
 
 
             // -------------------------------------------------
-            // Final angle이 result_buf에 수락되기를 대기
+            // Wait for final result handshake
             // -------------------------------------------------
             FINAL_WAIT: begin
                 if (final_fire)
@@ -1304,7 +1263,7 @@ module post_process (
     // =========================================================
     always @(*) begin
         // -----------------------------------------------------
-        // 기본값
+        // Default outputs
         // -----------------------------------------------------
         o_params_ready   = 1'b0;
 
@@ -1314,8 +1273,7 @@ module post_process (
 
         o_ready          = 1'b0;
 
-        // 데이터 출력은 state 로 게이팅하지 않고 레지스터를 그대로 낸다 (타이밍 2026-09-23 :
-        // state -> o_meta -> pooling 위치 계산 -> o_ready 가 한 경로였다). 유효 여부는 valid 만 본다
+        // Drive registered data directly
         o_data           = {result_lane2, result_lane1, result_lane0};
         o_valid          = 1'b0;
         o_keep           = keep_reg;
@@ -1327,11 +1285,11 @@ module post_process (
         case (state)
 
             IDLE: begin
-                // cfg 대기
+                // Wait for configuration
             end
 
             BIAS_REQ: begin
-                // 남은 lane 이 있으면 요청, 응답은 항상 받는다
+                // Issue pending bias requests
                 o_bias_req_valid = (bias_req_idx < bias_n_lanes);
                 o_bias_addr      = bias_base_reg + out_ch_base_reg + bias_req_idx;
                 o_bias_rsp_ready = 1'b1;
@@ -1341,38 +1299,38 @@ module post_process (
             end
 
             READY: begin
-                // 현재 Tile의 Bias cache 유효
+                // Bias cache ready
                 o_params_ready = 1'b1;
-                // cfg 수락 cycle은 입력 금지
-                // valid beat가 들어온 경우 keep도 정상이어야 수락
+                // Block input during config
+                // Validate incoming beat
                 o_ready = !cfg_change_allowed && !cfg_fire && (!i_valid || (input_keep_valid && input_meta_valid && final_input_valid));
             end
 
             PROCESS: begin
-                // 현재 Tile의 Bias cache 유효
+                // Bias cache ready
                 o_params_ready = 1'b1;
 
-                // lane 연산 중이므로 새로운 입력은 받지 않음
+                // Block input during processing
             end
 
             OUT_WAIT: begin
-                // 현재 Tile의 Bias cache 유효
+                // Bias cache ready
                 o_params_ready = 1'b1;
-                // 처리 완료된 3개의 INT8 lane을 24-bit로 출력
+                // Pack three INT8 lanes
                 o_data  = {result_lane2, result_lane1, result_lane0};
-                // 현재 beat에서 실제 유효했던 lane 정보 전달
+                // Forward valid lane mask
                 o_keep  = keep_reg;
-                // position / channel / tile_end / layer_end 전달
+                // Forward metadata
                 o_meta  = meta_reg;
-                // pooling_unit에 출력 유효 표시
+                // Assert output valid
                 o_valid = 1'b1;
             end
 
             FINAL_WAIT: begin
-                // 현재 Tile의 Bias cache 유효
+                // Bias cache ready
                 o_params_ready = 1'b1;
 
-                // Final FC2 결과는 signed INT8 각도값
+                // Signed INT8 angle result
                 o_final_data  = final_result_reg;
                 o_final_valid = 1'b1;
             end
@@ -1420,28 +1378,25 @@ module post_process (
     // =========================================================
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            // reset 후 첫 Tile configuration 허용
+            // Allow initial configuration
             cfg_change_allowed <= 1'b1;
         end
         else if (cfg_fire) begin
-            // 현재 Tile configuration을 받았으므로
-            // Tile이 끝날 때까지 새로운 cfg 금지
+            // Lock configuration during tile
             cfg_change_allowed <= 1'b0;
         end
         else if (output_fire && meta_reg[17]) begin
-            // Normal path의 마지막 row가 실제 수락되면
-            // 다음 Tile configuration 허용
+            // Unlock after final output row
             cfg_change_allowed <= 1'b1;
         end
         else if (final_fire) begin
-            // Final FC2 결과가 실제 수락되면
-            // 현재 Tile 종료
+            // Unlock after final result
             cfg_change_allowed <= 1'b1;
         end
     end
 
     // =========================================================
-    // Bias 읽기 / 캐시 갱신
+    // Bias read and cache update
     // =========================================================
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -1458,7 +1413,7 @@ module post_process (
             bc_next       <= 1'b0;
         end
         else begin
-            // param_buf 가 다시 적재되면 (새 추론) 캐시를 비운다
+            // Invalidate cache on parameter reload
             if (!i_params_loaded) bc_valid <= 2'b00;
 
             if (cfg_fire) begin
@@ -1485,7 +1440,7 @@ module post_process (
                         default: bias_cache2 <= i_bias_data;
                     endcase
                 end
-                // 마지막 응답 : 이 타일의 bias 세 개를 캐시에 넣는다
+                // Store received biases in cache
                 if (bias_rsp_last && i_params_loaded) begin
                     if (!bc_next) begin
                         bc_key0 <= {bias_base_reg, out_ch_base_reg, col_mask_reg};
@@ -1518,8 +1473,7 @@ module post_process (
             meta_reg <= 19'd0;
         end
         else if (input_fire) begin
-            // output_fifo에서 실제 handshake가 성립한 경우에만
-            // 현재 96-bit PE result beat와 부가 정보를 저장
+            // Capture accepted input beat
             data_reg <= i_data;
             keep_reg <= i_keep;
             meta_reg <= i_meta;
@@ -1527,7 +1481,7 @@ module post_process (
     end
 
     // =========================================================
-    // Lane 파이프라인 진행
+    // Lane pipeline
     // =========================================================
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -1544,27 +1498,27 @@ module post_process (
             final_result_reg <= 8'd0;
         end
         else begin
-            // ---- 파이프라인은 매 클럭 전진한다 ----
-            // s0 -> s1 : PROCESS 에서 현재 lane 을 넣는다 (무효 lane 은 valid=0 으로 지나간다)
+            // Advance pipeline every cycle
+            // S0 to S1: Capture lane
             s1_valid <= (state == PROCESS) && !issue_done && current_lane_valid;
             s1_lane  <= lane_idx;
             s1_last  <= issue_last;
             s1_acc32 <= acc32_reg;
             s1_mult  <= current_multiplier;
 
-            // s1 -> s2 : signed 32 x 32 곱 (DSP)
+            // S1 to S2: Signed multiply
             s2_valid <= s1_valid;
             s2_lane  <= s1_lane;
             s2_last  <= s1_last;
             s2_prod  <= s1_acc32 * s1_mult;
 
-            // s2 -> s3 : 반올림 오프셋 덧셈
+            // S2 to S3: Add rounding offset
             s3_valid <= s2_valid;
             s3_lane  <= s2_lane;
             s3_last  <= s2_last;
             s3_sum   <= s2_prod + round_off;
 
-            // ---- s3 : shift + 포화 결과 저장 ----
+            // S3: Shift and saturate
             if (s3_valid) begin
                 if (!is_final_layer_reg) begin
                     case (s3_lane)
@@ -1575,14 +1529,14 @@ module post_process (
                     endcase
                 end
                 else if (s3_lane == 2'd0) begin
-                    // Final FC2 는 lane0 하나
+                    // Final FC2 uses lane 0
                     final_result_reg <= final_int8_result;
                 end
             end
 
-            // ---- lane 넣기 ----
+            // Issue next lane
             if (input_fire) begin
-                // 새 beat : lane0 부터. 무효 lane 자리에 이전 결과가 남지 않도록 지운다
+                // Clear previous lane results
                 lane_idx         <= 2'd0;
                 issue_done       <= 1'b0;
                 result_lane0     <= 8'd0;
@@ -1645,10 +1599,10 @@ module pooling_unit (
     reg [6:0] in_w_reg;
     reg [6:0] in_h_reg;
     reg [5:0] channels_reg;
-    reg [2:0] in_w_sh_reg;     // log2(in_w).  in_w 는 2 의 거듭제곱 (64 / 32 / 16)
+    reg [2:0] in_w_sh_reg;     // log2(input width)
     reg [6:0] in_w_mask_reg;   // in_w - 1
 
-    // 2 의 거듭제곱 (1 ~ 64) 의 log2. 그 밖의 값은 최상위 1 의 자리 (타이밍 : 나눗셈 대신 shift 용)
+    // Input width shift helper
     function [2:0] f_log2_7;
         input [6:0] v;
         begin
@@ -1700,7 +1654,7 @@ module pooling_unit (
     assign input_tile_end    = i_meta[17];
     assign input_layer_end   = i_meta[18];
 
-    // 채널 그룹 선택. 1792 줄 always 블록보다 앞에 있어야 해서 여기로 올렸다 (사용 전 선언).
+    // Channel group selection
     // Current MaxPool layer has 6 output channels.
     //
     // group 0 : channel 0 ~ 2, out_ch_base = 0
@@ -1717,7 +1671,7 @@ module pooling_unit (
     wire [11:0] input_y_full;
     wire [11:0] input_x_full;
 
-    // 나눗셈 대신 shift / mask (in_w 는 2 의 거듭제곱). 조합 나눗셈은 100 MHz 에서 -20 ns 였다 (2026-09-23)
+    // Shift-based position calculation
     assign input_y_full = input_pos >> in_w_sh_reg;
     assign input_x_full = input_pos & {5'd0, in_w_mask_reg};
 
@@ -1750,8 +1704,7 @@ module pooling_unit (
     wire [11:0] pool_x2 = {6'd0, input_x[6:1]};
     assign pool_position = (in_w_sh_reg == 3'd0) ? 12'd0 : ((pool_y2 << (in_w_sh_reg - 3'd1)) | pool_x2);
 
-    // 동일 channel group에서 하나의 2x2 window를 구분하는 ID.
-    // 현재 구조에서는 pool output position과 동일하다.
+    // 2x2 window ID
     wire [11:0] pool_window_id;
 
     assign pool_window_id = pool_position;
@@ -1760,7 +1713,7 @@ module pooling_unit (
     // Input / Output Handshake
     // =========================================================
 
-    // result_buf로 전달할 출력 1개를 보관하는 register
+    // Pending pooled output
     reg  [23:0] out_data_reg;
     reg         out_valid_reg;
     reg  [ 2:0] out_keep_reg;
@@ -1770,9 +1723,7 @@ module pooling_unit (
     wire        output_fire;
     wire        pool_state_ready;
 
-    // Output register가 비어 있거나,
-    // 현재 output이 같은 cycle에 downstream으로 전달되면
-    // 새로운 input을 받을 수 있다.
+    // Output slot availability
     assign o_ready =
         rst_n &&
         !i_cfg_valid &&
@@ -1810,17 +1761,17 @@ module pooling_unit (
     // Group 0 Pool State : Channel 0 ~ 2
     // =========================================================
 
-    // 현재 처리 중인 2x2 window가 존재하는지 표시
+    // Active window flag
     reg               group0_window_valid;
 
-    // 현재 그룹이 처리 중인 window ID
+    // Current window ID
     reg        [11:0] group0_window_id;
 
-    // 다음에 받아야 하는 q
+    // Expected next quadrant
     // 0 -> 1 -> 2 -> 3
     reg        [ 1:0] group0_next_q;
 
-    // 각 channel lane의 현재 Max 값
+    // Running max per lane
     reg signed [ 7:0] group0_max0;
     reg signed [ 7:0] group0_max1;
     reg signed [ 7:0] group0_max2;
@@ -1923,22 +1874,17 @@ module pooling_unit (
     // Pool Configuration Validity
     // =========================================================
 
-    // 2x2 MaxPool 조건
-    // - width / height는 최소 2
-    // - width / height는 짝수
-    // - channel 수는 1 이상, 최대 6
+    // 2x2 MaxPool configuration checks
     assign pool_cfg_valid =
         (in_w_reg >= 7'd2) &&
         (in_h_reg >= 7'd2) &&
         (in_w_reg[0] == 1'b0) &&
         (in_h_reg[0] == 1'b0) &&
-        ((in_w_reg & (in_w_reg - 7'd1)) == 7'd0) &&   // in_w 는 2 의 거듭제곱 (위치를 shift 로 계산)
+        ((in_w_reg & (in_w_reg - 7'd1)) == 7'd0) &&   // Require power-of-two width
         (channels_reg >= 6'd1) &&
         (channels_reg <= 6'd6);
 
-    // Pool 경로에서 layer_end가 들어온 경우에는
-    // 반드시 마지막 2x2 window의 q=3,
-    // 그리고 마지막 channel group이어야 한다.
+    // Validate final pooling window
     assign pool_layer_end_valid =
         !input_layer_end ||
         (
@@ -1958,8 +1904,7 @@ module pooling_unit (
         (i_keep == 3'b011) ||
         (i_keep == 3'b111);
 
-    // 현재 MaxPool Layer는 6채널이므로
-    // channel group base는 0 또는 3만 허용
+    // Valid channel group bases
     assign pool_group_valid =
         (input_out_ch_base == 5'd0) ||
         (input_out_ch_base == 5'd3);
@@ -1968,13 +1913,12 @@ module pooling_unit (
     // Pool Input Sequence Check
     // =========================================================
 
-    // Bypass에서는 항상 입력 가능.
+    // Bypass input ready
     //
-    // MaxPool에서는 각 channel group마다
-    // q=0 -> q=1 -> q=2 -> q=3 순서를 강제한다.
+    // Enforce quadrant order
     //
-    // q=0 : 해당 group에 진행 중인 window가 없어야 함
-    // q=1~3 : 동일 window_id이고 next_q와 일치해야 함
+    // Start new window at q0
+    // Match window ID and quadrant
     assign pool_state_ready =
         !pool_en_reg ?
         (
@@ -2015,7 +1959,7 @@ module pooling_unit (
             )
         );
         
-    // (아래 always 는 group*_final_max / *_keep_reg / pool_output_layer_end 를 쓰므로 그 선언들 뒤로 옮겼다 : 사용 전 선언)
+    // Output processing after declarations
     // =========================================================
     // Output Register / Tile Input Done
     // =========================================================
@@ -2030,22 +1974,22 @@ module pooling_unit (
             o_tile_in_done    <= 1'b0;
         end
         else begin
-            // pulse 기본값
+            // Default completion pulse
             o_tile_in_done <= 1'b0;
 
-            // 새 Layer 시작 시 pending output 제거
+            // Clear pending output on layer change
             if (i_cfg_valid) begin
                 out_valid_reg <= 1'b0;
             end
             else begin
 
-                // 현재 output이 downstream에 수락되면 제거
+                // Release accepted output
                 if (output_fire) begin
                     out_valid_reg <= 1'b0;
                 end
 
                 // -------------------------------------------------
-                // 새로운 input 수락
+                // Capture accepted input
                 // -------------------------------------------------
                 if (input_fire) begin
 
@@ -2061,7 +2005,7 @@ module pooling_unit (
 
                     // =============================================
                     // 2x2 MaxPool
-                    // q=3에서만 output 생성
+                    // Emit output at q3
                     // =============================================
                     else if (pool_q == 2'd3) begin
 
@@ -2087,7 +2031,7 @@ module pooling_unit (
                         // Pool output metadata
                         //
                         // [18] layer_end
-                        // [17] tile_end = 항상 0
+                        // Tile end disabled
                         // [16:12] out_ch_base
                         // [11:0] pooled position
                         out_meta_reg <= {
@@ -2100,7 +2044,7 @@ module pooling_unit (
                         out_valid_reg <= 1'b1;
                     end
 
-                    // Tile의 마지막 input beat를 수락한 순간
+                    // Last input beat accepted
                     if (input_tile_end) begin
                         o_tile_in_done <= 1'b1;
                     end
@@ -2135,7 +2079,7 @@ module pooling_unit (
             group1_keep_reg     <= 3'b000;
         end
         else if (i_cfg_valid) begin
-            // Layer 변경 시에만 Pool 상태 clear
+            // Clear pool state on new layer
             group0_window_valid <= 1'b0;
             group0_window_id    <= 12'd0;
             group0_next_q       <= 2'd0;
@@ -2162,7 +2106,7 @@ module pooling_unit (
             if (!pool_group_sel) begin
                 case (pool_q)
 
-                    // q=0 : 실제 첫 입력값으로 Max 초기화
+                    // Initialize max at q0
                     2'd0: begin
                         group0_window_valid <= 1'b1;
                         group0_window_id    <= pool_window_id;
@@ -2204,8 +2148,7 @@ module pooling_unit (
                     end
 
                     // q=3 :
-                    // 마지막 비교 결과는 다음 단계에서
-                    // output register에 직접 넣는다.
+                    // Write final max to output
                     2'd3: begin
                         group0_window_valid <= 1'b0;
                         group0_next_q       <= 2'd0;
@@ -2315,23 +2258,23 @@ module result_buf (
     reg        is_final;
     reg [13:0] dst_base;
     reg [ 3:0] wpp;                         // ceil(C / 3) : C <= 32 -> 1 ~ 11
-    reg        final_stored;                // 이 레이어의 scalar 를 저장했다
-    reg        layer_done_sent;             // 이 레이어의 layer_done 을 냈다 (중복 금지, R472)
+    reg        final_stored;                // Final scalar stored
+    reg        layer_done_sent;             // Layer completion sent
 
-    function [3:0] ceil_div3;               // (C + 2) / 3, C 는 6bit
+    function [3:0] ceil_div3;               // Ceiling divide by 3
         input [5:0] c;
         begin ceil_div3 = ({2'b00, c} + 8'd2) / 8'd3; end
     endfunction
 
-    // ---- 중간 레이어 쓰기 ----
+    // Intermediate-layer write path
     wire [11:0] m_pos  = i_meta[11:0];
     wire [ 4:0] m_ocb  = i_meta[16:12];
     wire        m_lend = i_meta[18];
 
-    wire [15:0] pix_off = m_pos * {12'd0, wpp};                 // pos * ceil(C/3), 최대 4095 * 11
-    wire [ 3:0] ch_off  = m_ocb / 5'd3;                         // out_ch_base 는 3 의 배수 -> 그룹 번호 0 ~ 10
+    wire [15:0] pix_off = m_pos * {12'd0, wpp};                 // Pixel address offset
+    wire [ 3:0] ch_off  = m_ocb / 5'd3;                         // Channel group offset
 
-    assign o_ready = rst_n && !i_cfg_valid && !is_final && !layer_done_sent && i_write_grant;         // 큐 없음 : grant 가 있으면 바로 쓴다
+    assign o_ready = rst_n && !i_cfg_valid && !is_final && !layer_done_sent && i_write_grant;         // Direct write when granted
     assign o_wr_en   = i_valid && o_ready;
     assign o_wr_addr = dst_base + pix_off[13:0] + {10'd0, ch_off};
     assign o_wr_data = i_data;
