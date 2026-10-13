@@ -258,7 +258,7 @@ gcc -std=c11 -O2 -Wall -Wextra cnn_int8.c cnn_model_data.c cnn_mem_test.c -o cnn
 
 ## 팀
 
-4팀 **SoC닥SoC닥** — 대한상공회의소 서울기술교육센터 온디바이스 AI 시스템반도체 설계 2기 과정 최종 프로젝트
+4팀 **SoC닥SoC닥** — 대한상공회의소 경기도팹리스아카데미 온디바이스 AI 시스템반도체 설계 2기 과정 최종 프로젝트
 
 | 이름 | 역할 |
 |---|---|
