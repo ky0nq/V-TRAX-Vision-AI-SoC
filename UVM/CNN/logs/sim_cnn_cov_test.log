@@ -1,0 +1,410 @@
+Command: /home/pedu23/odai2/cnn_uvm/./simv +UVM_TESTNAME=cnn_cov_test +UVM_VERBOSITY=UVM_LOW +ntb_random_seed=1 -cm line+cond+fsm+tgl+branch+assert -cm_dir coverage.vdb -cm_name cnn_cov_test -l sim_cnn_cov_test.log
+Chronologic VCS simulator copyright 1991-2024
+Contains Synopsys proprietary information.
+Compiler version W-2024.09-SP2_Full64; Runtime version W-2024.09-SP2_Full64;  Oct 22 09:31 2026
+----------------------------------------------------------------
+UVM-1.1d.Synopsys
+(C) 2007-2013 Mentor Graphics Corporation
+(C) 2007-2013 Cadence Design Systems, Inc.
+(C) 2006-2013 Synopsys, Inc.
+(C) 2011-2013 Cypress Semiconductor Corp.
+----------------------------------------------------------------
+
+  ***********       IMPORTANT RELEASE NOTES         ************
+
+  You are using a version of the UVM library that has been compiled
+  with `UVM_NO_DEPRECATED undefined.
+  See http://www.eda.org/svdb/view.php?id=3313 for more details.
+
+  You are using a version of the UVM library that has been compiled
+  with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.
+  See http://www.eda.org/svdb/view.php?id=3770 for more details.
+
+      (Specify +UVM_NO_RELNOTES to turn off this notice)
+
+UVM_INFO @ 0: reporter [RNTST] Running test cnn_cov_test...
+UVM_INFO tb/cnn_env.sv(41) @ 0: uvm_test_top.env [cnn_env] cfg : host_active=1 layer_check=1 cov=1 done_timeout=3000000 qm='{1463994, 4487009, 849386, 1046256}  qs='{30, 30, 30, 30} 
+UVM_INFO @ 0: reporter [UVMTOP] UVM testbench topology:
+------------------------------------------------------------------
+Name                       Type                        Size  Value
+------------------------------------------------------------------
+uvm_test_top               cnn_cov_test                -     @477 
+  env                      cnn_env                     -     @490 
+    coverage               cnn_coverage                -     @726 
+      exp_imp              uvm_analysis_imp_cov_exp    -     @743 
+      host_imp             uvm_analysis_imp_cov_host   -     @734 
+    host_agent             cnn_host_agent              -     @501 
+      driver               cnn_host_driver             -     @897 
+        rsp_port           uvm_analysis_port           -     @914 
+        seq_item_port      uvm_seq_item_pull_port      -     @905 
+      monitor              cnn_host_monitor            -     @757 
+        ap                 uvm_analysis_port           -     @765 
+      sequencer            cnn_host_sequencer          -     @774 
+        rsp_export         uvm_analysis_export         -     @782 
+        seq_item_export    uvm_seq_item_pull_imp       -     @888 
+        arbitration_queue  array                       0     -    
+        lock_queue         array                       0     -    
+        num_last_reqs      integral                    32    'd1  
+        num_last_rsps      integral                    32    'd1  
+    img_agent              cnn_img_agent               -     @509 
+      image_responder      cnn_image_responder         -     @936 
+    layer_scb              cnn_layer_scb               -     @700 
+      exp_imp              uvm_analysis_imp_lscb_exp   -     @708 
+      host_imp             uvm_analysis_imp_lscb_host  -     @717 
+    predictor              cnn_predictor               -     @648 
+      analysis_imp         uvm_analysis_imp            -     @656 
+      exp_ap               uvm_analysis_port           -     @665 
+    scoreboard             cnn_scoreboard              -     @674 
+      exp_imp              uvm_analysis_imp_sb_exp     -     @682 
+      host_imp             uvm_analysis_imp_sb_host    -     @691 
+    virtual_sequencer      cnn_virtual_sequencer       -     @525 
+      rsp_export           uvm_analysis_export         -     @533 
+      seq_item_export      uvm_seq_item_pull_imp       -     @639 
+      arbitration_queue    array                       0     -    
+      lock_queue           array                       0     -    
+      num_last_reqs        integral                    32    'd1  
+      num_last_rsps        integral                    32    'd1  
+    wgt_agent              cnn_wgt_agent               -     @517 
+      wgt_param_responder  cnn_wgt_param_responder     -     @959 
+------------------------------------------------------------------
+
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 0: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 0 : mode=DM_FULL target=TGT_NEG_SAT irq_en=0 start_delay=0 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 0: uvm_test_top.env.virtual_sequencer@@seq.cov_0 [cnn_infer_vseq] Loaded stimulus : mode=DM_FULL sparse=10% img[0..3]=103,-15,-70,-15 sum(img)=8267 sum(w)=-77973 sum(bias)=38818112 bias[42]=-1067260
+UVM_INFO tb/cnn_predictor.sv(49) @ 75000: uvm_test_top.env.predictor [cnn_predictor] Golden #1 : mode=DM_FULL final_q=-128 (acc=40990 sum=-1026270 rounded=-1000) sat8+='{12288, 3072, 16, 0}  sat8-='{0, 0, 0, 1}  sat32='{0, 0, 0, 0}  relu0='{12288, 1024, 15, 0}  nz='{12288, 3072, 17, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 2456905000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 3335445000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 4496595000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 4497885000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=449784 layer=3 state=7 result=-128 irq_en=0 irq=0 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 4497885000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #1 PASS : final_result=-128 (mode=DM_FULL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 4497905000: uvm_test_top.env.virtual_sequencer@@seq.cov_0 [cnn_infer_vseq] inference (mode=DM_FULL) done : final_result=-128 cycles=449781 irq=0
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 4497905000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 1 : mode=DM_FULL target=TGT_NEG irq_en=1 start_delay=15 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 4497905000: uvm_test_top.env.virtual_sequencer@@seq.cov_1 [cnn_infer_vseq] Loaded stimulus : mode=DM_FULL sparse=10% img[0..3]=-6,-50,118,76 sum(img)=-2405 sum(w)=-60242 sum(bias)=22499902 bias[42]=-69924
+UVM_INFO tb/cnn_predictor.sv(49) @ 4498065000: uvm_test_top.env.predictor [cnn_predictor] Golden #2 : mode=DM_FULL final_q=-64 (acc=4243 sum=-65681 rounded=-64) sat8+='{12288, 2048, 17, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{12288, 2048, 14, 0}  nz='{12288, 2048, 18, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 6954895000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 7833435000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 8994585000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 8995875000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=899583 layer=3 state=7 result=-64 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 8995875000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #2 PASS : final_result=-64 (mode=DM_FULL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 8995895000: uvm_test_top.env.virtual_sequencer@@seq.cov_1 [cnn_infer_vseq] inference (mode=DM_FULL) done : final_result=-64 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 8995895000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 2 : mode=DM_FULL target=TGT_ZERO irq_en=0 start_delay=50 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 8995895000: uvm_test_top.env.virtual_sequencer@@seq.cov_2 [cnn_infer_vseq] Loaded stimulus : mode=DM_FULL sparse=10% img[0..3]=105,-75,21,124 sum(img)=222 sum(w)=-97353 sum(bias)=-15207844 bias[42]=-33274
+UVM_INFO tb/cnn_predictor.sv(49) @ 8996405000: uvm_test_top.env.predictor [cnn_predictor] Golden #3 : mode=DM_FULL final_q=0 (acc=33274 sum=0 rounded=0) sat8+='{8192, 1024, 15, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{16384, 3072, 17, 0}  nz='{8192, 1024, 15, 0} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 11453235000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 12331775000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 13492925000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 13494215000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=1349417 layer=3 state=7 result=0 irq_en=0 irq=0 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 13494215000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #3 PASS : final_result=0 (mode=DM_FULL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 13494235000: uvm_test_top.env.virtual_sequencer@@seq.cov_2 [cnn_infer_vseq] inference (mode=DM_FULL) done : final_result=0 cycles=449781 irq=0
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 13494235000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 3 : mode=DM_FULL target=TGT_POS irq_en=1 start_delay=0 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 13494235000: uvm_test_top.env.virtual_sequencer@@seq.cov_3 [cnn_infer_vseq] Loaded stimulus : mode=DM_FULL sparse=10% img[0..3]=-31,-1,68,-10 sum(img)=-17093 sum(w)=-71791 sum(bias)=43431448 bias[42]=124863
+UVM_INFO tb/cnn_predictor.sv(49) @ 13494275000: uvm_test_top.env.predictor [cnn_predictor] Golden #4 : mode=DM_FULL final_q=64 (acc=-59182 sum=65681 rounded=64) sat8+='{15777, 1024, 15, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{7405, 3072, 17, 0}  nz='{17146, 1024, 15, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 15951105000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 16829645000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 17990795000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 17992085000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=1799204 layer=3 state=7 result=64 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 17992085000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #4 PASS : final_result=64 (mode=DM_FULL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 17992105000: uvm_test_top.env.virtual_sequencer@@seq.cov_3 [cnn_infer_vseq] inference (mode=DM_FULL) done : final_result=64 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 17992105000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 4 : mode=DM_FULL target=TGT_POS_SAT irq_en=0 start_delay=15 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 17992105000: uvm_test_top.env.virtual_sequencer@@seq.cov_4 [cnn_infer_vseq] Loaded stimulus : mode=DM_FULL sparse=10% img[0..3]=96,106,-63,40 sum(img)=-6175 sum(w)=-49008 sum(bias)=-98612008 bias[42]=1049765
+UVM_INFO tb/cnn_predictor.sv(49) @ 17992265000: uvm_test_top.env.predictor [cnn_predictor] Golden #5 : mode=DM_FULL final_q=127 (acc=-23495 sum=1026270 rounded=1000) sat8+='{12288, 1024, 13, 1}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{12288, 3072, 19, 0}  nz='{12288, 1024, 13, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 20449095000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 21327635000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 22488785000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 22490075000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=2249003 layer=3 state=7 result=127 irq_en=0 irq=0 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 22490075000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #5 PASS : final_result=127 (mode=DM_FULL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 22490095000: uvm_test_top.env.virtual_sequencer@@seq.cov_4 [cnn_infer_vseq] inference (mode=DM_FULL) done : final_result=127 cycles=449781 irq=0
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 22490095000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 5 : mode=DM_SMALL target=TGT_NEG_SAT irq_en=1 start_delay=50 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 22490095000: uvm_test_top.env.virtual_sequencer@@seq.cov_5 [cnn_infer_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=93,37,-48,105 sum(img)=-8590 sum(w)=-53471 sum(bias)=-1119979 bias[42]=-1027142
+UVM_INFO tb/cnn_predictor.sv(49) @ 22490605000: uvm_test_top.env.predictor [cnn_predictor] Golden #6 : mode=DM_SMALL final_q=-128 (acc=872 sum=-1026270 rounded=-1000) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 1}  sat32='{0, 0, 0, 0}  relu0='{16808, 1957, 30, 0}  nz='{7398, 2089, 2, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 24947435000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 25825975000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 26987125000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 26988415000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=2698837 layer=3 state=7 result=-128 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 26988415000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #6 PASS : final_result=-128 (mode=DM_SMALL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 26988435000: uvm_test_top.env.virtual_sequencer@@seq.cov_5 [cnn_infer_vseq] inference (mode=DM_SMALL) done : final_result=-128 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 26988435000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 6 : mode=DM_SMALL target=TGT_NEG irq_en=0 start_delay=0 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 26988435000: uvm_test_top.env.virtual_sequencer@@seq.cov_6 [cnn_infer_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=-15,93,121,47 sum(img)=-11381 sum(w)=-64043 sum(bias)=4660 bias[42]=-66091
+UVM_INFO tb/cnn_predictor.sv(49) @ 26988475000: uvm_test_top.env.predictor [cnn_predictor] Golden #7 : mode=DM_SMALL final_q=-64 (acc=410 sum=-65681 rounded=-64) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{10824, 3072, 24, 0}  nz='{13531, 1024, 8, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 29445305000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 30323845000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 31484995000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 31486285000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=3148624 layer=3 state=7 result=-64 irq_en=0 irq=0 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 31486285000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #7 PASS : final_result=-64 (mode=DM_SMALL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 31486305000: uvm_test_top.env.virtual_sequencer@@seq.cov_6 [cnn_infer_vseq] inference (mode=DM_SMALL) done : final_result=-64 cycles=449781 irq=0
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 31486305000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 7 : mode=DM_SMALL target=TGT_ZERO irq_en=1 start_delay=15 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 31486305000: uvm_test_top.env.virtual_sequencer@@seq.cov_7 [cnn_infer_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=53,31,-117,-103 sum(img)=-9462 sum(w)=-71441 sum(bias)=-8321 bias[42]=-2518
+UVM_INFO tb/cnn_predictor.sv(49) @ 31486465000: uvm_test_top.env.predictor [cnn_predictor] Golden #8 : mode=DM_SMALL final_q=0 (acc=2518 sum=0 rounded=0) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{16251, 2048, 26, 0}  nz='{7742, 2048, 6, 0} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 33943295000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 34821835000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 35982985000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 35984275000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=3598423 layer=3 state=7 result=0 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 35984275000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #8 PASS : final_result=0 (mode=DM_SMALL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 35984295000: uvm_test_top.env.virtual_sequencer@@seq.cov_7 [cnn_infer_vseq] inference (mode=DM_SMALL) done : final_result=0 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 35984295000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 8 : mode=DM_SMALL target=TGT_POS irq_en=0 start_delay=50 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 35984295000: uvm_test_top.env.virtual_sequencer@@seq.cov_8 [cnn_infer_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=15,-63,-121,-15 sum(img)=-666 sum(w)=-80146 sum(bias)=51481 bias[42]=65226
+UVM_INFO tb/cnn_predictor.sv(49) @ 35984805000: uvm_test_top.env.predictor [cnn_predictor] Golden #9 : mode=DM_SMALL final_q=64 (acc=455 sum=65681 rounded=64) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{18077, 2048, 27, 0}  nz='{6121, 2048, 4, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 38441635000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 39320175000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 40481325000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 40482615000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=4048257 layer=3 state=7 result=64 irq_en=0 irq=0 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 40482615000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #9 PASS : final_result=64 (mode=DM_SMALL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 40482635000: uvm_test_top.env.virtual_sequencer@@seq.cov_8 [cnn_infer_vseq] inference (mode=DM_SMALL) done : final_result=64 cycles=449781 irq=0
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 40482635000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 9 : mode=DM_SMALL target=TGT_POS_SAT irq_en=1 start_delay=0 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 40482635000: uvm_test_top.env.virtual_sequencer@@seq.cov_9 [cnn_infer_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=-82,-89,46,17 sum(img)=-19402 sum(w)=-57622 sum(bias)=1111961 bias[42]=1030158
+UVM_INFO tb/cnn_predictor.sv(49) @ 40482675000: uvm_test_top.env.predictor [cnn_predictor] Golden #10 : mode=DM_SMALL final_q=127 (acc=-3888 sum=1026270 rounded=1000) sat8+='{0, 0, 0, 1}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{12244, 2048, 23, 0}  nz='{11577, 2048, 9, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 42939505000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 43818045000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 44979195000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 44980485000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=4498044 layer=3 state=7 result=127 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 44980485000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #10 PASS : final_result=127 (mode=DM_SMALL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 44980505000: uvm_test_top.env.virtual_sequencer@@seq.cov_9 [cnn_infer_vseq] inference (mode=DM_SMALL) done : final_result=127 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 44980505000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 10 : mode=DM_SPARSE target=TGT_NEG_SAT irq_en=0 start_delay=15 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 44980505000: uvm_test_top.env.virtual_sequencer@@seq.cov_10 [cnn_infer_vseq] Loaded stimulus : mode=DM_SPARSE sparse=10% img[0..3]=0,0,0,0 sum(img)=-3219 sum(w)=-1753 sum(bias)=-1001611 bias[42]=-1020484
+UVM_INFO tb/cnn_predictor.sv(49) @ 44980665000: uvm_test_top.env.predictor [cnn_predictor] Golden #11 : mode=DM_SPARSE final_q=-128 (acc=-5786 sum=-1026270 rounded=-1000) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 1}  sat32='{0, 0, 0, 0}  relu0='{3044, 954, 16, 0}  nz='{3011, 2554, 16, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 47437495000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 48316035000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 49477185000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 49478475000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=4947843 layer=3 state=7 result=-128 irq_en=0 irq=0 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 49478475000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #11 PASS : final_result=-128 (mode=DM_SPARSE latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 49478495000: uvm_test_top.env.virtual_sequencer@@seq.cov_10 [cnn_infer_vseq] inference (mode=DM_SPARSE) done : final_result=-128 cycles=449781 irq=0
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 49478495000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 11 : mode=DM_SPARSE target=TGT_NEG irq_en=1 start_delay=50 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 49478495000: uvm_test_top.env.virtual_sequencer@@seq.cov_11 [cnn_infer_vseq] Loaded stimulus : mode=DM_SPARSE sparse=10% img[0..3]=0,0,0,0 sum(img)=-2646 sum(w)=-25330 sum(bias)=-53676 bias[42]=-66117
+UVM_INFO tb/cnn_predictor.sv(49) @ 49479005000: uvm_test_top.env.predictor [cnn_predictor] Golden #12 : mode=DM_SPARSE final_q=-64 (acc=436 sum=-65681 rounded=-64) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{3421, 1610, 16, 0}  nz='{3398, 1274, 11, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 51935835000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 52814375000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 53975525000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 53976815000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=5397677 layer=3 state=7 result=-64 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 53976815000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #12 PASS : final_result=-64 (mode=DM_SPARSE latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 53976835000: uvm_test_top.env.virtual_sequencer@@seq.cov_11 [cnn_infer_vseq] inference (mode=DM_SPARSE) done : final_result=-64 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 53976835000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 12 : mode=DM_SPARSE target=TGT_ZERO irq_en=0 start_delay=0 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 53976835000: uvm_test_top.env.virtual_sequencer@@seq.cov_12 [cnn_infer_vseq] Loaded stimulus : mode=DM_SPARSE sparse=10% img[0..3]=0,0,27,0 sum(img)=-2194 sum(w)=-17061 sum(bias)=-25018 bias[42]=138
+UVM_INFO tb/cnn_predictor.sv(49) @ 53976875000: uvm_test_top.env.predictor [cnn_predictor] Golden #13 : mode=DM_SPARSE final_q=0 (acc=-138 sum=0 rounded=0) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{2743, 1729, 11, 0}  nz='{2746, 1045, 16, 0} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 56433705000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 57312245000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 58473395000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 58474685000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=5847464 layer=3 state=7 result=0 irq_en=0 irq=0 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 58474685000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #13 PASS : final_result=0 (mode=DM_SPARSE latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 58474705000: uvm_test_top.env.virtual_sequencer@@seq.cov_12 [cnn_infer_vseq] inference (mode=DM_SPARSE) done : final_result=0 cycles=449781 irq=0
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 58474705000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 13 : mode=DM_SPARSE target=TGT_POS irq_en=1 start_delay=15 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 58474705000: uvm_test_top.env.virtual_sequencer@@seq.cov_13 [cnn_infer_vseq] Loaded stimulus : mode=DM_SPARSE sparse=10% img[0..3]=0,0,-82,0 sum(img)=1967 sum(w)=-1156 sum(bias)=40376 bias[42]=65197
+UVM_INFO tb/cnn_predictor.sv(49) @ 58474865000: uvm_test_top.env.predictor [cnn_predictor] Golden #14 : mode=DM_SPARSE final_q=64 (acc=484 sum=65681 rounded=64) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{1956, 1239, 19, 0}  nz='{1934, 1326, 8, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 60931695000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 61810235000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 62971385000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 62972675000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=6297263 layer=3 state=7 result=64 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 62972675000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #14 PASS : final_result=64 (mode=DM_SPARSE latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 62972695000: uvm_test_top.env.virtual_sequencer@@seq.cov_13 [cnn_infer_vseq] inference (mode=DM_SPARSE) done : final_result=64 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 62972695000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 14 : mode=DM_SPARSE target=TGT_POS_SAT irq_en=0 start_delay=50 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 62972695000: uvm_test_top.env.virtual_sequencer@@seq.cov_14 [cnn_infer_vseq] Loaded stimulus : mode=DM_SPARSE sparse=10% img[0..3]=76,0,0,0 sum(img)=463 sum(w)=-20867 sum(bias)=988400 bias[42]=1026294
+UVM_INFO tb/cnn_predictor.sv(49) @ 62973205000: uvm_test_top.env.predictor [cnn_predictor] Golden #15 : mode=DM_SPARSE final_q=127 (acc=-24 sum=1026270 rounded=1000) sat8+='{0, 0, 0, 1}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{2723, 1245, 16, 0}  nz='{2769, 757, 12, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 65430035000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 66308575000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 67469725000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 67471015000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=6747097 layer=3 state=7 result=127 irq_en=0 irq=0 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 67471015000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #15 PASS : final_result=127 (mode=DM_SPARSE latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 67471035000: uvm_test_top.env.virtual_sequencer@@seq.cov_14 [cnn_infer_vseq] inference (mode=DM_SPARSE) done : final_result=127 cycles=449781 irq=0
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 67471035000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 15 : mode=DM_ZERO target=TGT_NEG_SAT irq_en=1 start_delay=0 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 67471035000: uvm_test_top.env.virtual_sequencer@@seq.cov_15 [cnn_infer_vseq] Loaded stimulus : mode=DM_ZERO sparse=10% img[0..3]=0,0,0,0 sum(img)=0 sum(w)=0 sum(bias)=-881431 bias[42]=-1026270
+UVM_INFO tb/cnn_predictor.sv(49) @ 67471075000: uvm_test_top.env.predictor [cnn_predictor] Golden #16 : mode=DM_ZERO final_q=-128 (acc=0 sum=-1026270 rounded=-1000) sat8+='{0, 2048, 0, 0}  sat8-='{0, 0, 0, 1}  sat32='{0, 0, 0, 0}  relu0='{8192, 1024, 17, 0}  nz='{16384, 3072, 15, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 69927905000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 70806445000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 71967595000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 71968885000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=7196884 layer=3 state=7 result=-128 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 71968885000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #16 PASS : final_result=-128 (mode=DM_ZERO latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 71968905000: uvm_test_top.env.virtual_sequencer@@seq.cov_15 [cnn_infer_vseq] inference (mode=DM_ZERO) done : final_result=-128 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 71968905000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 16 : mode=DM_ZERO target=TGT_NEG irq_en=0 start_delay=15 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 71968905000: uvm_test_top.env.virtual_sequencer@@seq.cov_16 [cnn_infer_vseq] Loaded stimulus : mode=DM_ZERO sparse=10% img[0..3]=0,0,0,0 sum(img)=0 sum(w)=0 sum(bias)=-183479 bias[42]=-65681
+UVM_INFO tb/cnn_predictor.sv(49) @ 71969065000: uvm_test_top.env.predictor [cnn_predictor] Golden #17 : mode=DM_ZERO final_q=-64 (acc=0 sum=-65681 rounded=-64) sat8+='{0, 2048, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{24576, 1024, 19, 0}  nz='{0, 3072, 13, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 74425895000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 75304435000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 76465585000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 76466875000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=7646683 layer=3 state=7 result=-64 irq_en=0 irq=0 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 76466875000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #17 PASS : final_result=-64 (mode=DM_ZERO latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 76466895000: uvm_test_top.env.virtual_sequencer@@seq.cov_16 [cnn_infer_vseq] inference (mode=DM_ZERO) done : final_result=-64 cycles=449781 irq=0
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 76466895000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 17 : mode=DM_ZERO target=TGT_ZERO irq_en=1 start_delay=50 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 76466895000: uvm_test_top.env.virtual_sequencer@@seq.cov_17 [cnn_infer_vseq] Loaded stimulus : mode=DM_ZERO sparse=10% img[0..3]=0,0,0,0 sum(img)=0 sum(w)=0 sum(bias)=-55022 bias[42]=0
+UVM_INFO tb/cnn_predictor.sv(49) @ 76467405000: uvm_test_top.env.predictor [cnn_predictor] Golden #18 : mode=DM_ZERO final_q=0 (acc=0 sum=0 rounded=0) sat8+='{0, 1024, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{20480, 2048, 12, 0}  nz='{4096, 2048, 19, 0} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 78924235000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 79802775000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 80963925000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 80965215000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=8096517 layer=3 state=7 result=0 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 80965215000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #18 PASS : final_result=0 (mode=DM_ZERO latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 80965235000: uvm_test_top.env.virtual_sequencer@@seq.cov_17 [cnn_infer_vseq] inference (mode=DM_ZERO) done : final_result=0 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 80965235000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 18 : mode=DM_ZERO target=TGT_POS irq_en=0 start_delay=0 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 80965235000: uvm_test_top.env.virtual_sequencer@@seq.cov_18 [cnn_infer_vseq] Loaded stimulus : mode=DM_ZERO sparse=10% img[0..3]=0,0,0,0 sum(img)=0 sum(w)=0 sum(bias)=126704 bias[42]=65681
+UVM_INFO tb/cnn_predictor.sv(49) @ 80965275000: uvm_test_top.env.predictor [cnn_predictor] Golden #19 : mode=DM_ZERO final_q=64 (acc=0 sum=65681 rounded=64) sat8+='{0, 1024, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{8192, 2048, 16, 0}  nz='{16384, 2048, 16, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 83422105000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 84300645000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 85461795000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 85463085000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=8546304 layer=3 state=7 result=64 irq_en=0 irq=0 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 85463085000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #19 PASS : final_result=64 (mode=DM_ZERO latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 85463105000: uvm_test_top.env.virtual_sequencer@@seq.cov_18 [cnn_infer_vseq] inference (mode=DM_ZERO) done : final_result=64 cycles=449781 irq=0
+UVM_INFO tb/cnn_seq_lib.sv(518) @ 85463105000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 19 : mode=DM_ZERO target=TGT_POS_SAT irq_en=1 start_delay=15 ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 85463105000: uvm_test_top.env.virtual_sequencer@@seq.cov_19 [cnn_infer_vseq] Loaded stimulus : mode=DM_ZERO sparse=10% img[0..3]=0,0,0,0 sum(img)=0 sum(w)=0 sum(bias)=717659 bias[42]=1026270
+UVM_INFO tb/cnn_predictor.sv(49) @ 85463265000: uvm_test_top.env.predictor [cnn_predictor] Golden #20 : mode=DM_ZERO final_q=127 (acc=0 sum=1026270 rounded=1000) sat8+='{0, 2048, 0, 1}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{16384, 1024, 17, 0}  nz='{8192, 3072, 14, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 87920095000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 88798635000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 89959785000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 89961075000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=8996103 layer=3 state=7 result=127 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 89961075000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #20 PASS : final_result=127 (mode=DM_ZERO latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 89961095000: uvm_test_top.env.virtual_sequencer@@seq.cov_19 [cnn_infer_vseq] inference (mode=DM_ZERO) done : final_result=127 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(530) @ 89961095000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 20 : mode=DM_MAX ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 89961095000: uvm_test_top.env.virtual_sequencer@@seq.cov_20 [cnn_infer_vseq] Loaded stimulus : mode=DM_MAX sparse=10% img[0..3]=127,127,127,127 sum(img)=1560576 sum(w)=16698214 sum(bias)=92341796821 bias[42]=2147483647
+UVM_INFO tb/cnn_predictor.sv(49) @ 89961135000: uvm_test_top.env.predictor [cnn_predictor] Golden #21 : mode=DM_MAX final_q=127 (acc=516128 sum=2147483647 rounded=2092512) sat8+='{24576, 4096, 32, 1}  sat8-='{0, 0, 0, 0}  sat32='{24576, 4096, 32, 1}  relu0='{0, 0, 0, 0}  nz='{24576, 4096, 32, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 92417965000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 93296505000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 94457655000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 94458945000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=9445890 layer=3 state=7 result=127 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 94458945000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #21 PASS : final_result=127 (mode=DM_MAX latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 94458965000: uvm_test_top.env.virtual_sequencer@@seq.cov_20 [cnn_infer_vseq] inference (mode=DM_MAX) done : final_result=127 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(530) @ 94458965000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 21 : mode=DM_MIN ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 94458965000: uvm_test_top.env.virtual_sequencer@@seq.cov_21 [cnn_infer_vseq] Loaded stimulus : mode=DM_MIN sparse=10% img[0..3]=-128,-128,-128,-128 sum(img)=-1572864 sum(w)=-16829696 sum(bias)=-92341796864 bias[42]=-2147483648
+UVM_INFO tb/cnn_predictor.sv(49) @ 94459005000: uvm_test_top.env.predictor [cnn_predictor] Golden #22 : mode=DM_MIN final_q=-128 (acc=0 sum=-2147483648 rounded=-2092512) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 1}  sat32='{0, 0, 0, 0}  relu0='{24576, 4096, 32, 0}  nz='{0, 0, 0, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 96915835000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 97794375000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 98955525000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 98956815000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=9895677 layer=3 state=7 result=-128 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 98956815000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #22 PASS : final_result=-128 (mode=DM_MIN latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 98956835000: uvm_test_top.env.virtual_sequencer@@seq.cov_21 [cnn_infer_vseq] inference (mode=DM_MIN) done : final_result=-128 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(530) @ 98956835000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 22 : mode=DM_ALT ----
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 98956835000: uvm_test_top.env.virtual_sequencer@@seq.cov_22 [cnn_infer_vseq] Loaded stimulus : mode=DM_ALT sparse=10% img[0..3]=127,-128,127,-128 sum(img)=-6144 sum(w)=-65741 sum(bias)=1000 bias[42]=1000
+UVM_INFO tb/cnn_predictor.sv(49) @ 98956875000: uvm_test_top.env.predictor [cnn_predictor] Golden #23 : mode=DM_ALT final_q=3 (acc=2032 sum=3032 rounded=3) sat8+='{11904, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{12288, 4096, 16, 0}  nz='{12288, 0, 16, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 101413705000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 102292245000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 103453395000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 103454685000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=10345464 layer=3 state=7 result=3 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 103454685000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #23 PASS : final_result=3 (mode=DM_ALT latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 103454705000: uvm_test_top.env.virtual_sequencer@@seq.cov_22 [cnn_infer_vseq] inference (mode=DM_ALT) done : final_result=3 cycles=449781 irq=1
+UVM_INFO tb/cnn_seq_lib.sv(541) @ 103454705000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov 23 : mode=DM_FILE (cov_img.hex, cov_ram.hex) ----
+UVM_INFO tb/cnn_mem_model.sv(79) @ 103454705000: reporter [cnn_mem_model] image_memory : loaded 4096 words from 'cov_img.hex' at base 0
+UVM_INFO tb/cnn_mem_model.sv(79) @ 103454705000: reporter [cnn_mem_model] ram_memory : loaded 45293 words from 'cov_ram.hex' at base 0
+UVM_INFO tb/cnn_predictor.sv(49) @ 103454745000: uvm_test_top.env.predictor [cnn_predictor] Golden #24 : mode=DM_FILE final_q=3 (acc=2032 sum=3032 rounded=3) sat8+='{11904, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{12288, 4096, 16, 0}  nz='{12288, 0, 16, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 105911575000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 106790115000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 107951265000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 107952555000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=10795251 layer=3 state=7 result=3 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 107952555000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #24 PASS : final_result=3 (mode=DM_FILE latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 107952575000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=-38,-105,-58,41 sum(img)=-3050 sum(w)=-70748 sum(bias)=-90031 bias[42]=-12636
+UVM_INFO tb/cnn_seq_lib.sv(445) @ 107952575000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov irq : irq_en change while done held / clear with and without done ----
+UVM_INFO tb/cnn_predictor.sv(49) @ 107952615000: uvm_test_top.env.predictor [cnn_predictor] Golden #25 : mode=DM_SMALL final_q=-14 (acc=-1439 sum=-14075 rounded=-14) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{16951, 3071, 24, 0}  nz='{7190, 1024, 6, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 110409445000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 111287985000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 112449135000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 112450425000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=11245038 layer=3 state=7 result=-14 irq_en=0 irq=0 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 112450425000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #25 PASS : final_result=-14 (mode=DM_SMALL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 112450545000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] Loaded stimulus : mode=DM_SPARSE sparse=10% img[0..3]=0,-25,0,0 sum(img)=157 sum(w)=-14141 sum(bias)=32534 bias[42]=-7954
+UVM_INFO tb/cnn_seq_lib.sv(460) @ 112450545000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov irq : irq_clear while busy ----
+UVM_INFO tb/cnn_predictor.sv(49) @ 112450555000: uvm_test_top.env.predictor [cnn_predictor] Golden #26 : mode=DM_SPARSE final_q=-8 (acc=-48 sum=-8002 rounded=-8) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{1982, 1695, 13, 0}  nz='{6105, 1102, 16, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 114907385000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 115785925000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 116947075000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 116948365000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=11694832 layer=3 state=7 result=-8 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 116948365000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #26 PASS : final_result=-8 (mode=DM_SPARSE latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 116948385000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=-25,43,-59,66 sum(img)=-9657 sum(w)=-59678 sum(bias)=2090 bias[42]=-18163
+UVM_INFO tb/cnn_seq_lib.sv(476) @ 116948385000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov reset : busy in layer 0 ----
+UVM_INFO tb/cnn_predictor.sv(49) @ 116948425000: uvm_test_top.env.predictor [cnn_predictor] Golden #27 : mode=DM_SMALL final_q=-19 (acc=-1459 sum=-19622 rounded=-19) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{14114, 1047, 26, 0}  nz='{9663, 3021, 5, 1} 
+UVM_INFO tb/cnn_scb.sv(52) @ 116990345000: uvm_test_top.env.scoreboard [cnn_scoreboard] RESET : discarding 1 pending expected result(s)
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 116990405000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=80,-93,-71,-128 sum(img)=-18886 sum(w)=-66533 sum(bias)=34941 bias[42]=-1522
+UVM_INFO tb/cnn_seq_lib.sv(476) @ 116990405000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov reset : busy in layer 1 ----
+UVM_INFO tb/cnn_predictor.sv(49) @ 116990415000: uvm_test_top.env.predictor [cnn_predictor] Golden #28 : mode=DM_SMALL final_q=4 (acc=5900 sum=4378 rounded=4) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{17234, 2048, 25, 0}  nz='{6799, 2048, 7, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 119447245000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_scb.sv(52) @ 119447295000: uvm_test_top.env.scoreboard [cnn_scoreboard] RESET : discarding 1 pending expected result(s)
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 119447355000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=-105,39,-58,84 sum(img)=1132 sum(w)=-64246 sum(bias)=92313 bias[42]=3595
+UVM_INFO tb/cnn_seq_lib.sv(476) @ 119447355000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov reset : busy in layer 2 ----
+UVM_INFO tb/cnn_predictor.sv(49) @ 119447365000: uvm_test_top.env.predictor [cnn_predictor] Golden #29 : mode=DM_SMALL final_q=5 (acc=1248 sum=4843 rounded=5) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{10465, 2048, 29, 0}  nz='{13708, 2048, 3, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 121904195000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 122782735000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_scb.sv(52) @ 122782785000: uvm_test_top.env.scoreboard [cnn_scoreboard] RESET : discarding 1 pending expected result(s)
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 122782845000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=68,94,-108,122 sum(img)=-6692 sum(w)=-63271 sum(bias)=-53923 bias[42]=-3262
+UVM_INFO tb/cnn_seq_lib.sv(476) @ 122782845000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov reset : busy in layer 3 ----
+UVM_INFO tb/cnn_predictor.sv(49) @ 122782855000: uvm_test_top.env.predictor [cnn_predictor] Golden #30 : mode=DM_SMALL final_q=-4 (acc=-433 sum=-3695 rounded=-4) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{13575, 4096, 15, 0}  nz='{10617, 0, 15, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 125239685000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 126118225000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 127279375000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/cnn_scb.sv(52) @ 127279425000: uvm_test_top.env.scoreboard [cnn_scoreboard] RESET : discarding 1 pending expected result(s)
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 127279485000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=5,96,15,-103 sum(img)=-7650 sum(w)=-63166 sum(bias)=11367 bias[42]=-9291
+UVM_INFO tb/cnn_seq_lib.sv(486) @ 127279485000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov reset : done held ----
+UVM_INFO tb/cnn_predictor.sv(49) @ 127279495000: uvm_test_top.env.predictor [cnn_predictor] Golden #31 : mode=DM_SMALL final_q=-10 (acc=-933 sum=-10224 rounded=-10) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{8568, 2048, 27, 0}  nz='{15165, 2048, 5, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 129736325000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 130614865000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 131776015000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 131777305000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=449784 layer=3 state=7 result=-10 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 131777305000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #27 PASS : final_result=-10 (mode=DM_SMALL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(491) @ 131777435000: uvm_test_top.env.virtual_sequencer@@seq [cnn_cov_vseq] ---- cov reset : idle ----
+UVM_INFO /tools/synopsys/vcs/W-2024.09-SP2/etc/uvm/base/uvm_objection.svh(1274) @ 131777815000: reporter [TEST_DONE] 'run' phase is ready to proceed to the 'extract' phase
+UVM_INFO tb/cnn_cov.sv(356) @ 131777815000: uvm_test_top.env.coverage [cnn_coverage] coverage : cg_infer=100.0% cg_layer=100.0% cg_state=100.0% cg_ctrl_clear=100.0% cg_ctrl_irq_en=100.0% cg_ctrl_start=100.0% cg_reset=100.0%
+UVM_INFO tb/host_mon.sv(123) @ 131777815000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] starts=31 dones=27 layer_dones=114 resets=6 cycles=11
+UVM_INFO tb/img_resp.sv(40) @ 131777815000: uvm_test_top.env.img_agent.image_responder [cnn_image_responder] image_memory depth=4096 width=24 reads=13177781 oor=0
+UVM_INFO tb/cnn_layer_scb.sv(138) @ 131777815000: uvm_test_top.env.layer_scb [cnn_layer_scb] 
+========================================
+       CNN LAYER SCOREBOARD RESULT
+========================================
+    enabled        : 1
+    Layer0 pass/fail : 30 / 0
+    Layer1 pass/fail : 29 / 0
+    Layer2 pass/fail : 28 / 0
+    words checked  : 121140
+    lane mismatch  : 0
+========================================
+UVM_INFO tb/cnn_scb.sv(111) @ 131777815000: uvm_test_top.env.scoreboard [cnn_scoreboard] 
+========================================
+         CNN SCOREBOARD RESULT
+========================================
+    Start Count   : 31
+    Done Count    : 27
+    Pass Count    : 27
+    Fail Count    : 0
+    IRQ Errors    : 0
+    Resets        : 6
+    Latency clk   : min 449781 / avg 449781 / max 449781
+========================================
+UVM_INFO tb/param_resp.sv(40) @ 131777815000: uvm_test_top.env.wgt_agent.wgt_param_responder [cnn_wgt_param_responder] ram_memory depth=45293 width=32 reads=13177781 oor=121
+UVM_INFO tb/cnn_test_lib.sv(67) @ 131777815000: uvm_test_top [cnn_cov_test] 
+========================================
+           TEST PASSED
+========================================
+
+--- UVM Report Summary ---
+
+** Report counts by severity
+UVM_INFO :  274
+UVM_WARNING :    0
+UVM_ERROR :    0
+UVM_FATAL :    0
+** Report counts by id
+[RNTST]     1
+[TEST_DONE]     1
+[UVMTOP]     1
+[cnn_cov_test]     1
+[cnn_cov_vseq]    39
+[cnn_coverage]     1
+[cnn_env]     1
+[cnn_host_monitor]    28
+[cnn_image_responder]     1
+[cnn_infer_vseq]    46
+[cnn_layer_scb]    88
+[cnn_mem_model]     2
+[cnn_predictor]    31
+[cnn_scoreboard]    32
+[cnn_wgt_param_responder]     1
+$finish called from file "/tools/synopsys/vcs/W-2024.09-SP2/etc/uvm/base/uvm_root.svh", line 437.
+[wgt_path_sva] tb_top.dut.U_WGT_PATH.u_wgt_path_sva : overlap=1182720 clk, write half0=634032 clk, half1=633160 clk                                                                      
+$finish at simulation time         131777815000
+"tb/cnn_sva.sv", 285: tb_top.dut.U_OUT_PATH.u_result_buf.u_result_buf_sva.c_final, 13177781 attempts, 27 match
+"tb/cnn_sva.sv", 68: tb_top.dut.u_top_sva.c_start, 13177781 attempts, 31 match
+"tb/cnn_sva.sv", 69: tb_top.dut.u_top_sva.c_done_irq, 13177781 attempts, 16 match
+"tb/cnn_sva.sv", 70: tb_top.dut.u_top_sva.c_done_noirq, 13177781 attempts, 11 match
+"tb/cnn_sva.sv", 71: tb_top.dut.u_top_sva.c_clear, 13177781 attempts, 26 match
+"tb/cnn_sva.sv", 351: tb_top.dut.U_WGT_PATH.u_wgt_path_sva.c_overlap, 13177781 attempts, 1182720 match
+"tb/cnn_sva.sv", 352: tb_top.dut.U_WGT_PATH.u_wgt_path_sva.c_half0_wr, 13177781 attempts, 634032 match
+"tb/cnn_sva.sv", 353: tb_top.dut.U_WGT_PATH.u_wgt_path_sva.c_half1_wr, 13177781 attempts, 633160 match
+"tb/cnn_sva.sv", 163: tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.c_tile_fire, 13177781 attempts, 102131 match
+"tb/cnn_sva.sv", 164: tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.c_chunk_req, 13177781 attempts, 4620 match
+
+---------------------------------------------------------------------------
+VCS Coverage Metrics: during simulation line, cond, FSM, branch, tgl was monitored
+---------------------------------------------------------------------------
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 131777815000 ps
+CPU Time:    109.650 seconds;       Data structure size:   0.8Mb
+Thu Oct 22 09:33:35 2026

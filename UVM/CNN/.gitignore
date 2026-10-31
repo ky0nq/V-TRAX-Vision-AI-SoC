@@ -1,0 +1,17 @@
+# VCS / Verdi build & sim artifacts
+simv
+simv.daidir/
+csrc/
+coverage.vdb/
+vdCovLog/
+verdiLog/
+ucli.key
+vc_hdrs.h
+novas.rc
+novas.conf
+vdCov.conf
+cm.log
+.fsm.sch.verilog.xml
+*.fsdb
+*.vpd
+backup_before_rename/

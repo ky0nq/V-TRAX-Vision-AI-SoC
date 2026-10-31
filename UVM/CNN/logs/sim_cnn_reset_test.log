@@ -1,0 +1,158 @@
+Command: /home/pedu23/odai2/cnn_uvm/./simv +UVM_TESTNAME=cnn_reset_test +UVM_VERBOSITY=UVM_LOW +ntb_random_seed=1 -cm line+cond+fsm+tgl+branch+assert -cm_dir coverage.vdb -cm_name cnn_reset_test -l sim_cnn_reset_test.log
+Chronologic VCS simulator copyright 1991-2024
+Contains Synopsys proprietary information.
+Compiler version W-2024.09-SP2_Full64; Runtime version W-2024.09-SP2_Full64;  Oct 22 09:31 2026
+----------------------------------------------------------------
+UVM-1.1d.Synopsys
+(C) 2007-2013 Mentor Graphics Corporation
+(C) 2007-2013 Cadence Design Systems, Inc.
+(C) 2006-2013 Synopsys, Inc.
+(C) 2011-2013 Cypress Semiconductor Corp.
+----------------------------------------------------------------
+
+  ***********       IMPORTANT RELEASE NOTES         ************
+
+  You are using a version of the UVM library that has been compiled
+  with `UVM_NO_DEPRECATED undefined.
+  See http://www.eda.org/svdb/view.php?id=3313 for more details.
+
+  You are using a version of the UVM library that has been compiled
+  with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.
+  See http://www.eda.org/svdb/view.php?id=3770 for more details.
+
+      (Specify +UVM_NO_RELNOTES to turn off this notice)
+
+UVM_INFO @ 0: reporter [RNTST] Running test cnn_reset_test...
+UVM_INFO tb/cnn_env.sv(41) @ 0: uvm_test_top.env [cnn_env] cfg : host_active=1 layer_check=1 cov=1 done_timeout=3000000 qm='{1463994, 4487009, 849386, 1046256}  qs='{30, 30, 30, 30} 
+UVM_INFO @ 0: reporter [UVMTOP] UVM testbench topology:
+------------------------------------------------------------------
+Name                       Type                        Size  Value
+------------------------------------------------------------------
+uvm_test_top               cnn_reset_test              -     @477 
+  env                      cnn_env                     -     @490 
+    coverage               cnn_coverage                -     @726 
+      exp_imp              uvm_analysis_imp_cov_exp    -     @743 
+      host_imp             uvm_analysis_imp_cov_host   -     @734 
+    host_agent             cnn_host_agent              -     @501 
+      driver               cnn_host_driver             -     @897 
+        rsp_port           uvm_analysis_port           -     @914 
+        seq_item_port      uvm_seq_item_pull_port      -     @905 
+      monitor              cnn_host_monitor            -     @757 
+        ap                 uvm_analysis_port           -     @765 
+      sequencer            cnn_host_sequencer          -     @774 
+        rsp_export         uvm_analysis_export         -     @782 
+        seq_item_export    uvm_seq_item_pull_imp       -     @888 
+        arbitration_queue  array                       0     -    
+        lock_queue         array                       0     -    
+        num_last_reqs      integral                    32    'd1  
+        num_last_rsps      integral                    32    'd1  
+    img_agent              cnn_img_agent               -     @509 
+      image_responder      cnn_image_responder         -     @936 
+    layer_scb              cnn_layer_scb               -     @700 
+      exp_imp              uvm_analysis_imp_lscb_exp   -     @708 
+      host_imp             uvm_analysis_imp_lscb_host  -     @717 
+    predictor              cnn_predictor               -     @648 
+      analysis_imp         uvm_analysis_imp            -     @656 
+      exp_ap               uvm_analysis_port           -     @665 
+    scoreboard             cnn_scoreboard              -     @674 
+      exp_imp              uvm_analysis_imp_sb_exp     -     @682 
+      host_imp             uvm_analysis_imp_sb_host    -     @691 
+    virtual_sequencer      cnn_virtual_sequencer       -     @525 
+      rsp_export           uvm_analysis_export         -     @533 
+      seq_item_export      uvm_seq_item_pull_imp       -     @639 
+      arbitration_queue    array                       0     -    
+      lock_queue           array                       0     -    
+      num_last_reqs        integral                    32    'd1  
+      num_last_rsps        integral                    32    'd1  
+    wgt_agent              cnn_wgt_agent               -     @517 
+      wgt_param_responder  cnn_wgt_param_responder     -     @959 
+------------------------------------------------------------------
+
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 0: uvm_test_top.env.virtual_sequencer@@seq [cnn_reset_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=23,104,104,-107 sum(img)=-3711 sum(w)=-70386 sum(bias)=-36418 bias[42]=7346
+UVM_INFO tb/cnn_predictor.sv(49) @ 75000: uvm_test_top.env.predictor [cnn_predictor] Golden #1 : mode=DM_SMALL final_q=8 (acc=804 sum=8150 rounded=8) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{11989, 2707, 25, 0}  nz='{12061, 1266, 7, 1} 
+UVM_INFO tb/cnn_seq_lib.sv(386) @ 314185000: uvm_test_top.env.virtual_sequencer@@seq [cnn_reset_vseq] reset 31410 cycles after start
+UVM_INFO tb/cnn_scb.sv(52) @ 314205000: uvm_test_top.env.scoreboard [cnn_scoreboard] RESET : discarding 1 pending expected result(s)
+UVM_INFO tb/cnn_seq_lib.sv(54) @ 314265000: uvm_test_top.env.virtual_sequencer@@seq.after_reset [cnn_infer_vseq] Loaded stimulus : mode=DM_SMALL sparse=10% img[0..3]=-127,-60,-12,-102 sum(img)=-13452 sum(w)=-75449 sum(bias)=-65364 bias[42]=-2319
+UVM_INFO tb/cnn_predictor.sv(49) @ 314275000: uvm_test_top.env.predictor [cnn_predictor] Golden #2 : mode=DM_SMALL final_q=-3 (acc=-502 sum=-2821 rounded=-3) sat8+='{0, 0, 0, 0}  sat8-='{0, 0, 0, 0}  sat32='{0, 0, 0, 0}  relu0='{16621, 3072, 28, 0}  nz='{7560, 1024, 4, 1} 
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 2771105000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 0 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 3649645000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 1 PASS : 2048 words match golden
+UVM_INFO tb/cnn_layer_scb.sv(127) @ 4810795000: uvm_test_top.env.layer_scb [cnn_layer_scb] LAYER 2 PASS : 11 words match golden
+UVM_INFO tb/host_mon.sv(104) @ 4812085000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] Observed : EV_DONE cycle=449784 layer=3 state=7 result=-3 irq_en=1 irq=1 latency=449781
+UVM_INFO tb/cnn_scb.sv(78) @ 4812085000: uvm_test_top.env.scoreboard [cnn_scoreboard] INFER #1 PASS : final_result=-3 (mode=DM_SMALL latency=449781 clk)
+UVM_INFO tb/cnn_seq_lib.sv(177) @ 4812105000: uvm_test_top.env.virtual_sequencer@@seq.after_reset [cnn_infer_vseq] inference (mode=DM_SMALL) done : final_result=-3 cycles=449781 irq=1
+UVM_INFO /tools/synopsys/vcs/W-2024.09-SP2/etc/uvm/base/uvm_objection.svh(1274) @ 4812205000: reporter [TEST_DONE] 'run' phase is ready to proceed to the 'extract' phase
+UVM_INFO tb/cnn_cov.sv(356) @ 4812205000: uvm_test_top.env.coverage [cnn_coverage] coverage : cg_infer=44.1% cg_layer=100.0% cg_state=100.0% cg_ctrl_clear=33.3% cg_ctrl_irq_en=0.0% cg_ctrl_start=0.0% cg_reset=16.7%
+UVM_INFO tb/host_mon.sv(123) @ 4812205000: uvm_test_top.env.host_agent.monitor [cnn_host_monitor] starts=2 dones=1 layer_dones=4 resets=1 cycles=449795
+UVM_INFO tb/img_resp.sv(40) @ 4812205000: uvm_test_top.env.img_agent.image_responder [cnn_image_responder] image_memory depth=4096 width=24 reads=481220 oor=0
+UVM_INFO tb/cnn_layer_scb.sv(138) @ 4812205000: uvm_test_top.env.layer_scb [cnn_layer_scb] 
+========================================
+       CNN LAYER SCOREBOARD RESULT
+========================================
+    enabled        : 1
+    Layer0 pass/fail : 1 / 0
+    Layer1 pass/fail : 1 / 0
+    Layer2 pass/fail : 1 / 0
+    words checked  : 4107
+    lane mismatch  : 0
+========================================
+UVM_INFO tb/cnn_scb.sv(111) @ 4812205000: uvm_test_top.env.scoreboard [cnn_scoreboard] 
+========================================
+         CNN SCOREBOARD RESULT
+========================================
+    Start Count   : 2
+    Done Count    : 1
+    Pass Count    : 1
+    Fail Count    : 0
+    IRQ Errors    : 0
+    Resets        : 1
+    Latency clk   : min 449781 / avg 449781 / max 449781
+========================================
+UVM_INFO tb/param_resp.sv(40) @ 4812205000: uvm_test_top.env.wgt_agent.wgt_param_responder [cnn_wgt_param_responder] ram_memory depth=45293 width=32 reads=481220 oor=7
+UVM_INFO tb/cnn_test_lib.sv(67) @ 4812205000: uvm_test_top [cnn_reset_test] 
+========================================
+           TEST PASSED
+========================================
+
+--- UVM Report Summary ---
+
+** Report counts by severity
+UVM_INFO :   23
+UVM_WARNING :    0
+UVM_ERROR :    0
+UVM_FATAL :    0
+** Report counts by id
+[RNTST]     1
+[TEST_DONE]     1
+[UVMTOP]     1
+[cnn_coverage]     1
+[cnn_env]     1
+[cnn_host_monitor]     2
+[cnn_image_responder]     1
+[cnn_infer_vseq]     2
+[cnn_layer_scb]     4
+[cnn_predictor]     2
+[cnn_reset_test]     1
+[cnn_reset_vseq]     2
+[cnn_scoreboard]     3
+[cnn_wgt_param_responder]     1
+$finish called from file "/tools/synopsys/vcs/W-2024.09-SP2/etc/uvm/base/uvm_root.svh", line 437.
+[wgt_path_sva] tb_top.dut.U_WGT_PATH.u_wgt_path_sva : overlap=42240 clk, write half0=22668 clk, half1=22636 clk                                                                      
+$finish at simulation time           4812205000
+"tb/cnn_sva.sv", 285: tb_top.dut.U_OUT_PATH.u_result_buf.u_result_buf_sva.c_final, 481220 attempts, 1 match
+"tb/cnn_sva.sv", 68: tb_top.dut.u_top_sva.c_start, 481220 attempts, 2 match
+"tb/cnn_sva.sv", 69: tb_top.dut.u_top_sva.c_done_irq, 481220 attempts, 1 match
+"tb/cnn_sva.sv", 70: tb_top.dut.u_top_sva.c_done_noirq, 481220 attempts, 0 match
+"tb/cnn_sva.sv", 71: tb_top.dut.u_top_sva.c_clear, 481220 attempts, 1 match
+"tb/cnn_sva.sv", 351: tb_top.dut.U_WGT_PATH.u_wgt_path_sva.c_overlap, 481220 attempts, 42240 match
+"tb/cnn_sva.sv", 352: tb_top.dut.U_WGT_PATH.u_wgt_path_sva.c_half0_wr, 481220 attempts, 22668 match
+"tb/cnn_sva.sv", 353: tb_top.dut.U_WGT_PATH.u_wgt_path_sva.c_half1_wr, 481220 attempts, 22636 match
+"tb/cnn_sva.sv", 163: tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.c_tile_fire, 481220 attempts, 3737 match
+"tb/cnn_sva.sv", 164: tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.c_chunk_req, 481220 attempts, 165 match
+
+---------------------------------------------------------------------------
+VCS Coverage Metrics: during simulation line, cond, FSM, branch, tgl was monitored
+---------------------------------------------------------------------------
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 4812205000 ps
+CPU Time:      4.440 seconds;       Data structure size:   0.8Mb
+Thu Oct 22 09:31:45 2026

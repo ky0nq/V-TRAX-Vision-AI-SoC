@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>cnn_uvm 구조도</title>
+<style>
+	:root {
+		--bg: #f5f7f5; --surface: #ffffff; --ink: #1c222b; --muted: #5f6874; --line: #cfd5d9;
+		--accent: #0f7c7a; --accent-soft: #dcefee; --amber: #b8651a; --amber-soft: #f8e9d8; --seq: #eef1ee; --code: #eceff0;
+		--sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+		--mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root { color-scheme: dark; --bg: #131719; --surface: #1b2124; --ink: #e4e8ea; --muted: #98a2ab; --line: #343d43;
+			--accent: #4fc7c3; --accent-soft: #163c3b; --amber: #e39a5c; --amber-soft: #3d2a17; --seq: #20272a; --code: #22292d; }
+	}
+	body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; padding: 32px 20px 64px; }
+	.wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 40px; }
+	header { display: grid; gap: 8px; max-width: 70ch; }
+	.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+	h1 { font-size: 30px; line-height: 1.2; margin: 0; font-weight: 600; }
+	h2 { font-size: 20px; margin: 0 0 12px; font-weight: 600; }
+	p { margin: 0; } .lead { color: var(--muted); }
+	code { font-family: var(--mono); font-size: 0.92em; background: var(--code); padding: 1px 5px; border-radius: 3px; }
+	figure { margin: 0; display: grid; gap: 12px; }
+	.diagram { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 12px; }
+	.diagram svg { display: block; width: 100%; height: auto; min-width: 900px; color: var(--ink); font-family: var(--sans); }
+	figcaption { color: var(--muted); font-size: 14px; max-width: 80ch; }
+	.bx-outer { fill: none; stroke: var(--muted); stroke-dasharray: 6 4; }
+	.bx-test  { fill: var(--seq); stroke: var(--line); }
+	.bx-env   { fill: var(--surface); stroke: var(--ink); stroke-width: 1.2; }
+	.bx-comp  { fill: var(--bg); stroke: var(--ink); }
+	.bx-sub   { fill: var(--surface); stroke: var(--line); }
+	.bx-model { fill: var(--accent-soft); stroke: var(--accent); }
+	.bx-if    { fill: var(--amber-soft); stroke: var(--amber); }
+	.bx-dut   { fill: var(--surface); stroke: var(--amber); stroke-width: 1.8; }
+	.bx-sva   { fill: none; stroke: var(--amber); stroke-dasharray: 4 3; }
+	.t-name  { font-family: var(--mono); font-size: 12px; font-weight: 600; fill: currentColor; }
+	.t-big   { font-family: var(--mono); font-size: 14px; font-weight: 600; fill: currentColor; }
+	.t-small { font-size: 10.5px; fill: var(--muted); }
+	.t-label { font-family: var(--mono); font-size: 10.5px; fill: currentColor; }
+	.t-ap    { font-family: var(--mono); font-size: 10.5px; fill: var(--accent); font-weight: 600; }
+	.ln     { fill: none; stroke: currentColor; stroke-width: 1.2; }
+	.ln-dash{ fill: none; stroke: currentColor; stroke-width: 1.2; stroke-dasharray: 4 3; }
+	.ln-ap  { fill: none; stroke: var(--accent); stroke-width: 1.7; }
+	.ln-exp { fill: none; stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 5 3; }
+	.ln-pin { fill: none; stroke: var(--amber); stroke-width: 1.7; }
+	.mk-ink { fill: currentColor; } .mk-ap { fill: var(--accent); } .mk-pin { fill: var(--amber); }
+	.legend { display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 13px; color: var(--muted); }
+	.legend span { display: inline-flex; align-items: center; gap: 8px; }
+	.sw { display: inline-block; width: 28px; height: 0; border-top: 2px solid currentColor; }
+	.sw.ap { border-color: var(--accent); } .sw.exp { border-top-style: dashed; border-color: var(--accent); } .sw.pin { border-color: var(--amber); }
+	.sw.box { width: 14px; height: 12px; border: 1px solid var(--amber); background: var(--amber-soft); }
+	.sw.model { width: 14px; height: 12px; border: 1px solid var(--accent); background: var(--accent-soft); }
+	.tablewrap { overflow-x: auto; }
+	table { border-collapse: collapse; width: 100%; font-size: 14px; }
+	th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+	th { font-weight: 600; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+	td:first-child { font-family: var(--mono); font-weight: 600; white-space: nowrap; }
+	.chip { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 1px 7px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); margin-left: 6px; }
+	.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px; }
+	ol { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+	pre { margin: 0; background: var(--code); border-radius: 6px; padding: 12px 14px; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.55; }
+	.note { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+	<header>
+		<div class="eyebrow">cnn_uvm · top_cnn 검증 환경</div>
+		<h1>cnn_uvm UVM 구조도</h1>
+		<p class="lead">agent / coverage / env / interface / package / monitor / item / sequence / sequencer / test / scoreboard / driver / tb_top 을 파일 하나씩으로 나눈 구조에, CNN 가속기 검증에 필요한 predictor(레퍼런스 모델) · RAM responder · layer checker · SVA 를 더한 형태입니다. 소스 위치는 <code>cnn_uvm/tb/</code> 입니다.</p>
+	</header>
+
+	<figure>
+		<div class="diagram">
+		<svg viewBox="0 0 1200 840" role="img" aria-label="cnn_uvm 블록 다이어그램">
+			<defs>
+				<marker id="m-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><polygon class="mk-ink" points="0,0 10,5 0,10"/></marker>
+				<marker id="m-ap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><polygon class="mk-ap" points="0,0 10,5 0,10"/></marker>
+				<marker id="m-pin" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><polygon class="mk-pin" points="0,0 10,5 0,10"/></marker>
+			</defs>
+			<rect class="bx-outer" x="16" y="16" width="1168" height="808" rx="6"/>
+			<text class="t-name" x="28" y="38">tb_top.sv</text>
+			<text class="t-small" x="110" y="38">clk 10 ns · 인터페이스 3 개 · input_buf probe class · DUT · SVA · config_db set · run_test()</text>
+			<rect class="bx-test" x="40" y="56" width="720" height="752" rx="6"/>
+			<text class="t-name" x="52" y="78">cnn_base_test</text>
+			<text class="t-small" x="160" y="78">cnn_random_test · cnn_corner_test · cnn_file_test · cnn_irq_test · cnn_reset_test</text>
+			<text class="t-small" x="748" y="78" text-anchor="end">cnn_test_lib.sv</text>
+			<text class="t-small" x="52" y="96">아래 class 는 전부 cnn_pkg.sv 안 (uvm_test → env → agent → component)</text>
+			<rect class="bx-sub" x="60" y="110" width="680" height="56" rx="4"/>
+			<text class="t-name" x="72" y="130">virtual sequence</text>
+			<text class="t-small" x="728" y="130" text-anchor="end">cnn_seq_lib.sv</text>
+			<text class="t-small" x="72" y="150">cnn_vseq_base → cnn_infer_vseq · cnn_multi_infer_vseq · cnn_corner_vseq · cnn_file_infer_vseq · cnn_irq_vseq · cnn_reset_vseq</text>
+			<rect class="bx-env" x="60" y="196" width="680" height="596" rx="6"/>
+			<text class="t-name" x="72" y="216">cnn_env</text>
+			<text class="t-small" x="728" y="216" text-anchor="end">cnn_env.sv</text>
+			<rect class="bx-comp" x="80" y="236" width="250" height="54" rx="4"/>
+			<text class="t-name" x="90" y="256">vsqr : cnn_vsequencer</text>
+			<text class="t-small" x="90" y="274">csr_sqr · img_mem · ram_mem · cfg 핸들</text>
+			<rect class="bx-model" x="80" y="316" width="250" height="54" rx="4"/>
+			<text class="t-name" x="90" y="336">img_mem · ram_mem</text>
+			<text class="t-small" x="90" y="354">cnn_mem_model (RAM 내용, backdoor 적재 / 읽기)</text>
+			<rect class="bx-comp" x="80" y="400" width="250" height="66" rx="4"/>
+			<text class="t-name" x="90" y="420">pred : cnn_predictor</text>
+			<text class="t-small" x="90" y="438">cnn_ref_model → cnn_golden</text>
+			<text class="t-small" x="90" y="454">START 시점 RAM 내용으로 4 레이어 계산</text>
+			<rect class="bx-comp" x="80" y="496" width="250" height="54" rx="4"/>
+			<text class="t-name" x="90" y="516">scb : cnn_scoreboard</text>
+			<text class="t-small" x="90" y="534">o_final_result == golden · irq · latency</text>
+			<rect class="bx-comp" x="80" y="580" width="250" height="54" rx="4"/>
+			<text class="t-name" x="90" y="600">lchk : cnn_layer_checker</text>
+			<text class="t-small" x="90" y="618">레이어 끝마다 input_buf == golden (ibuf_probe)</text>
+			<rect class="bx-comp" x="80" y="664" width="250" height="54" rx="4"/>
+			<text class="t-name" x="90" y="684">cov : cnn_coverage</text>
+			<text class="t-small" x="90" y="702">결과 x 패턴 · 포화 / ReLU · irq_en · FSM</text>
+			<rect class="bx-sub" x="80" y="748" width="250" height="30" rx="4"/>
+			<text class="t-small" x="90" y="767">cfg : cnn_env_cfg  (config_db "cfg" 로 전파)</text>
+			<rect class="bx-comp" x="380" y="236" width="340" height="154" rx="4"/>
+			<text class="t-name" x="392" y="256">csr_agt : cnn_csr_agent</text>
+			<text class="t-small" x="708" y="256" text-anchor="end">cnn_csr_agent.sv</text>
+			<rect class="bx-sub" x="392" y="282" width="110" height="56" rx="3"/>
+			<text class="t-name" x="447" y="304" text-anchor="middle">csr_sqr</text>
+			<text class="t-small" x="447" y="322" text-anchor="middle">cnn_csr_sequencer</text>
+			<rect class="bx-sub" x="540" y="268" width="168" height="48" rx="3"/>
+			<text class="t-name" x="624" y="288" text-anchor="middle">csr_drv</text>
+			<text class="t-small" x="624" y="304" text-anchor="middle">cnn_csr_driver (reset 포함)</text>
+			<rect class="bx-sub" x="540" y="332" width="168" height="48" rx="3"/>
+			<text class="t-name" x="624" y="352" text-anchor="middle">csr_mon</text>
+			<text class="t-small" x="624" y="368" text-anchor="middle">cnn_csr_monitor</text>
+			<polyline class="ln" points="502,310 520,310 520,292 540,292" marker-end="url(#m-ink)"/>
+			<rect class="bx-comp" x="380" y="406" width="340" height="120" rx="4"/>
+			<text class="t-name" x="392" y="426">img_agt : cnn_mem_agent #(12,24)</text>
+			<text class="t-small" x="392" y="442">Image RAM 4096 x 24bit (act_ld_unit 이 읽는다)</text>
+			<rect class="bx-sub" x="392" y="450" width="316" height="32" rx="3"/>
+			<text class="t-name" x="400" y="470">rsp</text>
+			<text class="t-small" x="432" y="470">cnn_mem_responder : rdata &lt;= mem.read(rd_addr), 1 clk 지연</text>
+			<rect class="bx-sub" x="392" y="488" width="316" height="32" rx="3"/>
+			<text class="t-name" x="400" y="508">mon</text>
+			<text class="t-small" x="432" y="508">cnn_mem_monitor : 읽기 주소 관측 (cnn_mem_item)</text>
+			<rect class="bx-comp" x="380" y="556" width="340" height="120" rx="4"/>
+			<text class="t-name" x="392" y="576">ram_agt : cnn_mem_agent #(16,32)</text>
+			<text class="t-small" x="392" y="592">공유 RAM 45293 x 32bit : weight 0..45249 · bias 45250..45292</text>
+			<rect class="bx-sub" x="392" y="600" width="316" height="32" rx="3"/>
+			<text class="t-name" x="400" y="620">rsp</text>
+			<text class="t-small" x="432" y="620">cnn_mem_responder</text>
+			<rect class="bx-sub" x="392" y="638" width="316" height="32" rx="3"/>
+			<text class="t-name" x="400" y="658">mon</text>
+			<text class="t-small" x="432" y="658">cnn_mem_monitor</text>
+			<rect class="bx-sub" x="380" y="692" width="340" height="94" rx="4"/>
+			<text class="t-name" x="392" y="710">objects (item / event)</text>
+			<text class="t-small" x="392" y="728">cnn_infer_item   img · w0..w3 · bias  ↔  RAM 배치 (pack / unpack)</text>
+			<text class="t-small" x="392" y="744">cnn_csr_item     OP_RESET · START · WAIT_DONE · IRQ_CLEAR · SET_IRQ_EN · IDLE</text>
+			<text class="t-small" x="392" y="760">cnn_csr_event    START · LAYER_DONE · DONE · IRQ_CLEAR · RESET</text>
+			<text class="t-small" x="392" y="776">cnn_mem_item · cnn_golden · cnn_env_cfg</text>
+			<rect class="bx-if" x="790" y="250" width="120" height="96" rx="4"/>
+			<text class="t-name" x="850" y="272" text-anchor="middle">cnn_csr_if</text>
+			<text class="t-small" x="850" y="290" text-anchor="middle">start / ready / busy</text>
+			<text class="t-small" x="850" y="305" text-anchor="middle">irq_en / irq_clear / irq</text>
+			<text class="t-small" x="850" y="320" text-anchor="middle">done / result / state</text>
+			<text class="t-small" x="850" y="336" text-anchor="middle">rst_n (driver 가 구동)</text>
+			<rect class="bx-if" x="790" y="436" width="120" height="70" rx="4"/>
+			<text class="t-name" x="850" y="458" text-anchor="middle">cnn_mem_if</text>
+			<text class="t-small" x="850" y="474" text-anchor="middle">#(AW 12, DW 24)</text>
+			<text class="t-small" x="850" y="492" text-anchor="middle">rd_addr → · ← rdata</text>
+			<rect class="bx-if" x="790" y="586" width="120" height="70" rx="4"/>
+			<text class="t-name" x="850" y="608" text-anchor="middle">cnn_mem_if</text>
+			<text class="t-small" x="850" y="624" text-anchor="middle">#(AW 16, DW 32)</text>
+			<text class="t-small" x="850" y="642" text-anchor="middle">rd_addr → · ← rdata</text>
+			<rect class="bx-model" x="790" y="690" width="120" height="54" rx="4"/>
+			<text class="t-name" x="850" y="708" text-anchor="middle">cnn_ibuf_probe</text>
+			<text class="t-small" x="850" y="723" text-anchor="middle">tb_top 안의 class</text>
+			<text class="t-small" x="850" y="737" text-anchor="middle">ibuf_read(addr)</text>
+			<rect class="bx-dut" x="960" y="236" width="200" height="440" rx="6"/>
+			<text class="t-big" x="1060" y="260" text-anchor="middle">top_cnn (DUT)</text>
+			<rect class="bx-sub" x="976" y="276" width="168" height="40" rx="3"/>
+			<text class="t-name" x="1060" y="293" text-anchor="middle">top_cnn_cntl</text>
+			<text class="t-small" x="1060" y="308" text-anchor="middle">cnn_cntl · pe_cntl</text>
+			<rect class="bx-sub" x="976" y="328" width="168" height="60" rx="3"/>
+			<text class="t-name" x="1060" y="346" text-anchor="middle">act_path</text>
+			<text class="t-small" x="1060" y="361" text-anchor="middle">input_buf 24b x 16384</text>
+			<text class="t-small" x="1060" y="376" text-anchor="middle">act_patch_gen · fc_gen</text>
+			<rect class="bx-sub" x="976" y="400" width="168" height="40" rx="3"/>
+			<text class="t-name" x="1060" y="417" text-anchor="middle">wgt_path</text>
+			<text class="t-small" x="1060" y="432" text-anchor="middle">wgt_buf 2 x 256 (이중 버퍼)</text>
+			<rect class="bx-sub" x="976" y="452" width="168" height="40" rx="3"/>
+			<text class="t-name" x="1060" y="469" text-anchor="middle">pe_core</text>
+			<text class="t-small" x="1060" y="484" text-anchor="middle">3 x 3 single_pe (INT8 MAC)</text>
+			<rect class="bx-sub" x="976" y="504" width="168" height="72" rx="3"/>
+			<text class="t-name" x="1060" y="521" text-anchor="middle">out_path</text>
+			<text class="t-small" x="1060" y="536" text-anchor="middle">output_fifo · post_process</text>
+			<text class="t-small" x="1060" y="551" text-anchor="middle">pooling_unit · result_buf</text>
+			<text class="t-small" x="1060" y="566" text-anchor="middle">param_buf (bias 43)</text>
+			<text class="t-small" x="1060" y="600" text-anchor="middle">o_img_rd_addr[11:0] → Image RAM</text>
+			<text class="t-small" x="1060" y="616" text-anchor="middle">o_ram_rd_addr[15:0] → 공유 RAM</text>
+			<text class="t-small" x="1060" y="640" text-anchor="middle">o_final_result[7:0] · o_done_status · o_irq</text>
+			<text class="t-small" x="1060" y="656" text-anchor="middle">o_layer_idx · o_cnn_state (debug)</text>
+			<rect class="bx-sva" x="960" y="700" width="200" height="44" rx="4"/>
+			<text class="t-name" x="1060" y="718" text-anchor="middle">cnn_sva.sv</text>
+			<text class="t-small" x="1060" y="734" text-anchor="middle">cnn_top_sva + bind (내부 12 모듈)</text>
+			<line class="ln-dash" x1="1060" y1="700" x2="1060" y2="676"/>
+			<line class="ln" x1="205" y1="166" x2="205" y2="236" marker-end="url(#m-ink)"/>
+			<text class="t-label" x="212" y="206">start(vsqr)</text>
+			<polyline class="ln" points="330,263 360,263 360,310 392,310" marker-end="url(#m-ink)"/>
+			<text class="t-label" x="356" y="300" text-anchor="end">cnn_csr_item</text>
+			<line class="ln" x1="205" y1="290" x2="205" y2="316" marker-end="url(#m-ink)"/>
+			<text class="t-label" x="212" y="308">pack_to_mem()</text>
+			<polyline class="ln" points="330,343 356,343 356,466 392,466" marker-end="url(#m-ink)"/>
+			<polyline class="ln" points="356,466 356,616 392,616" marker-end="url(#m-ink)"/>
+			<text class="t-label" x="352" y="338" text-anchor="end">read()</text>
+			<line class="ln" x1="150" y1="370" x2="150" y2="400" marker-end="url(#m-ink)"/>
+			<text class="t-label" x="158" y="390">unpack_from_mem()</text>
+			<line class="ln" x1="708" y1="292" x2="790" y2="292" marker-end="url(#m-ink)"/>
+			<text class="t-label" x="749" y="286" text-anchor="middle">drive</text>
+			<line class="ln" x1="790" y1="356" x2="708" y2="356" marker-end="url(#m-ink)"/>
+			<text class="t-label" x="749" y="350" text-anchor="middle">sample</text>
+			<line class="ln-pin" x1="708" y1="466" x2="790" y2="466" marker-start="url(#m-pin)" marker-end="url(#m-pin)"/>
+			<line class="ln" x1="790" y1="504" x2="708" y2="504" marker-end="url(#m-ink)"/>
+			<text class="t-label" x="749" y="498" text-anchor="middle">sample</text>
+			<line class="ln-pin" x1="708" y1="616" x2="790" y2="616" marker-start="url(#m-pin)" marker-end="url(#m-pin)"/>
+			<line class="ln" x1="790" y1="654" x2="708" y2="654" marker-end="url(#m-ink)"/>
+			<text class="t-label" x="749" y="648" text-anchor="middle">sample</text>
+			<line class="ln-pin" x1="910" y1="298" x2="960" y2="298" marker-start="url(#m-pin)" marker-end="url(#m-pin)"/>
+			<line class="ln-pin" x1="910" y1="471" x2="960" y2="471" marker-start="url(#m-pin)" marker-end="url(#m-pin)"/>
+			<line class="ln-pin" x1="910" y1="621" x2="960" y2="621" marker-start="url(#m-pin)" marker-end="url(#m-pin)"/>
+			<polyline class="ln-dash" points="910,717 935,717 935,358 960,358" marker-end="url(#m-ink)"/>
+			<text class="t-small" x="912" y="756">계층 참조로 input_buf 읽기</text>
+			<polyline class="ln-ap" points="540,356 350,356 350,691"/>
+			<line class="ln-ap" x1="350" y1="433" x2="330" y2="433" marker-end="url(#m-ap)"/>
+			<line class="ln-ap" x1="350" y1="523" x2="330" y2="523" marker-end="url(#m-ap)"/>
+			<line class="ln-ap" x1="350" y1="607" x2="330" y2="607" marker-end="url(#m-ap)"/>
+			<line class="ln-ap" x1="350" y1="691" x2="330" y2="691" marker-end="url(#m-ap)"/>
+			<text class="t-ap" transform="rotate(-90 343 560)" x="343" y="560" text-anchor="middle">csr_mon.ap : cnn_csr_event</text>
+			<polyline class="ln-exp" points="80,433 70,433 70,691"/>
+			<line class="ln-exp" x1="70" y1="523" x2="80" y2="523" marker-end="url(#m-ap)"/>
+			<line class="ln-exp" x1="70" y1="607" x2="80" y2="607" marker-end="url(#m-ap)"/>
+			<line class="ln-exp" x1="70" y1="691" x2="80" y2="691" marker-end="url(#m-ap)"/>
+		</svg>
+		</div>
+		<div class="legend">
+			<span><i class="sw"></i>sequence · 핸들 · driver 구동 / monitor 관측</span>
+			<span><i class="sw ap"></i>csr_mon.ap → cnn_csr_event</span>
+			<span><i class="sw exp"></i>pred.exp_ap → cnn_golden</span>
+			<span><i class="sw pin"></i>인터페이스 ↔ DUT 핀</span>
+			<span><i class="sw box"></i>interface</span>
+			<span><i class="sw model"></i>RAM 모델 · input_buf probe (backdoor)</span>
+		</div>
+		<figcaption>tb_top 안에 test → env → agent 계층이 있고, sequence 가 RAM 모델을 채운 뒤 CSR driver 가 start 를 주면 DUT 가 두 RAM 을 읽는다. monitor 가 START 를 보면 predictor 가 같은 RAM 내용으로 golden 을 만들고, DONE 에서 scoreboard 가 최종 결과를, 레이어가 끝날 때마다 layer checker 가 input_buf 를 비교한다.</figcaption>
+	</figure>
+
+	<section>
+		<h2>요청하신 구성요소와 파일</h2>
+		<div class="tablewrap">
+		<table>
+			<thead><tr><th>구성요소</th><th>파일 (tb/)</th><th>클래스 / 역할</th></tr></thead>
+			<tbody>
+				<tr><td>interface</td><td>cnn_csr_if.sv · cnn_mem_if.sv</td><td>CSR + rst_n · 고정 지연 RAM 읽기 (#(AW,DW) 로 Image / 공유 RAM 공용). input_buf white-box 읽기는 interface 가 아니라 tb_top 안의 class cnn_ibuf_probe 가 한다 (바깥 계층 참조가 있는 interface 는 virtual interface 로 쓸 수 없다, IEEE 1800-2017 25.9)</td></tr>
+				<tr><td>item</td><td>cnn_csr_item.sv · cnn_infer_item.sv · cnn_csr_event.sv · cnn_mem_item.sv</td><td>CSR 동작 하나 · 추론 자극 (영상 / weight / bias ↔ RAM 배치) · monitor 사건 · RAM 읽기 관측</td></tr>
+				<tr><td>sequence</td><td>cnn_seq_lib.sv</td><td>cnn_vseq_base 와 infer · multi · corner · file · irq · reset 6 종 virtual sequence</td></tr>
+				<tr><td>sequencer</td><td>cnn_csr_sequencer.sv · cnn_vsequencer.sv</td><td>CSR sequencer · virtual sequencer (csr_sqr + RAM 모델 핸들)</td></tr>
+				<tr><td>driver</td><td>cnn_csr_driver.sv <span class="chip">+ cnn_mem_responder.sv</span></td><td>reset · start 핸드셰이크 · done 대기 · irq_clear. responder 는 sequencer 없이 RAM 모델을 1 clk 뒤에 돌려주는 reactive driver</td></tr>
+				<tr><td>monitor</td><td>cnn_csr_monitor.sv · cnn_mem_monitor.sv</td><td>START / LAYER_DONE / DONE / IRQ_CLEAR / RESET · RAM 주소 관측</td></tr>
+				<tr><td>agent</td><td>cnn_csr_agent.sv · cnn_mem_agent.sv</td><td>CSR agent · cnn_mem_agent #(12,24) = img_agt, #(16,32) = ram_agt</td></tr>
+				<tr><td>scoreboard</td><td>cnn_scoreboard.sv <span class="chip">+ cnn_predictor.sv · cnn_ref_model.sv · cnn_layer_checker.sv</span></td><td>최종 결과 비교 · golden 생성 (post_process 와 같은 정수 산술) · 레이어별 input_buf 비교</td></tr>
+				<tr><td>coverage</td><td>cnn_coverage.sv <span class="chip">+ cnn_sva.sv cover</span></td><td>결과 범위 x 데이터 패턴, 레이어별 포화 / ReLU, irq_en, FSM 전이 (latency 는 scoreboard 가 보고)</td></tr>
+				<tr><td>environment</td><td>cnn_env.sv · cnn_env_cfg.sv</td><td>agent / 검사기 생성과 analysis 연결 · 설정 객체 (timeout, layer check on/off, QM/QS)</td></tr>
+				<tr><td>test</td><td>cnn_test_lib.sv</td><td>cnn_base_test 와 random · corner · file · irq · reset test</td></tr>
+				<tr><td>package</td><td>cnn_pkg.sv · cnn_tb_types.sv · cnn_tb_defs.svh</td><td>include 순서 · 레이어 상수 / enum / 형 · 계층 경로 매크로</td></tr>
+				<tr><td>tb_top</td><td>tb_top.sv <span class="chip">+ cnn_sva.sv</span></td><td>clk, 인터페이스, DUT, SVA(bind), input_buf probe class, config_db, run_test()</td></tr>
+			</tbody>
+		</table>
+		</div>
+		<p class="note">chip 이 붙은 것은 목록에 없던 추가 파일입니다. RTL 은 <code>rtl/</code> 에 SystemVerilog 로 두고, 빌드는 <code>Makefile</code> (VCS, vip/ 와 같은 형식) 과 <code>cnn_uvm.f</code> 로 합니다.</p>
+	</section>
+
+	<div class="cols">
+		<section>
+			<h2>추론 1 회의 흐름</h2>
+			<ol>
+				<li>test 가 virtual sequence 를 <code>env.vsqr</code> 에 시작한다.</li>
+				<li>sequence 가 <code>cnn_infer_item</code> 을 만들어 (패턴 선택) <code>pack_to_mem()</code> 으로 img_mem / ram_mem 에 DUT 배치대로 쓴다.</li>
+				<li><code>cnn_csr_item(OP_START)</code> 을 csr_sqr 로 보내면 driver 가 start 핸드셰이크를 하고 done_status 를 기다린다.</li>
+				<li>DUT 가 RAM 주소를 내면 responder 가 다음 clk 에 RAM 모델 내용을 돌려준다 (동기 RAM 타이밍).</li>
+				<li>csr_mon 이 START 를 내면 predictor 가 RAM 모델을 <code>unpack_from_mem()</code> 하고 <code>cnn_ref_model</code> 로 golden 을 만든다.</li>
+				<li>cnn_state 가 C_LAYER_END 를 벗어날 때마다 layer checker 가 input_buf 를 probe 로 읽어 레이어 0 / 1 / 2 결과를 비교한다.</li>
+				<li>DONE 에서 scoreboard 가 <code>o_final_result</code> 와 golden 을 비교하고 coverage 가 sample 한다. SVA 는 내내 핸드셰이크 규칙을 본다.</li>
+			</ol>
+		</section>
+		<section>
+			<h2>컴파일 순서 (Makefile TB_SRCS)</h2>
+<pre>rtl/*.sv                 (+incdir+rtl : cnn_defs.vh)
+tb/cnn_csr_if.sv
+tb/cnn_mem_if.sv
+tb/cnn_sva.sv
+tb/cnn_pkg.sv            (class 파일 include)
+tb/tb_top.sv             (+incdir+tb : cnn_tb_defs.svh)
+
+make run TEST=cnn_base_test
+make run TEST=cnn_random_test NUM_INFER=5 SEED=3
+make run TEST=cnn_corner_test
+make run TEST=cnn_irq_test
+make run TEST=cnn_reset_test RESET_AFTER=20000
+make run TEST=cnn_file_test IMG_HEX=img.hex RAM_HEX=ram.hex</pre>
+		</section>
+	</div>
+</div>
+</body>
+</html>

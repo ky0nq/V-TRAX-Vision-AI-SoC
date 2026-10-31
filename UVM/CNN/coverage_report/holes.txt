@@ -1,0 +1,888 @@
+
+#### act_ld_unit : line
+  234        1/2     ==>                          if (i_ld_word_count == 0) o_ld_done <= 1;
+  248        0/1     ==>                  default: state <= S_IDLE;
+#### act_ld_unit : cond
+  L234 : EXPRESSION (i_ld_word_count == 13'b0)
+       1  Not Covered
+  L198 : EXPRESSION ((state == S_IDLE) && i_ld_start && (i_ld_word_count != 13'b0))
+       0   1   1  Not Covered
+       1   1   0  Not Covered
+  L212 : EXPRESSION (rst_n && accept_rsp)
+       0   1  Not Covered
+#### act_ld_unit : toggle
+  i_ram_base[31:0]      No     No          No          INPUT     
+  i_ld_word_count[12:0] No     No          No          INPUT     
+  o_ibuf_waddr[13:12]   No     No          No          OUTPUT    
+  o_ibuf_wbe[2:0]       No     No          No          OUTPUT    
+  ram_base[31:0]       No     No          No          
+  word_count[11:0]     No     No          No          
+  word_index[12]       No     No          No          
+  ram_addr_full[31:13] No     No          No          
+
+#### output_fifo : line
+  399        0/1     ==>                  7'b001????: f_log2_7 = 3'd4;
+  400        0/1     ==>                  7'b0001???: f_log2_7 = 3'd3;
+  401        0/1     ==>                  7'b00001??: f_log2_7 = 3'd2;
+  402        0/1     ==>                  7'b000001?: f_log2_7 = 3'd1;
+  441        0/1     ==>              first_row = 2'd1;
+  443        0/1     ==>              first_row = 2'd2;
+  455        1/2     ==>                  else if (row_mask_reg[2]) next_row = 2'd2;
+  464        0/1     ==>                  next_row = 2'd3;
+  509        0/1     ==>                  selected_row_data     = 96'd0;
+  510        0/1     ==>                  selected_row_complete = 1'b0;
+  535        0/1     ==>                      o_data  = 96'd0;
+  536        0/1     ==>                      o_keep  = 3'b000;
+  537        0/1     ==>                      o_valid = 1'b0;
+  662        0/1     ==>                              row0_valid <= row0_valid;
+  663        0/1     ==>                              row1_valid <= row1_valid;
+  664        0/1     ==>                              row2_valid <= row2_valid;
+#### output_fifo : cond
+  L419 : SUB-EXPRESSION ((i_row_mask == 3'b1) || (i_row_mask == 3'b011) || (i_row_mask == 3'b111))
+       0   1   0  Not Covered
+  L419 : SUB-EXPRESSION (i_row_mask == 3'b011)
+       1  Not Covered
+  L430 : EXPRESSION (i_cfg_valid && o_cfg_ready && cfg_mask_valid)
+       1   1   0  Not Covered
+  L480 : EXPRESSION ((out_row == 2'b0) && row_mask_reg[0] && ((!row_mask_reg[1])) && ((!row_mask_reg[2])))
+       0   1   1   1  Not Covered
+       1   1   0   1  Not Covered
+       1   1   1   0  Not Covered
+  L482 : EXPRESSION ((out_row == 2'b1) && row_mask_reg[1] && ((!row_mask_reg[2])))
+       0   1   1  Not Covered
+       1   0   1  Not Covered
+       1   1   1  Not Covered
+  L484 : EXPRESSION ((out_row == 2'd2) && row_mask_reg[2])
+       1   0  Not Covered
+  L486 : EXPRESSION (last_valid_0 || last_valid_1 || last_valid_2)
+       0   1   0  Not Covered
+  L564 : SUB-EXPRESSION (tile_last_reg && last_valid_row)
+       1   0  Not Covered
+#### output_fifo : toggle
+  i_conv_w[4:1]        No     No          No          INPUT     
+  conv_w_reg[4:1]         No     No          No          
+  last_valid_1            No     No          No          
+  wpr_sh[1]               No     No          No          
+  by[9:5]                 No     No          No          
+  bx[9:5]                 No     No          No          
+  pos_y[11:6]             No     No          No          
+  pos_x[11:6]             No     No          No          
+#### output_fifo : fsm
+  FSM ::
+      'h3    436      Not Covered 
+      'h0->'h2    443      Not Covered 
+      'h0->'h3    436      Not Covered 
+      'h1->'h0    591      Not Covered 
+      'h1->'h3    436      Not Covered 
+      'h2->'h1    441      Not Covered 
+      'h2->'h3    436      Not Covered 
+      'h3->'h0    591      Not Covered 
+      'h3->'h1    441      Not Covered 
+      'h3->'h2    443      Not Covered 
+#### output_fifo : branch
+  464                        next_row = 2'd3;
+      2'b0    0   1   -   Not Covered 
+      2'b1    -   -   0   Not Covered 
+      default -   -   -   Not Covered 
+  509                        selected_row_data     = 96'd0;
+      default Not Covered 
+  403                        default:    f_log2_7 = 3'd0;
+      7'b001zzzz  Not Covered 
+      7'b0001zzz  Not Covered 
+      7'b00001zz  Not Covered 
+      7'b000001z  Not Covered 
+
+#### pooling_unit : line
+  1422       0/1     ==>                  7'b001????: f_log2_7 = 3'd4;
+  1423       0/1     ==>                  7'b0001???: f_log2_7 = 3'd3;
+  1424       0/1     ==>                  7'b00001??: f_log2_7 = 3'd2;
+  1425       0/1     ==>                  7'b000001?: f_log2_7 = 3'd1;
+#### pooling_unit : cond
+  L1832 : EXPRESSION (group0_keep_reg[0] && (input_lane0 > group0_max0))
+       0   1  Not Covered
+  L1835 : EXPRESSION (group0_keep_reg[1] && (input_lane1 > group0_max1))
+       0   1  Not Covered
+  L1838 : EXPRESSION (group0_keep_reg[2] && (input_lane2 > group0_max2))
+       0   1  Not Covered
+  L1845 : EXPRESSION (group0_keep_reg[0] && (input_lane0 > group0_max0))
+       0   1  Not Covered
+  L1848 : EXPRESSION (group0_keep_reg[1] && (input_lane1 > group0_max1))
+       0   1  Not Covered
+  L1851 : EXPRESSION (group0_keep_reg[2] && (input_lane2 > group0_max2))
+       0   1  Not Covered
+  L1885 : EXPRESSION (group1_keep_reg[0] && (input_lane0 > group1_max0))
+       0   1  Not Covered
+  L1888 : EXPRESSION (group1_keep_reg[1] && (input_lane1 > group1_max1))
+       0   1  Not Covered
+  L1891 : EXPRESSION (group1_keep_reg[2] && (input_lane2 > group1_max2))
+       0   1  Not Covered
+  L1898 : EXPRESSION (group1_keep_reg[0] && (input_lane0 > group1_max0))
+       0   1  Not Covered
+  L1901 : EXPRESSION (group1_keep_reg[1] && (input_lane1 > group1_max1))
+       0   1  Not Covered
+  L1904 : EXPRESSION (group1_keep_reg[2] && (input_lane2 > group1_max2))
+       0   1  Not Covered
+  L1508 : EXPRESSION (rst_n && ((!i_cfg_valid)) && (((!out_valid_reg)) || i_ready) && (((!i_valid)) || pool_state_ready))
+       1   1   0   1  Not Covered
+       1   1   1   0  Not Covered
+  L1508 : SUB-EXPRESSION (((!out_valid_reg)) || i_ready)
+       0   0  Not Covered
+  L1508 : SUB-EXPRESSION (((!i_valid)) || pool_state_ready)
+       0   0  Not Covered
+  L1514 : EXPRESSION (i_valid && o_ready)
+       1   0  Not Covered
+  L1515 : EXPRESSION (out_valid_reg && i_ready)
+       1   0  Not Covered
+  L1600 : EXPRESSION ((in_w_reg != 7'b0) && (in_h_reg != 7'b0) && (input_x == (in_w_reg - 7'b1)) && (input_y == (in_h_reg - 7'b1)))
+       0   1   1   1  Not Covered
+       1   0   1   1  Not Covered
+  L1609 : EXPRESSION (input_layer_end && pool_last_window && pool_last_group)
+       0   1   1  Not Covered
+  L1621 : EXPRESSION 
+       0   1   1   1   1   1   1  Not Covered
+       1   0   1   1   1   1   1  Not Covered
+       1   1   0   1   1   1   1  Not Covered
+       1   1   1   0   1   1   1  Not Covered
+       1   1   1   1   0   1   1  Not Covered
+       1   1   1   1   1   0   1  Not Covered
+       1   1   1   1   1   1   0  Not Covered
+  L1639 : EXPRESSION ((in_w_reg != 7'b0) && (in_h_reg != 7'b0) && (input_y_full < {5'b0, in_h_reg}) && (input_x_full < {5'b0, in_w_reg}))
+       0   1   1   1  Not Covered
+       1   0   1   1  Not Covered
+       1   1   1   0  Not Covered
+  L1657 : SUB-EXPRESSION 
+       1   0   1   1   1   1  Not Covered
+       1   1   0   1   1   1  Not Covered
+       1   1   1   0   1   1  Not Covered
+  L1657 : SUB-EXPRESSION (group0_window_valid && (group0_window_id == pool_window_id) && (group0_next_q == pool_q) && (group0_keep_reg == i_keep))
+       0   1   1   1  Not Covered
+       1   0   1   1  Not Covered
+       1   1   1   0  Not Covered
+  L1657 : SUB-EXPRESSION (group0_window_id == pool_window_id)
+       0  Not Covered
+  L1657 : SUB-EXPRESSION (group0_keep_reg == i_keep)
+       0  Not Covered
+  L1657 : SUB-EXPRESSION (group1_window_valid && (group1_window_id == pool_window_id) && (group1_next_q == pool_q) && (group1_keep_reg == i_keep))
+       0   1   1   1  Not Covered
+       1   0   1   1  Not Covered
+       1   1   1   0  Not Covered
+  L1657 : SUB-EXPRESSION (group1_window_id == pool_window_id)
+       0  Not Covered
+  L1657 : SUB-EXPRESSION (group1_keep_reg == i_keep)
+       0  Not Covered
+#### pooling_unit : toggle
+  i_in_w[4:1]     No     No          No          INPUT     
+  i_in_h[4:1]     No     No          No          INPUT     
+  i_channels[4:3] No     No          No          INPUT     
+  i_data[7]       No     No          No          INPUT     
+  i_data[15]      No     No          No          INPUT     
+  i_data[23]      No     No          No          INPUT     
+  o_data[7]       No     No          No          OUTPUT    
+  o_data[15]      No     No          No          OUTPUT    
+  o_data[23]      No     No          No          OUTPUT    
+  o_meta[11:10]   No     No          No          OUTPUT    
+  in_w_reg[4:1]               No     No          No          
+  in_h_reg[4:1]               No     No          No          
+  channels_reg[4:3]           No     No          No          
+  in_w_mask_reg[6]            No     No          No          
+  input_y_full[11:10]         No     No          No          
+  input_x_full[11:6]          No     No          No          
+  input_x[6]                  No     No          No          
+  pool_position[11:10]        No     No          No          
+  pool_y2[11:6]               No     No          No          
+  pool_x2[11:5]               No     No          No          
+  pool_window_id[11:10]       No     No          No          
+  out_data_reg[7]             No     No          No          
+  out_data_reg[15]            No     No          No          
+  out_data_reg[23]            No     No          No          
+  out_meta_reg[11:10]         No     No          No          
+  input_lane0[7]              No     No          No          
+  input_lane1[7]              No     No          No          
+  input_lane2[7]              No     No          No          
+  group0_window_id[11:10]     No     No          No          
+  group0_max0[7]              No     No          No          
+  group0_max1[7]              No     No          No          
+  group0_max2[7]              No     No          No          
+  group1_window_id[11:10]     No     No          No          
+  group1_max0[7]              No     No          No          
+  group1_max1[7]              No     No          No          
+  group1_max2[7]              No     No          No          
+  group0_final_max0[7]        No     No          No          
+  group0_final_max1[7]        No     No          No          
+  group0_final_max2[7]        No     No          No          
+  group1_final_max0[7]        No     No          No          
+  group1_final_max1[7]        No     No          No          
+  group1_final_max2[7]        No     No          No          
+  input_valid_lane_count[2]   No     No          No          
+  input_group_end_ch[6]       No     No          No          
+#### pooling_unit : fsm
+      'h0->'h2    1841     Not Covered 
+      'h0->'h3    1854     Not Covered 
+      'h1->'h0    1777     Not Covered 
+      'h1->'h3    1854     Not Covered 
+      'h2->'h1    1822     Not Covered 
+      'h3->'h1    1822     Not Covered 
+      'h3->'h2    1841     Not Covered 
+      'h0->'h2    1894     Not Covered 
+      'h0->'h3    1907     Not Covered 
+      'h1->'h0    1785     Not Covered 
+      'h1->'h3    1907     Not Covered 
+      'h2->'h1    1875     Not Covered 
+      'h3->'h1    1875     Not Covered 
+      'h3->'h2    1894     Not Covered 
+#### pooling_unit : branch
+  1426                       default:    f_log2_7 = 3'd0;
+      7'b001zzzz  Not Covered 
+      7'b0001zzz  Not Covered 
+      7'b00001zz  Not Covered 
+      7'b000001z  Not Covered 
+
+#### act_patch_gen : line
+  351        0/1     ==>                  7'b0001???: f_log2_7 = 3'd3;
+  352        0/1     ==>                  7'b00001??: f_log2_7 = 3'd2;
+  353        0/1     ==>                  7'b000001?: f_log2_7 = 3'd1;
+  354        0/1     ==>                  default:    f_log2_7 = 3'd0;
+  631        0/1     ==>                  default: state <= S_IDLE;
+#### act_patch_gen : cond
+  L543 : EXPRESSION ((i_pos_base == 14'b0) || (i_src_base != src_base) || (i_in_c != in_c) || (i_in_h != in_h) || (i_in_w != in_w) || (i_pad_en != pad_en))
+       0   0   0   0   0   1  Not Covered
+       0   0   0   0   1   0  Not Covered
+       0   0   0   1   0   0  Not Covered
+       0   0   1   0   0   0  Not Covered
+       0   1   0   0   0   0  Not Covered
+  L564 : EXPRESSION ((row_mask == 3'b0) ? S_IDLE : S_SEND)
+       1  Not Covered
+  L564 : SUB-EXPRESSION (row_mask == 3'b0)
+       1  Not Covered
+  L605 : EXPRESSION (o_valid && i_ready)
+       0   1  Not Covered
+       1   0  Not Covered
+  L428 : EXPRESSION (rst_n && (state == S_SEND) && (row_mask != 3'b0))
+       1   1   0  Not Covered
+  L492 : EXPRESSION ((out_w_in[6:1] == 6'b0) ? 6'b1 : out_w_in[6:1])
+       1  Not Covered
+  L492 : SUB-EXPRESSION (out_w_in[6:1] == 6'b0)
+       1  Not Covered
+#### act_patch_gen : toggle
+  i_src_base[12:0]  No     No          No          INPUT     
+  i_pos_base[13:12] No     No          No          INPUT     
+  i_in_c[4:3]       No     No          No          INPUT     
+  i_in_h[4:1]       No     No          No          INPUT     
+  i_in_w[4:1]       No     No          No          INPUT     
+  i_stride[1:0]     No     No          No          INPUT     
+  i_k_total[11:6]   No     No          No          INPUT     
+  o_rd_addr[12]     No     No          No          OUTPUT    
+  src_base[12:0]      No     No          No          
+  in_c[1]             No     No          No          
+  in_c[5:3]           No     No          No          
+  in_h[4:0]           No     No          No          
+  in_w[4:0]           No     No          No          
+  k_total[12:6]       No     No          No          
+  wpr[3:1]            No     No          No          
+  wpr_sh[1]           No     No          No          
+  wpr_mask[5]         No     No          No          
+  base_patch[13:12]   No     No          No          
+  in_w_s16[4:0]       No     No          No          
+  in_w_s16[15:7]      No     No          No          
+  win_tag0[0]         No     No          No          
+  win_tag0[11:10]     No     No          No          
+  win_tag1[11:10]     No     No          No          
+  cur_patch[13]       No     No          No          
+  cur_win[11]         No     No          No          
+  cur_tag[11:10]      No     No          No          
+  win_x[5]            No     No          No          
+  in_w_s10[4:0]       No     No          No          
+  in_w_s10[9:7]       No     No          No          
+  in_h_s10[4:0]       No     No          No          
+  in_h_s10[9:7]       No     No          No          
+  send_k[12:6]        No     No          No          
+  send_ch[5:3]        No     No          No          
+  lane_patch[13]      No     No          No          
+#### act_patch_gen : fsm
+      S_CAP_INIT->S_IDLE    496      Not Covered 
+      S_CAP_REQ->S_IDLE     496      Not Covered 
+      S_CAP_WAIT->S_IDLE    496      Not Covered 
+      S_SELECT->S_IDLE      496      Not Covered 
+#### act_patch_gen : branch
+  354                        default:    f_log2_7 = 3'd0;
+      7'b0001zzz  Not Covered 
+      7'b00001zz  Not Covered 
+      7'b000001z  Not Covered 
+      default     Not Covered 
+#### cnn_cntl : cond
+  L532 : EXPRESSION (i_start_valid && o_start_ready)
+       1   0  Not Covered
+  L539 : EXPRESSION (i_ld_done || ld_done_seen)
+       0   1  Not Covered
+  L579 : EXPRESSION (first_chunk_rdy && (wsvc == W_IDLE))
+       1   0  Not Covered
+  L608 : EXPRESSION ((i_tile_in_done || tile_in_done_seen) && i_tile_ready)
+       0   1  Not Covered
+  L635 : EXPRESSION (i_layer_done || layer_done_seen)
+       0   0  Not Covered
+       1   0  Not Covered
+  L370 : EXPRESSION (wtag_valid[first_half] && (wtag_layer[first_half] == layer_idx) && (wtag_oc[first_half] == oc_group) && (ly_k <= WBUF_WORDS))
+       1   1   0   1  Not Covered
+  L392 : EXPRESSION ((state == C_PE_WAIT) && (wsvc == W_IDLE) && i_chunk_req)
+       0   1   1  Not Covered
+  L406 : EXPRESSION ((wsvc == W_ISSUE) && i_wload_ready)
+       1   0  Not Covered
+  L443 : EXPRESSION ((state == C_TILE_CFG) && ((!tcfg_sent)) && i_tile_ready)
+       1   1   0  Not Covered
+#### cnn_cntl : toggle
+  o_param_mem_addr[6]       No     No          No          OUTPUT    
+  o_step_total[11:6]        No     No          No          OUTPUT    
+  o_ram_base[31:0]          No     No          No          OUTPUT    
+  o_ld_word_count[12:0]     No     No          No          OUTPUT    
+  o_src_base[12:0]          No     No          No          OUTPUT    
+  o_in_w[4:1]               No     No          No          OUTPUT    
+  o_in_h[4:1]               No     No          No          OUTPUT    
+  o_in_c[4:3]               No     No          No          OUTPUT    
+  o_stride[1:0]             No     No          No          OUTPUT    
+  o_k_total[11:6]           No     No          No          OUTPUT    
+  o_fc_in_count[11:6]       No     No          No          OUTPUT    
+  o_chunk_word_count[7:6]   No     No          No          OUTPUT    
+  o_conv_w[4:1]             No     No          No          OUTPUT    
+  o_conv_h[4:1]             No     No          No          OUTPUT    
+  o_out_channels[4:3]       No     No          No          OUTPUT    
+  o_dst_base[12:0]          No     No          No          OUTPUT    
+  o_quant_multiplier[2]     No     No          No          OUTPUT    
+  o_quant_multiplier[5]     No     No          No          OUTPUT    
+  o_quant_multiplier[12:10] No     No          No          OUTPUT    
+  o_quant_multiplier[14]    No     No          No          OUTPUT    
+  o_quant_multiplier[18]    No     No          No          OUTPUT    
+  o_quant_multiplier[21]    No     No          No          OUTPUT    
+  o_quant_multiplier[31:23] No     No          No          OUTPUT    
+  o_quant_shift[5:0]        No     No          No          OUTPUT    
+  o_bias_base[0]            No     No          No          OUTPUT    
+  o_bias_base[4]            No     No          No          OUTPUT    
+  o_bias_base[6]            No     No          No          OUTPUT    
+  o_param_wr_addr[6]        No     No          No          OUTPUT    
+  o_layer_idx[2]            No     No          No          OUTPUT    
+  layer_idx[2]       No          No          No          
+  pos_group[11]      No          No          No          
+  og_off_q[11:6]     No          No          No          
+  ld_done_seen       No          No          No          
+  ly_in_w[4:1]       No          No          No          
+  ly_in_h[4:1]       No          No          No          
+  ly_out_w[4:1]      No          No          No          
+  ly_out_h[4:1]      No          No          No          
+  ly_in_c[4:3]       No          No          No          
+  ly_out_c[4:3]      No          No          No          
+  ly_stride[1:0]     No          No          No          
+  ly_k[11:6]         No          No          No          
+  ly_out_pix[9:1]    No          No          No          
+  ly_out_pix[11]     No          No          No          
+  ly_w_base[0]       No          No          No          
+  ly_w_base[3]       No          No          No          
+  ly_w_base[6]       No          No          No          
+  ly_w_base[11:8]    No          No          No          
+  ly_w_base[14]      No          No          No          
+  ly_param_base[0]   No          No          No          
+  ly_param_base[4]   No          No          No          
+  ly_param_base[6]   No          No          No          
+  ly_qm[2]           No          No          No          
+  ly_qm[5]           No          No          No          
+  ly_qm[12:10]       No          No          No          
+  ly_qm[14]          No          No          No          
+  ly_qm[18]          No          No          No          
+  ly_qm[21]          No          No          No          
+  ly_qm[31:23]       No          No          No          
+  ly_qs[5:0]         No          No          No          
+  pos_base_k[12]     No          No          No          
+  oc_base_k[12:5]    No          No          No          
+  out_c_k[4:3]       No          No          No          
+  out_c_k[12:6]      No          No          No          
+  svc_kbase[7:0]     No          No          No          
+  svc_kbase[12]      No          No          No          
+  svc_len[7:6]       No          No          No          
+  first_len[7:6]     No          No          No          
+  nx_kbase[7:6]      No          No          No          
+  nx_len[2]          No          No          No          
+  nx_len[7:5]        No          No          No          
+  og_ext[15:4]       No          No          No          
+  k_ext[11:6]        No          No          No          
+  k_ext[15:13]       No          No          No          
+  kb_ext[7:0]        No          No          No          
+  kb_ext[15:12]      No          No          No          
+  og_off[11:6]       No          No          No          
+  pl_idx[7:6]        No          No          No          
+  pl_addr_q[6]       No          No          No          
+#### cnn_cntl : fsm
+      C_LAYER_END->C_IDLE     447      Not Covered 
+      C_NXT_TILE->C_IDLE      447      Not Covered 
+      C_PARAM_LOAD->C_IDLE    447      Not Covered 
+      C_PE_TILE->C_IDLE       447      Not Covered 
+      C_SET->C_IDLE           447      Not Covered 
+      C_START->C_IDLE         447      Not Covered 
+      C_TILE_CFG->C_IDLE      447      Not Covered 
+      W_ISSUE->W_IDLE 465      Not Covered 
+
+#### fc_gen : line
+  758        0/1     ==>                  default: state <= S_IDLE;
+#### fc_gen : cond
+  L698 : EXPRESSION (rst_n && (state == S_GET) && ((!cache_hit)))
+       0   1   1  Not Covered
+  L719 : EXPRESSION (i_tile_start && (i_fc_in_count != 13'b0))
+       1   0  Not Covered
+  L719 : SUB-EXPRESSION (i_fc_in_count != 13'b0)
+       0  Not Covered
+  L742 : EXPRESSION (o_valid && i_ready)
+       0   1  Not Covered
+  L682 : EXPRESSION (rst_n && (state == S_SEND))
+       0   1  Not Covered
+#### fc_gen : toggle
+  i_src_base[12:0]    No     No          No          INPUT     
+  i_fc_in_count[11:6] No     No          No          INPUT     
+  o_rd_addr[12:11]    No     No          No          OUTPUT    
+  o_data[23:7]        No     No          No          OUTPUT    
+  o_keep[2:0]         No     No          No          OUTPUT    
+  base_addr[12:0]    No     No          No          
+  input_count[4:0]   No     No          No          
+  input_count[11:6]  No     No          No          
+  k[12]              No     No          No          
+  cached_addr[12:11] No     No          No          
+  cached_word[7]     No     No          No          
+  wanted_addr[12:11] No     No          No          
+  word_offset[12:11] No     No          No          
+  k_word[12:11]      No     No          No          
+#### fc_gen : fsm
+      S_GET->S_IDLE  707      Not Covered 
+      S_WAIT->S_IDLE 707      Not Covered 
+
+#### post_process : line
+  895        0/1     ==>                  current_lane_data  = 32'd0;
+  896        0/1     ==>                  current_bias       = 32'd0;
+  897        0/1     ==>                  current_lane_valid = 1'b0;
+  916        0/1     ==>              2'b10:   acc32_reg = 32'h8000_0000;   // -overflow -> INT32 min
+  1089       0/1     ==>                  next_state = READY;
+#### post_process : cond
+  L1080 : EXPRESSION (cfg_hit ? READY : BIAS_REQ)
+       1  Not Covered
+  L1161 : SUB-EXPRESSION (input_keep_valid && input_meta_valid && final_input_valid)
+       1   0   1  Not Covered
+       1   1   0  Not Covered
+  L1276 : EXPRESSION (bias_rsp_last && i_params_loaded)
+       1   0  Not Covered
+  L1279 : EXPRESSION ((bias_rsp_idx == 2'b0) ? i_bias_data : bias_cache0)
+       1  Not Covered
+  L1279 : SUB-EXPRESSION (bias_rsp_idx == 2'b0)
+       1  Not Covered
+  L1287 : EXPRESSION ((bias_rsp_idx == 2'b1) ? i_bias_data : bias_cache1)
+       1  Not Covered
+  L1287 : SUB-EXPRESSION (bias_rsp_idx == 2'b1)
+       1  Not Covered
+  L1327 : EXPRESSION ((state == PROCESS) && ((!issue_done)) && current_lane_valid)
+       0   1   1  Not Covered
+       1   1   0  Not Covered
+  L1355 : EXPRESSION (s3_lane == 2'b0)
+       0  Not Covered
+  L1019 : EXPRESSION (((!i_is_final_layer)) || ((i_out_ch_base == 5'b0) && (i_bias_base == 6'd42) && (i_relu_en == 1'b0)))
+       0   0  Not Covered
+  L1019 : SUB-EXPRESSION ((i_out_ch_base == 5'b0) && (i_bias_base == 6'd42) && (i_relu_en == 1'b0))
+       0   1   1  Not Covered
+       1   1   0  Not Covered
+  L1033 : EXPRESSION ((i_meta[16:12] == out_ch_base_reg) && (((!i_meta[18])) || i_meta[17]))
+       0   1  Not Covered
+       1   0  Not Covered
+  L1033 : SUB-EXPRESSION (((!i_meta[18])) || i_meta[17])
+       0   0  Not Covered
+  L1035 : SUB-EXPRESSION ((i_keep == 3'b1) && (i_meta[17] == 1'b1) && (i_meta[18] == 1'b1))
+       1   0   1  Not Covered
+  L1036 : EXPRESSION (((i_keep == 3'b1) || (i_keep == 3'b011) || (i_keep == 3'b111)) && (i_keep == col_mask_reg))
+       1   0  Not Covered
+  L1038 : EXPRESSION (i_cfg_valid && o_cfg_ready)
+       1   0  Not Covered
+  L1039 : EXPRESSION (i_params_loaded && cfg_mask_valid && cfg_bias_addr_valid && cfg_final_valid && cfg_change_allowed && ((state == IDLE) || (state == READY)))
+       1   1   0   1   1   1  Not Covered
+       1   1   1   0   1   1  Not Covered
+       1   1   1   1   1   0  Not Covered
+  L1048 : EXPRESSION (o_valid && i_ready)
+       1   0  Not Covered
+  L1049 : EXPRESSION (o_final_valid && i_final_ready)
+       1   0  Not Covered
+  L1050 : EXPRESSION (o_bias_req_valid && i_bias_req_ready)
+       1   0  Not Covered
+  L1051 : EXPRESSION (i_bias_rsp_valid && o_bias_rsp_ready)
+       1   0  Not Covered
+  L1065 : EXPRESSION ((state == PROCESS) && s3_last)
+       0   1  Not Covered
+#### post_process : toggle
+  i_bias_base[0]            No     No          No          INPUT     
+  i_bias_base[4]            No     No          No          INPUT     
+  i_quant_multiplier[2]     No     No          No          INPUT     
+  i_quant_multiplier[11]    No     No          No          INPUT     
+  i_quant_multiplier[21]    No     No          No          INPUT     
+  i_quant_multiplier[31:23] No     No          No          INPUT     
+  i_quant_shift[0]          No     No          No          INPUT     
+  i_quant_shift[5]          No     No          No          INPUT     
+  i_angle_multiplier[2]     No     No          No          INPUT     
+  i_angle_multiplier[11]    No     No          No          INPUT     
+  i_angle_multiplier[21]    No     No          No          INPUT     
+  i_angle_multiplier[31:23] No     No          No          INPUT     
+  i_angle_shift[0]          No     No          No          INPUT     
+  i_angle_shift[5]          No     No          No          INPUT     
+  o_data[7]                 No     No          No          OUTPUT    
+  o_data[15]                No     No          No          OUTPUT    
+  o_data[23]                No     No          No          OUTPUT    
+  bias_base_reg[0]            No     No          No          
+  bias_base_reg[4]            No     No          No          
+  quant_multiplier_reg[2]     No     No          No          
+  quant_multiplier_reg[11]    No     No          No          
+  quant_multiplier_reg[21]    No     No          No          
+  quant_multiplier_reg[31:23] No     No          No          
+  quant_shift_reg[0]          No     No          No          
+  quant_shift_reg[5]          No     No          No          
+  angle_multiplier_reg[2]     No     No          No          
+  angle_multiplier_reg[11]    No     No          No          
+  angle_multiplier_reg[21]    No     No          No          
+  angle_multiplier_reg[31:23] No     No          No          
+  angle_shift_reg[0]          No     No          No          
+  angle_shift_reg[5]          No     No          No          
+  bc_key0[3]                  No     No          No          
+  bc_key0[8]                  No     No          No          
+  bc_key0[13:12]              No     No          No          
+  bc_key1[8]                  No     No          No          
+  bc_key1[12]                 No     No          No          
+  cfg_key[8]                  No     No          No          
+  cfg_key[12]                 No     No          No          
+  current_multiplier[2]       No     No          No          
+  current_multiplier[11]      No     No          No          
+  current_multiplier[21]      No     No          No          
+  current_multiplier[31:23]   No     No          No          
+  current_shift[0]            No     No          No          
+  current_shift[5]            No     No          No          
+  s1_mult[2]                  No     No          No          
+  s1_mult[11]                 No     No          No          
+  s1_mult[21]                 No     No          No          
+  s1_mult[31:23]              No     No          No          
+  round_half[28:0]            No     No          No          
+  round_half[63:30]           No     No          No          
+  round_off[63:30]            No     No          No          
+  result_lane0[7]             No     No          No          
+  result_lane1[7]             No     No          No          
+  result_lane2[7]             No     No          No          
+  cfg_bias_last_addr[6]       No     No          No          
+  cfg_final_valid             No     No          No          
+  input_meta_valid            No     No          No          
+#### post_process : fsm
+      BIAS_WAIT  1088     Not Covered 
+      BIAS_REQ->IDLE      1069     Not Covered 
+      BIAS_WAIT->IDLE     1069     Not Covered 
+      BIAS_WAIT->READY    1089     Not Covered 
+      FINAL_WAIT->IDLE    1069     Not Covered 
+      IDLE->READY         1080     Not Covered 
+      OUT_WAIT->IDLE      1069     Not Covered 
+      PROCESS->IDLE       1069     Not Covered 
+#### post_process : branch
+  895                        current_lane_data  = 32'd0;
+      default Not Covered 
+  917                    default: acc32_reg = bias_sum_ext[31:0];
+      2'b10   Not Covered 
+  1121                       next_state = IDLE;
+      IDLE        1   1   -   -   -   -   -   -   -    -    Not Covered 
+      BIAS_WAIT   -   -   -   -   -   -   -   -   -    -    Not Covered 
+  1182                   default: begin
+      BIAS_WAIT   Not Covered 
+      default     Not Covered 
+
+#### act_feeder : line
+  827        0/1     ==>                  o_valid <= 1'b0;
+#### act_feeder : cond
+  L826 : EXPRESSION (o_valid && i_ready)
+       0   1  Not Covered
+       1   1  Not Covered
+  L808 : EXPRESSION (rst_n && ((!i_clear)) && i_feed_en && (((!o_valid)) || i_ready))
+       0   1   1   1  Not Covered
+       1   0   1   1  Not Covered
+
+#### pe_cntl : line
+  915        0/1     ==>                  default: state <= P_IDLE;
+#### pe_cntl : cond
+  L853 : EXPRESSION (i_tile_valid && o_tile_ready)
+       1   0  Not Covered
+  L894 : EXPRESSION (next_ready || i_chunk_loaded)
+       0   0  Not Covered
+       0   1  Not Covered
+  L912 : EXPRESSION (i_tile_in_done || tile_in_done_seen)
+       0   1  Not Covered
+  L776 : EXPRESSION ((state == P_FEED) && i_act_valid && i_weight_valid)
+       0   1   1  Not Covered
+  L790 : EXPRESSION ((i_step_total == {13 {1'b0}}) ? K_ONE : i_step_total)
+       1  Not Covered
+  L790 : SUB-EXPRESSION (i_step_total == {13 {1'b0}})
+       1  Not Covered
+  L800 : EXPRESSION ((state == P_IDLE) || ( ! (rd_active && next_ready) ))
+       1   0  Not Covered
+  L817 : EXPRESSION (valid_pipe[(0 + 0)] && row_mask_q[0] && col_mask_q[0])
+       1   0   1  Not Covered
+       1   1   0  Not Covered
+  L818 : EXPRESSION (last_pipe[(0 + 0)] && row_mask_q[0] && col_mask_q[0])
+       1   0   1  Not Covered
+       1   1   0  Not Covered
+  L817 : EXPRESSION (valid_pipe[(0 + 1)] && row_mask_q[0] && col_mask_q[1])
+       1   0   1  Not Covered
+  L818 : EXPRESSION (last_pipe[(0 + 1)] && row_mask_q[0] && col_mask_q[1])
+       1   0   1  Not Covered
+  L817 : EXPRESSION (valid_pipe[(0 + 2)] && row_mask_q[0] && col_mask_q[2])
+       1   0   1  Not Covered
+  L818 : EXPRESSION (last_pipe[(0 + 2)] && row_mask_q[0] && col_mask_q[2])
+       1   0   1  Not Covered
+  L817 : EXPRESSION (valid_pipe[(1 + 0)] && row_mask_q[1] && col_mask_q[0])
+       1   1   0  Not Covered
+  L818 : EXPRESSION (last_pipe[(1 + 0)] && row_mask_q[1] && col_mask_q[0])
+       1   1   0  Not Covered
+  L817 : EXPRESSION (valid_pipe[(2 + 0)] && row_mask_q[2] && col_mask_q[0])
+       1   1   0  Not Covered
+  L818 : EXPRESSION (last_pipe[(2 + 0)] && row_mask_q[2] && col_mask_q[0])
+       1   1   0  Not Covered
+#### pe_cntl : toggle
+  i_step_total[11:6]      No     No          No          INPUT     
+  o_chunk_word_count[7:6] No     No          No          OUTPUT    
+  cur_len[7:6]      No          No          No          
+  k_init[11:6]      No          No          No          
+#### pe_cntl : fsm
+      P_CHUNK_WAIT->P_IDLE    826      Not Covered 
+      P_CLEAR->P_IDLE         826      Not Covered 
+      P_DRAIN->P_IDLE         826      Not Covered 
+      P_PREFILL->P_IDLE       826      Not Covered 
+
+#### wgt_feeder : line
+  372        0/1     ==>                  o_valid <= 1'b0;
+#### wgt_feeder : cond
+  L371 : EXPRESSION (o_valid && i_ready)
+       0   1  Not Covered
+       1   1  Not Covered
+  L353 : EXPRESSION (rst_n && ((!i_clear)) && i_feed_en && (((!o_valid)) || i_ready))
+       1   0   1   1  Not Covered
+
+#### wgt_ld_unit : line
+  176        1/2     ==>                          if (i_chunk_word_count == 9'd0) o_ld_done <= 1'b1;
+  192        0/1     ==>                  default: state <= S_IDLE;
+#### wgt_ld_unit : cond
+  L176 : EXPRESSION (i_chunk_word_count == 9'b0)
+       1  Not Covered
+  L145 : EXPRESSION (i_ld_start && o_ld_ready)
+       1   0  Not Covered
+#### wgt_ld_unit : toggle
+  i_chunk_word_count[7:6] No     No          No          INPUT     
+  state[1]       No     No          No          
+  chunk_len[7:6] No     No          No          
+  idx[8]         No     No          No          
+#### top_cnn_cntl : toggle
+  o_src_base[12:0]          No     No          No          OUTPUT    
+  o_in_w[4:1]               No     No          No          OUTPUT    
+  o_in_h[4:1]               No     No          No          OUTPUT    
+  o_in_c[4:3]               No     No          No          OUTPUT    
+  o_stride[1:0]             No     No          No          OUTPUT    
+  o_k_total[11:6]           No     No          No          OUTPUT    
+  o_pos_base[13:12]         No     No          No          OUTPUT    
+  o_param_base[0]           No     No          No          OUTPUT    
+  o_param_base[4]           No     No          No          OUTPUT    
+  o_dst_base[12:0]          No     No          No          OUTPUT    
+  o_out_c[4:3]              No     No          No          OUTPUT    
+  o_pool_in_w[4:1]          No     No          No          OUTPUT    
+  o_pool_in_h[4:1]          No     No          No          OUTPUT    
+  o_pool_c[4:3]             No     No          No          OUTPUT    
+  o_load_chunk_len[7:6]     No     No          No          OUTPUT    
+  o_reader_chunk_len[7:6]   No     No          No          OUTPUT    
+  o_param_mem_addr[6]       No     No          No          OUTPUT    
+  o_quant_multiplier[2]     No     No          No          OUTPUT    
+  o_quant_multiplier[5]     No     No          No          OUTPUT    
+  o_quant_multiplier[12:10] No     No          No          OUTPUT    
+  o_quant_multiplier[14]    No     No          No          OUTPUT    
+  o_quant_multiplier[18]    No     No          No          OUTPUT    
+  o_quant_multiplier[21]    No     No          No          OUTPUT    
+  o_quant_multiplier[31:23] No     No          No          OUTPUT    
+  o_quant_shift[5:0]        No     No          No          OUTPUT    
+  o_layer_idx[2]            No     No          No          OUTPUT    
+  pe_step_total[11:6]    No          No          No          
+  param_base_7[0]        No          No          No          
+  param_base_7[4]        No          No          No          
+  param_base_7[6]        No          No          No          
+  param_wr_addr_7[6]     No          No          No          
+#### result_buf : cond
+  L1986 : EXPRESSION (i_valid && o_ready)
+       1   0  Not Covered
+  L1994 : EXPRESSION (wr_fire && m_lend && ((!layer_done_sent)))
+       1   1   0  Not Covered
+  L1996 : EXPRESSION (rst_n && ((!i_cfg_valid)) && is_final && ((!final_stored)))
+       1   0   1   1  Not Covered
+  L1998 : EXPRESSION (i_final_valid && o_final_ready)
+       1   0  Not Covered
+#### result_buf : toggle
+  i_dst_base[12:0]     No     No          No          INPUT     
+  i_dst_channels[4:3]  No     No          No          INPUT     
+  i_data[7]            No     No          No          INPUT     
+  i_data[15]           No     No          No          INPUT     
+  i_data[23]           No     No          No          INPUT     
+  i_meta[11:10]        No     No          No          INPUT     
+  o_wr_addr[12]        No     No          No          OUTPUT    
+  o_wr_data[7]         No     No          No          OUTPUT    
+  o_wr_data[15]        No     No          No          OUTPUT    
+  o_wr_data[23]        No     No          No          OUTPUT    
+  dst_base[12:0]  No     No          No          
+  wpp[2]          No     No          No          
+  m_pos[11:10]    No     No          No          
+  pix_off[12]     No     No          No          
+  pix_off[15:14]  No     No          No          
+#### act_path : cond
+  L99 : EXPRESSION (i_pg_tile_start && ((!i_fc_mode)))
+       1   0  Not Covered
+  L122 : EXPRESSION (i_fc_tile_start && i_fc_mode)
+       1   0  Not Covered
+#### act_path : toggle
+  i_ram_base[31:0]      No     No          No          INPUT     
+  i_ld_word_count[12:0] No     No          No          INPUT     
+  i_src_base[12:0]      No     No          No          INPUT     
+  i_pos_base[13:12]     No     No          No          INPUT     
+  i_in_c[4:3]           No     No          No          INPUT     
+  i_in_h[4:1]           No     No          No          INPUT     
+  i_in_w[4:1]           No     No          No          INPUT     
+  i_stride[1:0]         No     No          No          INPUT     
+  i_k_total[11:6]       No     No          No          INPUT     
+  i_fc_in_count[11:6]   No     No          No          INPUT     
+  i_wr_addr[12]         No     No          No          INPUT     
+  i_wr_data[7]          No     No          No          INPUT     
+  i_wr_data[15]         No     No          No          INPUT     
+  i_wr_data[23]         No     No          No          INPUT     
+  ibuf_waddr[13:12]  No     No          No          
+  ibuf_wbe[2:0]      No     No          No          
+  pg_rd_addr[12]     No     No          No          
+  fc_rd_addr[12:11]  No     No          No          
+  ibuf_rd_addr[12]   No     No          No          
+  fc_data[23:7]      No     No          No          
+  fc_keep[2:0]       No     No          No          
+#### param_buf : cond
+  L708 : EXPRESSION (loading && ((!i_load_start)) && i_wr_en)
+       0   1   1  Not Covered
+       1   0   1  Not Covered
+  L712 : EXPRESSION (i_rd_req_valid && o_rd_req_ready)
+       1   0  Not Covered
+  L714 : EXPRESSION (o_rd_rsp_valid && i_rd_rsp_ready)
+       1   0  Not Covered
+  L717 : EXPRESSION (o_loaded && ((!loading)) && ((!i_load_start)) && (((!o_rd_rsp_valid)) || i_rd_rsp_ready))
+       1   0   1   1  Not Covered
+       1   1   1   0  Not Covered
+  L717 : SUB-EXPRESSION (((!o_rd_rsp_valid)) || i_rd_rsp_ready)
+       0   0  Not Covered
+#### wgt_skew : cond
+  L380 : EXPRESSION (rst_n && ((!i_clear)) && i_step_en && i_feed_valid)
+       1   0   1   1  Not Covered
+       1   1   0   1  Not Covered
+  L382 : SUB-EXPRESSION (i_feed_valid && i_valid)
+       1   0  Not Covered
+#### single_pe : cond
+  L120 : EXPRESSION (i_step_en && i_mac_valid && i_mac_last)
+       0   1   1  Not Covered
+       1   0   1  Not Covered
+#### MUX : toggle
+  i_fc_data[23:7] No     No          No          INPUT     
+  i_fc_keep[2:0]  No     No          No          INPUT     
+#### act_skew : cond
+  L333 : EXPRESSION (rst_n && ((!i_clear)) && i_step_en && i_feed_valid)
+       1   0   1   1  Not Covered
+       1   1   0   1  Not Covered
+
+#### wgt_patch_gen : line
+  307        1/2     ==>                      if (i_chunk_word_count == 9'd0) o_chunk_done <= 1'b1;
+#### wgt_patch_gen : cond
+  L307 : EXPRESSION (i_chunk_word_count == 9'b0)
+       1  Not Covered
+  L325 : EXPRESSION (buf_read && (rd_idx == chunk_len_r) && (pend_count == 2'b1))
+       1   0   1  Not Covered
+  L264 : EXPRESSION (chunk_active && (rd_idx != chunk_len_r) && ((pend_count < 2'd2) || buf_read))
+       0   1   1  Not Covered
+  L271 : EXPRESSION (chunk_active && (buf_count != 2'b0))
+       0   1  Not Covered
+#### wgt_patch_gen : toggle
+  i_chunk_word_count[7:6] No     No          No          INPUT     
+  chunk_len_r[7:6] No     No          No          
+#### input_buf : toggle
+  i_wr_addr[12]   No     No          No          INPUT     
+  i_wr_be[0]      No     No          No          INPUT     
+  i_rd_addr[12]   No     No          No          INPUT     
+#### out_path : toggle
+  i_conv_w[4:1]             No     No          No          INPUT     
+  i_conv_h[4:1]             No     No          No          INPUT     
+  i_out_channels[4:3]       No     No          No          INPUT     
+  i_dst_base[12:0]          No     No          No          INPUT     
+  i_quant_multiplier[2]     No     No          No          INPUT     
+  i_quant_multiplier[5]     No     No          No          INPUT     
+  i_quant_multiplier[12:10] No     No          No          INPUT     
+  i_quant_multiplier[14]    No     No          No          INPUT     
+  i_quant_multiplier[18]    No     No          No          INPUT     
+  i_quant_multiplier[21]    No     No          No          INPUT     
+  i_quant_multiplier[31:23] No     No          No          INPUT     
+  i_quant_shift[5:0]        No     No          No          INPUT     
+  i_bias_base[0]            No     No          No          INPUT     
+  i_bias_base[4]            No     No          No          INPUT     
+  i_angle_multiplier[2]     No     No          No          INPUT     
+  i_angle_multiplier[5]     No     No          No          INPUT     
+  i_angle_multiplier[12:10] No     No          No          INPUT     
+  i_angle_multiplier[14]    No     No          No          INPUT     
+  i_angle_multiplier[18]    No     No          No          INPUT     
+  i_angle_multiplier[21]    No     No          No          INPUT     
+  i_angle_multiplier[31:23] No     No          No          INPUT     
+  i_angle_shift[5:0]        No     No          No          INPUT     
+  o_wr_addr[12]             No     No          No          OUTPUT    
+  o_wr_data[7]              No     No          No          OUTPUT    
+  o_wr_data[15]             No     No          No          OUTPUT    
+  o_wr_data[23]             No     No          No          OUTPUT    
+  conv_w_reg[4:1]             No     No          No          
+  out_channels_reg[4:3]       No     No          No          
+  dst_base_reg[12:0]          No     No          No          
+  quant_multiplier_reg[2]     No     No          No          
+  quant_multiplier_reg[11]    No     No          No          
+  quant_multiplier_reg[21]    No     No          No          
+  quant_multiplier_reg[31:23] No     No          No          
+  quant_shift_reg[0]          No     No          No          
+  quant_shift_reg[5]          No     No          No          
+  bias_base_reg[0]            No     No          No          
+  bias_base_reg[4]            No     No          No          
+  angle_multiplier_reg[2]     No     No          No          
+  angle_multiplier_reg[11]    No     No          No          
+  angle_multiplier_reg[21]    No     No          No          
+  angle_multiplier_reg[31:23] No     No          No          
+  angle_shift_reg[0]          No     No          No          
+  angle_shift_reg[5]          No     No          No          
+  pp_data[7]                  No     No          No          
+  pp_data[15]                 No     No          No          
+  pp_data[23]                 No     No          No          
+  pool_data[7]                No     No          No          
+  pool_data[15]               No     No          No          
+  pool_data[23]               No     No          No          
+  pool_meta[11:10]            No     No          No          
+#### top_cnn : toggle
+  o_layer_idx[2]      No     No          No          OUTPUT    
+  c_src_base[12:0]        No     No          No          
+  c_pos_base[13:12]       No     No          No          
+  c_in_c[4:3]             No     No          No          
+  c_in_h[4:1]             No     No          No          
+  c_in_w[4:1]             No     No          No          
+  c_stride[1:0]           No     No          No          
+  c_k_total[11:6]         No     No          No          
+  c_load_chunk_len[7:6]   No     No          No          
+  c_reader_chunk_len[7:6] No     No          No          
+  c_pool_in_w[4:1]        No     No          No          
+  c_pool_in_h[4:1]        No     No          No          
+  c_out_c[4:3]            No     No          No          
+  c_dst_base[12:0]        No     No          No          
+  c_quant_m[2]            No     No          No          
+  c_quant_m[5]            No     No          No          
+  c_quant_m[12:10]        No     No          No          
+  c_quant_m[14]           No     No          No          
+  c_quant_m[18]           No     No          No          
+  c_quant_m[21]           No     No          No          
+  c_quant_m[31:23]        No     No          No          
+  c_quant_s[5:0]          No     No          No          
+  c_param_base[0]         No     No          No          
+  c_param_base[4]         No     No          No          
+  r_wr_addr[12]           No     No          No          
+  r_wr_data[7]            No     No          No          
+  r_wr_data[15]           No     No          No          
+  r_wr_data[23]           No     No          No          
+  param_mem_addr[6]       No     No          No          
+#### wgt_path : toggle
+  i_chunk_word_count[7:6] No     No          No          INPUT     
+  i_load_chunk_len[7:6]   No     No          No          INPUT     

@@ -1,0 +1,125 @@
+Assertions
+
+
+Assertions by Category
+           ASSERT PROPERTIES SEQUENCES
+Total          58         10         0
+Category 0     58         10         0
+
+-------------------------------------------------------------------------------
+
+Assertions by Severity
+           ASSERT PROPERTIES SEQUENCES
+Total          58         10         0
+Severity 0     58         10         0
+
+-------------------------------------------------------------------------------
+
+Summary for Assertions
+                 NUMBER PERCENT
+Total Number         58  100.00
+Uncovered             5    8.62
+Success              53   91.38
+Failure               0    0.00
+Incomplete            0    0.00
+Without Attempts      2    3.45
+
+-------------------------------------------------------------------------------
+
+Summary for Cover Properties
+             NUMBER PERCENT
+Total Number     10  100.00
+Uncovered         0    0.00
+Matches          10  100.00
+
+-------------------------------------------------------------------------------
+
+Detail Report for Assertions
+
+Assertions Uncovered:
+                              ASSERTIONS                               CATEGORY SEVERITY ATTEMPTS REAL SUCCESSES FAILURES INCOMPLETE
+tb_top.dut.U_OUT_PATH.u_pooling_unit.u_pooling_unit_sva.a_out_stable          0        0 19056529              0        0          0
+tb_top.dut.U_OUT_PATH.u_post_process.u_post_process_sva.a_final_stable        0        0 19056529              0        0          0
+tb_top.dut.U_OUT_PATH.u_post_process.u_post_process_sva.a_out_stable          0        0 19056529              0        0          0
+uvm_pkg.\uvm_reg_map::do_read .unnamed$$_0.unnamed$$_1                        0        0        0              0        0          0
+uvm_pkg.\uvm_reg_map::do_write .unnamed$$_0.unnamed$$_1                       0        0        0              0        0          0
+
+Assertions Success:
+                                 ASSERTIONS                                  CATEGORY SEVERITY ATTEMPTS REAL SUCCESSES FAILURES INCOMPLETE
+tb_top.dut.U_ACT_PATH.ACT_LD_UNIT.u_act_ld_unit_sva.a_start_idle                    0        0 19056529             45        0          0
+tb_top.dut.U_ACT_PATH.ACT_PATCH_GEN.u_act_patch_gen_sva.a_start_idle                0        0 19056529         146513        0          0
+tb_top.dut.U_ACT_PATH.FC_GEN.u_fc_gen_sva.a_start_idle                              0        0 19056529            491        0          0
+tb_top.dut.U_OUT_PATH.u_output_fifo.u_output_fifo_sva.a_cfg_accept                  0        0 19056529         147004        0          0
+tb_top.dut.U_OUT_PATH.u_output_fifo.u_output_fifo_sva.a_cfg_mask                    0        0 19056529         147004        0          0
+tb_top.dut.U_OUT_PATH.u_output_fifo.u_output_fifo_sva.a_out_stable                  0        0 19056529        1991500        0          0
+tb_top.dut.U_OUT_PATH.u_output_fifo.u_output_fifo_sva.a_res_active                  0        0 19056529         704844        0          0
+tb_top.dut.U_OUT_PATH.u_pooling_unit.u_pooling_unit_sva.a_cfg_no_pending            0        0 19056529            171        0          0
+tb_top.dut.U_OUT_PATH.u_pooling_unit.u_pooling_unit_sva.a_keep_legal                0        0 19056529         439647        0          0
+tb_top.dut.U_OUT_PATH.u_post_process.u_post_process_sva.a_cfg_accept                0        0 19056529         147004        0          0
+tb_top.dut.U_OUT_PATH.u_post_process.u_post_process_sva.a_keep_legal                0        0 19056529         439687        0          0
+tb_top.dut.U_OUT_PATH.u_post_process.u_post_process_sva.a_no_both                   0        0 19056529       19056459        0          0
+tb_top.dut.U_OUT_PATH.u_result_buf.u_result_buf_sva.a_cfg_quiet                     0        0 19056529            171        0          0
+tb_top.dut.U_OUT_PATH.u_result_buf.u_result_buf_sva.a_wr_grant                      0        0 19056529         174761        0          0
+tb_top.dut.U_PE_CORE.u_pe_array.u_single_pe00.u_single_pe_sva.a_result_pulse        0        0 19056529         147003        0          0
+tb_top.dut.U_PE_CORE.u_pe_array.u_single_pe01.u_single_pe_sva.a_result_pulse        0        0 19056529         132599        0          0
+tb_top.dut.U_PE_CORE.u_pe_array.u_single_pe02.u_single_pe_sva.a_result_pulse        0        0 19056529         132558        0          0
+tb_top.dut.U_PE_CORE.u_pe_array.u_single_pe10.u_single_pe_sva.a_result_pulse        0        0 19056529         146342        0          0
+tb_top.dut.U_PE_CORE.u_pe_array.u_single_pe11.u_single_pe_sva.a_result_pulse        0        0 19056529         132020        0          0
+tb_top.dut.U_PE_CORE.u_pe_array.u_single_pe12.u_single_pe_sva.a_result_pulse        0        0 19056529         132020        0          0
+tb_top.dut.U_PE_CORE.u_pe_array.u_single_pe20.u_single_pe_sva.a_result_pulse        0        0 19056529         146342        0          0
+tb_top.dut.U_PE_CORE.u_pe_array.u_single_pe21.u_single_pe_sva.a_result_pulse        0        0 19056529         132020        0          0
+tb_top.dut.U_PE_CORE.u_pe_array.u_single_pe22.u_single_pe_sva.a_result_pulse        0        0 19056529         132020        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_CNN_CNTL.u_cnn_cntl_sva.a_busy_state                    0        0 19056529       19056459        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_CNN_CNTL.u_cnn_cntl_sva.a_fc_fc_only                    0        0 19056529            491        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_CNN_CNTL.u_cnn_cntl_sva.a_lcfg_pulse                    0        0 19056529            171        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_CNN_CNTL.u_cnn_cntl_sva.a_pg_conv_only                  0        0 19056529         146513        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_CNN_CNTL.u_cnn_cntl_sva.a_ready_idle                    0        0 19056529            569        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_CNN_CNTL.u_cnn_cntl_sva.a_tcfg_pulse                    0        0 19056529         147004        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_CNN_CNTL.u_cnn_cntl_sva.a_tcfg_ready                    0        0 19056529         147004        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_CNN_CNTL.u_cnn_cntl_sva.a_tile_start_1h                 0        0 19056529       19056459        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_CNN_CNTL.u_cnn_cntl_sva.a_tile_valid_cfg                0        0 19056529         147004        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_CNN_CNTL.u_cnn_cntl_sva.a_wload_pulse                   0        0 19056529           7432        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_CNN_CNTL.u_cnn_cntl_sva.a_wload_ready                   0        0 19056529           7432        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.a_chunk_feed                      0        0 19056529         153769        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.a_chunk_pulse                     0        0 19056529         153769        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.a_clear_no_step                   0        0 19056529         147004        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.a_feed_both                       0        0 19056529        6580066        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.a_feed_is_step                    0        0 19056529        6580066        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.a_loaded_req                      0        0 19056529           6765        0          0
+tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.a_req_served                      0        0 19056529           6765        0          0
+tb_top.dut.U_WGT_PATH.WGT_LD_UNIT.u_wgt_ld_unit_sva.a_start_ready                   0        0 19056529           7432        0          0
+tb_top.dut.U_WGT_PATH.WGT_PATCH_GEN.u_wgt_patch_gen_sva.a_start_idle                0        0 19056529         153769        0          0
+tb_top.dut.U_WGT_PATH.u_wgt_path_sva.a_no_overwrite                                 0        0 19056529        1731840        0          0
+tb_top.dut.u_top_sva.a_busy_state                                                   0        0 19056529       19056459        0          0
+tb_top.dut.u_top_sva.a_done_hold                                                    0        0 19056529             51        0          0
+tb_top.dut.u_top_sva.a_done_in_busy                                                 0        0 19056529             40        0          0
+tb_top.dut.u_top_sva.a_irq_clear                                                    0        0 19056529              1        0          0
+tb_top.dut.u_top_sva.a_irq_eq                                                       0        0 19056529       19056459        0          0
+tb_top.dut.u_top_sva.a_ready_not_busy                                               0        0 19056529            569        0          0
+tb_top.dut.u_top_sva.a_result_stable                                                0        0 19056529             51        0          0
+tb_top.dut.u_top_sva.a_start_busy                                                   0        0 19056529             45        0          0
+tb_top.dut.u_top_sva.a_state_range                                                  0        0 19056529       19056459        0          0
+
+Assertions Without Attempts:
+                       ASSERTIONS                       CATEGORY SEVERITY ATTEMPTS REAL SUCCESSES FAILURES INCOMPLETE
+uvm_pkg.\uvm_reg_map::do_read .unnamed$$_0.unnamed$$_1         0        0        0              0        0          0
+uvm_pkg.\uvm_reg_map::do_write .unnamed$$_0.unnamed$$_1        0        0        0              0        0          0
+
+-------------------------------------------------------------------------------
+
+Detail Report for Cover Properties
+
+Cover Properties Matches:
+                       COVER PROPERTIES                       CATEGORY SEVERITY ATTEMPTS MATCHES INCOMPLETE
+tb_top.dut.U_OUT_PATH.u_result_buf.u_result_buf_sva.c_final          0        0 19056529      40          0
+tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.c_chunk_req        0        0 19056529    6765          0
+tb_top.dut.U_TOP_CNN_CNTL.U_PE_CNTL.u_pe_cntl_sva.c_tile_fire        0        0 19056529  147004          0
+tb_top.dut.U_WGT_PATH.u_wgt_path_sva.c_half0_wr                      0        0 19056529  928392          0
+tb_top.dut.U_WGT_PATH.u_wgt_path_sva.c_half1_wr                      0        0 19056529  927104          0
+tb_top.dut.U_WGT_PATH.u_wgt_path_sva.c_overlap                       0        0 19056529 1731840          0
+tb_top.dut.u_top_sva.c_clear                                         0        0 19056529      39          0
+tb_top.dut.u_top_sva.c_done_irq                                      0        0 19056529      28          0
+tb_top.dut.u_top_sva.c_done_noirq                                    0        0 19056529      12          0
+tb_top.dut.u_top_sva.c_start                                         0        0 19056529      45          0
+
+

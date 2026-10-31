@@ -1,0 +1,1830 @@
+Group : cnn_pkg::cnn_coverage::cg_layer
+
+===============================================================================
+Group : cnn_pkg::cnn_coverage::cg_layer
+===============================================================================
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING 
+100.00 100.00    1      100    1        1            64           64            
+
+
+Source File(s) : 
+
+/home/pedu23/odai2/cnn_uvm/tb/cnn_cov.sv
+
+1 Instances:
+
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING NAME                   
+100.00 1      100    1        64           64            tb_top.me.obj.cg_layer 
+
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group   cnn_pkg::cnn_coverage::cg_layer
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 4        0         4       100.00  
+
+
+Variables for Group  cnn_pkg::cnn_coverage::cg_layer
+
+
+VARIABLE EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_layer 4        0         4       100.00  100  1      1        0                    
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_layer
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 4        0         4       100.00  
+
+
+User Defined Bins for cp_layer
+
+
+Bins
+
+NAME COUNT AT LEAST 
+l_0  43    1        
+l_1  42    1        
+l_2  41    1        
+l_3  40    1        
+
+
+-------------------------------------------------------------------------------
+===============================================================================
+Group Instance : tb_top.me.obj.cg_layer
+===============================================================================
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING 
+100.00 1      100    1        64           64            
+
+
+Group:
+
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING COMMENT NAME                            
+100.00 100.00    1      100    1        1            64           64                    cnn_pkg::cnn_coverage::cg_layer 
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group Instance   tb_top.me.obj.cg_layer
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 4        0         4       100.00  
+
+
+Variables for Group Instance  tb_top.me.obj.cg_layer
+
+
+VARIABLE EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_layer 4        0         4       100.00  100  1      1        0                    
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_layer
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 4        0         4       100.00  
+
+
+User Defined Bins for cp_layer
+
+
+Bins
+
+NAME COUNT AT LEAST 
+l_0  43    1        
+l_1  42    1        
+l_2  41    1        
+l_3  40    1        
+
+
+Group : cnn_pkg::cnn_coverage::cg_ctrl_irq_en
+
+===============================================================================
+Group : cnn_pkg::cnn_coverage::cg_ctrl_irq_en
+===============================================================================
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING 
+100.00 100.00    1      100    1        1            64           64            
+
+
+Source File(s) : 
+
+/home/pedu23/odai2/cnn_uvm/tb/cnn_cov.sv
+
+1 Instances:
+
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING NAME                         
+100.00 1      100    1        64           64            tb_top.me.obj.cg_ctrl_irq_en 
+
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group   cnn_pkg::cnn_coverage::cg_ctrl_irq_en
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 2        0         2       100.00  
+
+
+Variables for Group  cnn_pkg::cnn_coverage::cg_ctrl_irq_en
+
+
+VARIABLE      EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_irq_en_chg 2        0         2       100.00  100  1      1        0                    
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_irq_en_chg
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 2        0         2       100.00  
+
+
+User Defined Bins for cp_irq_en_chg
+
+
+Bins
+
+NAME COUNT AT LEAST 
+fall 1     1        
+rise 2     1        
+
+
+-------------------------------------------------------------------------------
+===============================================================================
+Group Instance : tb_top.me.obj.cg_ctrl_irq_en
+===============================================================================
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING 
+100.00 1      100    1        64           64            
+
+
+Group:
+
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING COMMENT NAME                                  
+100.00 100.00    1      100    1        1            64           64                    cnn_pkg::cnn_coverage::cg_ctrl_irq_en 
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group Instance   tb_top.me.obj.cg_ctrl_irq_en
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 2        0         2       100.00  
+
+
+Variables for Group Instance  tb_top.me.obj.cg_ctrl_irq_en
+
+
+VARIABLE      EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_irq_en_chg 2        0         2       100.00  100  1      1        0                    
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_irq_en_chg
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 2        0         2       100.00  
+
+
+User Defined Bins for cp_irq_en_chg
+
+
+Bins
+
+NAME COUNT AT LEAST 
+fall 1     1        
+rise 2     1        
+
+
+Group : cnn_pkg::cnn_coverage::cg_ctrl_clear
+
+===============================================================================
+Group : cnn_pkg::cnn_coverage::cg_ctrl_clear
+===============================================================================
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING 
+100.00 100.00    1      100    1        1            64           64            
+
+
+Source File(s) : 
+
+/home/pedu23/odai2/cnn_uvm/tb/cnn_cov.sv
+
+1 Instances:
+
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING NAME                        
+100.00 1      100    1        64           64            tb_top.me.obj.cg_ctrl_clear 
+
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group   cnn_pkg::cnn_coverage::cg_ctrl_clear
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 3        0         3       100.00  
+
+
+Variables for Group  cnn_pkg::cnn_coverage::cg_ctrl_clear
+
+
+VARIABLE      EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_clear_when 3        0         3       100.00  100  1      1        0                    
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_clear_when
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 3        0         3       100.00  
+
+
+User Defined Bins for cp_clear_when
+
+
+Bins
+
+NAME COUNT AT LEAST 
+busy 39    1        
+idle 1     1        
+done 1     1        
+
+
+-------------------------------------------------------------------------------
+===============================================================================
+Group Instance : tb_top.me.obj.cg_ctrl_clear
+===============================================================================
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING 
+100.00 1      100    1        64           64            
+
+
+Group:
+
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING COMMENT NAME                                 
+100.00 100.00    1      100    1        1            64           64                    cnn_pkg::cnn_coverage::cg_ctrl_clear 
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group Instance   tb_top.me.obj.cg_ctrl_clear
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 3        0         3       100.00  
+
+
+Variables for Group Instance  tb_top.me.obj.cg_ctrl_clear
+
+
+VARIABLE      EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_clear_when 3        0         3       100.00  100  1      1        0                    
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_clear_when
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 3        0         3       100.00  
+
+
+User Defined Bins for cp_clear_when
+
+
+Bins
+
+NAME COUNT AT LEAST 
+busy 39    1        
+idle 1     1        
+done 1     1        
+
+
+Group : cnn_pkg::cnn_coverage::cg_ctrl_start
+
+===============================================================================
+Group : cnn_pkg::cnn_coverage::cg_ctrl_start
+===============================================================================
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING 
+100.00 100.00    1      100    1        1            64           64            
+
+
+Source File(s) : 
+
+/home/pedu23/odai2/cnn_uvm/tb/cnn_cov.sv
+
+1 Instances:
+
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING NAME                        
+100.00 1      100    1        64           64            tb_top.me.obj.cg_ctrl_start 
+
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group   cnn_pkg::cnn_coverage::cg_ctrl_start
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 3        0         3       100.00  
+
+
+Variables for Group  cnn_pkg::cnn_coverage::cg_ctrl_start
+
+
+VARIABLE     EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_start_gap 3        0         3       100.00  100  1      1        0                    
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_start_gap
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 3        0         3       100.00  
+
+
+User Defined Bins for cp_start_gap
+
+
+Bins
+
+NAME      COUNT AT LEAST 
+gap_long  6     1        
+gap_short 8     1        
+gap_b2b   19    1        
+
+
+-------------------------------------------------------------------------------
+===============================================================================
+Group Instance : tb_top.me.obj.cg_ctrl_start
+===============================================================================
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING 
+100.00 1      100    1        64           64            
+
+
+Group:
+
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING COMMENT NAME                                 
+100.00 100.00    1      100    1        1            64           64                    cnn_pkg::cnn_coverage::cg_ctrl_start 
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group Instance   tb_top.me.obj.cg_ctrl_start
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 3        0         3       100.00  
+
+
+Variables for Group Instance  tb_top.me.obj.cg_ctrl_start
+
+
+VARIABLE     EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_start_gap 3        0         3       100.00  100  1      1        0                    
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_start_gap
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 3        0         3       100.00  
+
+
+User Defined Bins for cp_start_gap
+
+
+Bins
+
+NAME      COUNT AT LEAST 
+gap_long  6     1        
+gap_short 8     1        
+gap_b2b   19    1        
+
+
+Group : cnn_pkg::cnn_coverage::cg_infer
+
+===============================================================================
+Group : cnn_pkg::cnn_coverage::cg_infer
+===============================================================================
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING 
+100.00 100.00    1      100    1        1            64           64            
+
+
+Source File(s) : 
+
+/home/pedu23/odai2/cnn_uvm/tb/cnn_cov.sv
+
+1 Instances:
+
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING NAME                   
+100.00 1      100    1        64           64            tb_top.me.obj.cg_infer 
+
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group   cnn_pkg::cnn_coverage::cg_infer
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 45       0         45      100.00  
+Crosses   20       0         20      100.00  
+
+
+Variables for Group  cnn_pkg::cnn_coverage::cg_infer
+
+
+VARIABLE    EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_result   5        0         5       100.00  100  1      1        0                    
+cp_mode     8        0         8       100.00  100  1      1        0                    
+cp_irq_en   2        0         2       100.00  100  1      1        2                    
+cp_sat8p_l0 2        0         2       100.00  100  1      1        2                    
+cp_sat8p_l1 2        0         2       100.00  100  1      1        2                    
+cp_sat8p_l2 2        0         2       100.00  100  1      1        2                    
+cp_sat8p_l3 2        0         2       100.00  100  1      1        2                    
+cp_sat8n_l3 2        0         2       100.00  100  1      1        2                    
+cp_sat32_l0 2        0         2       100.00  100  1      1        2                    
+cp_sat32_l1 2        0         2       100.00  100  1      1        2                    
+cp_sat32_l2 2        0         2       100.00  100  1      1        2                    
+cp_sat32_l3 2        0         2       100.00  100  1      1        2                    
+cp_relu_l0  2        0         2       100.00  100  1      1        2                    
+cp_relu_l1  2        0         2       100.00  100  1      1        2                    
+cp_relu_l2  2        0         2       100.00  100  1      1        2                    
+cp_dead_l0  2        0         2       100.00  100  1      1        2                    
+cp_dead_l1  2        0         2       100.00  100  1      1        2                    
+cp_dead_l2  2        0         2       100.00  100  1      1        2                    
+
+
+Crosses for Group  cnn_pkg::cnn_coverage::cg_infer
+
+
+CROSS          EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST PRINT MISSING COMMENT 
+cx_mode_result 20       0         20      100.00  100  1      1        0                     
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_result
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 5        0         5       100.00  
+
+
+User Defined Bins for cp_result
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+pos_sat 6     1        
+pos     10    1        
+zero    7     1        
+neg     10    1        
+neg_sat 7     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_mode
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 8        0         8       100.00  
+
+
+Automatically Generated Bins for cp_mode
+
+
+Bins
+
+NAME           COUNT AT LEAST 
+auto_DM_FULL   6     1        
+auto_DM_SMALL  12    1        
+auto_DM_SPARSE 9     1        
+auto_DM_ZERO   6     1        
+auto_DM_MAX    2     1        
+auto_DM_MIN    2     1        
+auto_DM_ALT    2     1        
+auto_DM_FILE   1     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_irq_en
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_irq_en
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 12    1        
+auto[1] 28    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat8p_l0
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat8p_l0
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 29    1        
+auto[1] 11    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat8p_l1
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat8p_l1
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 26    1        
+auto[1] 14    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat8p_l2
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat8p_l2
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 32    1        
+auto[1] 8     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat8p_l3
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat8p_l3
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 34    1        
+auto[1] 6     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat8n_l3
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat8n_l3
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 33    1        
+auto[1] 7     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat32_l0
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat32_l0
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 38    1        
+auto[1] 2     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat32_l1
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat32_l1
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 38    1        
+auto[1] 2     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat32_l2
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat32_l2
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 38    1        
+auto[1] 2     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat32_l3
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat32_l3
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 38    1        
+auto[1] 2     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_relu_l0
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_relu_l0
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 2     1        
+auto[1] 38    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_relu_l1
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_relu_l1
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 2     1        
+auto[1] 38    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_relu_l2
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_relu_l2
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 2     1        
+auto[1] 38    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_dead_l0
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_dead_l0
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 37    1        
+auto[1] 3     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_dead_l1
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_dead_l1
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 35    1        
+auto[1] 5     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_dead_l2
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_dead_l2
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 38    1        
+auto[1] 2     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Cross cx_mode_result
+
+
+Samples crossed: cp_mode cp_result
+CATEGORY                           EXPECTED UNCOVERED COVERED PERCENT MISSING 
+TOTAL                              20       0         20      100.00          
+Automatically Generated Cross Bins 20       0         20      100.00          
+User Defined Cross Bins            0        0         0                       
+
+
+Automatically Generated Cross Bins for cx_mode_result
+
+
+Bins
+
+cp_mode        cp_result COUNT AT LEAST 
+auto_DM_FULL   pos_sat   1     1        
+auto_DM_FULL   pos       1     1        
+auto_DM_FULL   zero      1     1        
+auto_DM_FULL   neg       1     1        
+auto_DM_FULL   neg_sat   2     1        
+auto_DM_SMALL  pos_sat   1     1        
+auto_DM_SMALL  pos       4     1        
+auto_DM_SMALL  zero      1     1        
+auto_DM_SMALL  neg       5     1        
+auto_DM_SMALL  neg_sat   1     1        
+auto_DM_SPARSE pos_sat   1     1        
+auto_DM_SPARSE pos       1     1        
+auto_DM_SPARSE zero      4     1        
+auto_DM_SPARSE neg       2     1        
+auto_DM_SPARSE neg_sat   1     1        
+auto_DM_ZERO   pos_sat   1     1        
+auto_DM_ZERO   pos       1     1        
+auto_DM_ZERO   zero      1     1        
+auto_DM_ZERO   neg       2     1        
+auto_DM_ZERO   neg_sat   1     1        
+
+
+User Defined Cross Bins for cx_mode_result
+
+
+Excluded/Illegal bins
+
+NAME       COUNT STATUS   
+fixed_data 0     Excluded 
+
+
+-------------------------------------------------------------------------------
+===============================================================================
+Group Instance : tb_top.me.obj.cg_infer
+===============================================================================
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING 
+100.00 1      100    1        64           64            
+
+
+Group:
+
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING COMMENT NAME                            
+100.00 100.00    1      100    1        1            64           64                    cnn_pkg::cnn_coverage::cg_infer 
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group Instance   tb_top.me.obj.cg_infer
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 45       0         45      100.00  
+Crosses   20       0         20      100.00  
+
+
+Variables for Group Instance  tb_top.me.obj.cg_infer
+
+
+VARIABLE    EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_result   5        0         5       100.00  100  1      1        0                    
+cp_mode     8        0         8       100.00  100  1      1        0                    
+cp_irq_en   2        0         2       100.00  100  1      1        2                    
+cp_sat8p_l0 2        0         2       100.00  100  1      1        2                    
+cp_sat8p_l1 2        0         2       100.00  100  1      1        2                    
+cp_sat8p_l2 2        0         2       100.00  100  1      1        2                    
+cp_sat8p_l3 2        0         2       100.00  100  1      1        2                    
+cp_sat8n_l3 2        0         2       100.00  100  1      1        2                    
+cp_sat32_l0 2        0         2       100.00  100  1      1        2                    
+cp_sat32_l1 2        0         2       100.00  100  1      1        2                    
+cp_sat32_l2 2        0         2       100.00  100  1      1        2                    
+cp_sat32_l3 2        0         2       100.00  100  1      1        2                    
+cp_relu_l0  2        0         2       100.00  100  1      1        2                    
+cp_relu_l1  2        0         2       100.00  100  1      1        2                    
+cp_relu_l2  2        0         2       100.00  100  1      1        2                    
+cp_dead_l0  2        0         2       100.00  100  1      1        2                    
+cp_dead_l1  2        0         2       100.00  100  1      1        2                    
+cp_dead_l2  2        0         2       100.00  100  1      1        2                    
+
+
+Crosses for Group Instance  tb_top.me.obj.cg_infer
+
+
+CROSS          EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST PRINT MISSING COMMENT 
+cx_mode_result 20       0         20      100.00  100  1      1        0                     
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_result
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 5        0         5       100.00  
+
+
+User Defined Bins for cp_result
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+pos_sat 6     1        
+pos     10    1        
+zero    7     1        
+neg     10    1        
+neg_sat 7     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_mode
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 8        0         8       100.00  
+
+
+Automatically Generated Bins for cp_mode
+
+
+Bins
+
+NAME           COUNT AT LEAST 
+auto_DM_FULL   6     1        
+auto_DM_SMALL  12    1        
+auto_DM_SPARSE 9     1        
+auto_DM_ZERO   6     1        
+auto_DM_MAX    2     1        
+auto_DM_MIN    2     1        
+auto_DM_ALT    2     1        
+auto_DM_FILE   1     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_irq_en
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_irq_en
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 12    1        
+auto[1] 28    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat8p_l0
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat8p_l0
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 29    1        
+auto[1] 11    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat8p_l1
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat8p_l1
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 26    1        
+auto[1] 14    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat8p_l2
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat8p_l2
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 32    1        
+auto[1] 8     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat8p_l3
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat8p_l3
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 34    1        
+auto[1] 6     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat8n_l3
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat8n_l3
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 33    1        
+auto[1] 7     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat32_l0
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat32_l0
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 38    1        
+auto[1] 2     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat32_l1
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat32_l1
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 38    1        
+auto[1] 2     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat32_l2
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat32_l2
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 38    1        
+auto[1] 2     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_sat32_l3
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_sat32_l3
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 38    1        
+auto[1] 2     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_relu_l0
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_relu_l0
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 2     1        
+auto[1] 38    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_relu_l1
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_relu_l1
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 2     1        
+auto[1] 38    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_relu_l2
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_relu_l2
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 2     1        
+auto[1] 38    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_dead_l0
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_dead_l0
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 37    1        
+auto[1] 3     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_dead_l1
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_dead_l1
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 35    1        
+auto[1] 5     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_dead_l2
+
+
+CATEGORY                     EXPECTED UNCOVERED COVERED PERCENT 
+Automatically Generated Bins 2        0         2       100.00  
+
+
+Automatically Generated Bins for cp_dead_l2
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+auto[0] 38    1        
+auto[1] 2     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Cross cx_mode_result
+
+
+Samples crossed: cp_mode cp_result
+CATEGORY                           EXPECTED UNCOVERED COVERED PERCENT MISSING 
+TOTAL                              20       0         20      100.00          
+Automatically Generated Cross Bins 20       0         20      100.00          
+User Defined Cross Bins            0        0         0                       
+
+
+Automatically Generated Cross Bins for cx_mode_result
+
+
+Bins
+
+cp_mode        cp_result COUNT AT LEAST 
+auto_DM_FULL   pos_sat   1     1        
+auto_DM_FULL   pos       1     1        
+auto_DM_FULL   zero      1     1        
+auto_DM_FULL   neg       1     1        
+auto_DM_FULL   neg_sat   2     1        
+auto_DM_SMALL  pos_sat   1     1        
+auto_DM_SMALL  pos       4     1        
+auto_DM_SMALL  zero      1     1        
+auto_DM_SMALL  neg       5     1        
+auto_DM_SMALL  neg_sat   1     1        
+auto_DM_SPARSE pos_sat   1     1        
+auto_DM_SPARSE pos       1     1        
+auto_DM_SPARSE zero      4     1        
+auto_DM_SPARSE neg       2     1        
+auto_DM_SPARSE neg_sat   1     1        
+auto_DM_ZERO   pos_sat   1     1        
+auto_DM_ZERO   pos       1     1        
+auto_DM_ZERO   zero      1     1        
+auto_DM_ZERO   neg       2     1        
+auto_DM_ZERO   neg_sat   1     1        
+
+
+User Defined Cross Bins for cx_mode_result
+
+
+Excluded/Illegal bins
+
+NAME       COUNT STATUS   
+fixed_data 0     Excluded 
+
+
+Group : cnn_pkg::cnn_coverage::cg_reset
+
+===============================================================================
+Group : cnn_pkg::cnn_coverage::cg_reset
+===============================================================================
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING 
+100.00 100.00    1      100    1        1            64           64            
+
+
+Source File(s) : 
+
+/home/pedu23/odai2/cnn_uvm/tb/cnn_cov.sv
+
+1 Instances:
+
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING NAME                   
+100.00 1      100    1        64           64            tb_top.me.obj.cg_reset 
+
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group   cnn_pkg::cnn_coverage::cg_reset
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 6        0         6       100.00  
+
+
+Variables for Group  cnn_pkg::cnn_coverage::cg_reset
+
+
+VARIABLE    EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_rst_when 6        0         6       100.00  100  1      1        0                    
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_rst_when
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 6        0         6       100.00  
+
+
+User Defined Bins for cp_rst_when
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+busy_l3 1     1        
+busy_l2 1     1        
+busy_l1 1     1        
+busy_l0 2     1        
+done    1     1        
+idle    1     1        
+
+
+-------------------------------------------------------------------------------
+===============================================================================
+Group Instance : tb_top.me.obj.cg_reset
+===============================================================================
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING 
+100.00 1      100    1        64           64            
+
+
+Group:
+
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING COMMENT NAME                            
+100.00 100.00    1      100    1        1            64           64                    cnn_pkg::cnn_coverage::cg_reset 
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group Instance   tb_top.me.obj.cg_reset
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 6        0         6       100.00  
+
+
+Variables for Group Instance  tb_top.me.obj.cg_reset
+
+
+VARIABLE    EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_rst_when 6        0         6       100.00  100  1      1        0                    
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_rst_when
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 6        0         6       100.00  
+
+
+User Defined Bins for cp_rst_when
+
+
+Bins
+
+NAME    COUNT AT LEAST 
+busy_l3 1     1        
+busy_l2 1     1        
+busy_l1 1     1        
+busy_l0 2     1        
+done    1     1        
+idle    1     1        
+
+
+Group : cnn_pkg::cnn_coverage::cg_state
+
+===============================================================================
+Group : cnn_pkg::cnn_coverage::cg_state
+===============================================================================
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING 
+100.00 100.00    1      100    1        1            64           64            
+
+
+Source File(s) : 
+
+/home/pedu23/odai2/cnn_uvm/tb/cnn_cov.sv
+
+1 Instances:
+
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING NAME                   
+100.00 1      100    1        64           64            tb_top.me.obj.cg_state 
+
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group   cnn_pkg::cnn_coverage::cg_state
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 25       0         25      100.00  
+Crosses   20       0         20      100.00  
+
+
+Variables for Group  cnn_pkg::cnn_coverage::cg_state
+
+
+VARIABLE       EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_state       11       0         11      100.00  100  1      1        0                    
+cp_trans       5        0         5       100.00  100  1      1        0                    
+cp_tile_state  5        0         5       100.00  100  1      1        0                    
+cp_state_layer 4        0         4       100.00  100  1      1        0                    
+
+
+Crosses for Group  cnn_pkg::cnn_coverage::cg_state
+
+
+CROSS          EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST PRINT MISSING COMMENT 
+cx_state_layer 20       0         20      100.00  100  1      1        0                     
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_state
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 11       0         11      100.00  
+
+
+User Defined Bins for cp_state
+
+
+Bins
+
+NAME  COUNT  AT LEAST 
+st_0  54     1        
+st_1  45     1        
+st_2  45     1        
+st_3  171    1        
+st_4  147008 1        
+st_5  147004 1        
+st_6  147004 1        
+st_7  147004 1        
+st_8  147003 1        
+st_9  166    1        
+st_10 40     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_trans
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 5        0         5       100.00  
+
+
+User Defined Bins for cp_trans
+
+
+Bins
+
+NAME       COUNT  AT LEAST 
+finish     40     1        
+layer_end  126    1        
+next_tile  146837 1        
+first_tile 167    1        
+boot       45     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_tile_state
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 5        0         5       100.00  
+
+
+User Defined Bins for cp_tile_state
+
+
+Bins
+
+NAME COUNT  AT LEAST 
+st_4 147008 1        
+st_5 147004 1        
+st_6 147004 1        
+st_7 147004 1        
+st_8 147003 1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_state_layer
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 4        0         4       100.00  
+
+
+User Defined Bins for cp_state_layer
+
+
+Bins
+
+NAME COUNT  AT LEAST 
+l_0  589084 1        
+l_1  143726 1        
+l_2  2339   1        
+l_3  395    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Cross cx_state_layer
+
+
+Samples crossed: cp_tile_state cp_state_layer
+CATEGORY                           EXPECTED UNCOVERED COVERED PERCENT MISSING 
+Automatically Generated Cross Bins 20       0         20      100.00          
+
+
+Automatically Generated Cross Bins for cx_state_layer
+
+
+Bins
+
+cp_tile_state cp_state_layer COUNT  AT LEAST 
+st_4          l_0            117786 1        
+st_4          l_1            28729  1        
+st_4          l_2            452    1        
+st_4          l_3            41     1        
+st_5          l_0            117785 1        
+st_5          l_1            28728  1        
+st_5          l_2            451    1        
+st_5          l_3            40     1        
+st_6          l_0            117785 1        
+st_6          l_1            28728  1        
+st_6          l_2            451    1        
+st_6          l_3            40     1        
+st_7          l_0            117785 1        
+st_7          l_1            28728  1        
+st_7          l_2            451    1        
+st_7          l_3            40     1        
+st_8          l_0            117784 1        
+st_8          l_1            28728  1        
+st_8          l_2            451    1        
+st_8          l_3            40     1        
+
+
+-------------------------------------------------------------------------------
+===============================================================================
+Group Instance : tb_top.me.obj.cg_state
+===============================================================================
+SCORE  WEIGHT GOAL   AT LEAST AUTO BIN MAX PRINT MISSING 
+100.00 1      100    1        64           64            
+
+
+Group:
+
+SCORE  INSTANCES WEIGHT GOAL   AT LEAST PER INSTANCE AUTO BIN MAX PRINT MISSING COMMENT NAME                            
+100.00 100.00    1      100    1        1            64           64                    cnn_pkg::cnn_coverage::cg_state 
+
+
+
+-------------------------------------------------------------------------------
+
+Summary for Group Instance   tb_top.me.obj.cg_state
+
+
+
+CATEGORY  EXPECTED UNCOVERED COVERED PERCENT 
+Variables 25       0         25      100.00  
+Crosses   20       0         20      100.00  
+
+
+Variables for Group Instance  tb_top.me.obj.cg_state
+
+
+VARIABLE       EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST AUTO BIN MAX COMMENT 
+cp_state       11       0         11      100.00  100  1      1        0                    
+cp_trans       5        0         5       100.00  100  1      1        0                    
+cp_tile_state  5        0         5       100.00  100  1      1        0                    
+cp_state_layer 4        0         4       100.00  100  1      1        0                    
+
+
+Crosses for Group Instance  tb_top.me.obj.cg_state
+
+
+CROSS          EXPECTED UNCOVERED COVERED PERCENT GOAL WEIGHT AT LEAST PRINT MISSING COMMENT 
+cx_state_layer 20       0         20      100.00  100  1      1        0                     
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_state
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 11       0         11      100.00  
+
+
+User Defined Bins for cp_state
+
+
+Bins
+
+NAME  COUNT  AT LEAST 
+st_0  54     1        
+st_1  45     1        
+st_2  45     1        
+st_3  171    1        
+st_4  147008 1        
+st_5  147004 1        
+st_6  147004 1        
+st_7  147004 1        
+st_8  147003 1        
+st_9  166    1        
+st_10 40     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_trans
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 5        0         5       100.00  
+
+
+User Defined Bins for cp_trans
+
+
+Bins
+
+NAME       COUNT  AT LEAST 
+finish     40     1        
+layer_end  126    1        
+next_tile  146837 1        
+first_tile 167    1        
+boot       45     1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_tile_state
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 5        0         5       100.00  
+
+
+User Defined Bins for cp_tile_state
+
+
+Bins
+
+NAME COUNT  AT LEAST 
+st_4 147008 1        
+st_5 147004 1        
+st_6 147004 1        
+st_7 147004 1        
+st_8 147003 1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Variable cp_state_layer
+
+
+CATEGORY          EXPECTED UNCOVERED COVERED PERCENT 
+User Defined Bins 4        0         4       100.00  
+
+
+User Defined Bins for cp_state_layer
+
+
+Bins
+
+NAME COUNT  AT LEAST 
+l_0  589084 1        
+l_1  143726 1        
+l_2  2339   1        
+l_3  395    1        
+
+
+-------------------------------------------------------------------------------
+
+Summary for Cross cx_state_layer
+
+
+Samples crossed: cp_tile_state cp_state_layer
+CATEGORY                           EXPECTED UNCOVERED COVERED PERCENT MISSING 
+Automatically Generated Cross Bins 20       0         20      100.00          
+
+
+Automatically Generated Cross Bins for cx_state_layer
+
+
+Bins
+
+cp_tile_state cp_state_layer COUNT  AT LEAST 
+st_4          l_0            117786 1        
+st_4          l_1            28729  1        
+st_4          l_2            452    1        
+st_4          l_3            41     1        
+st_5          l_0            117785 1        
+st_5          l_1            28728  1        
+st_5          l_2            451    1        
+st_5          l_3            40     1        
+st_6          l_0            117785 1        
+st_6          l_1            28728  1        
+st_6          l_2            451    1        
+st_6          l_3            40     1        
+st_7          l_0            117785 1        
+st_7          l_1            28728  1        
+st_7          l_2            451    1        
+st_7          l_3            40     1        
+st_8          l_0            117784 1        
+st_8          l_1            28728  1        
+st_8          l_2            451    1        
+st_8          l_3            40     1        
+
+
